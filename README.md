@@ -38,14 +38,12 @@
 
 At present, only HTTP requests are supported to complete image generation tasks.
 
-The request format is as follows:
+The request format:
 
-| Method | POST |
-| --- | --- |
-| Body | A set of generation task parameters encoded in JSON format |
-| Response | The task result encoded in JSON format |
+- Method: POST
+- Body: A set of generation task parameters encoded in JSON format
 
-The general format of responses is as follows:
+The response format:
 
 ```
 {
@@ -57,8 +55,8 @@ The general format of responses is as follows:
 
 ```
 
-- In the case of success, an array called `images` will be returned, which contains the generated result images in base64 encoding. The `msg` field will not be included.
-- In the case of failure, the `images` field will not be included, and the `msg` field will contain the error message.
+- In case of success, an array called `images` will be returned, which contains the generated result images in base64 encoding. The `msg` field will not be included.
+- In case of failure, the `images` field will not be included, and the `msg` field will contain the error message.
 
 ### txt2img
 
