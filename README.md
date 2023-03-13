@@ -14,7 +14,7 @@
     - It's difficult to set up a stable diffusion runtime environment on your own.
         - Computer performance may not support it.
         - Downloading code from GitHub and running Stable Diffusion webui is beyond the ability of most non-programmers(even programmers).
-        - Learning about models and prompt knowledge requires high learning costs.
+    - Learning about models and prompt knowledge requires high learning costs.
 - More application developers should be supported in popularizing AI capabilities to the public.
 - For application developers, the cost of building a publicly available image generation service is too high.
     - Application developers should focus on implementing business requirements.
