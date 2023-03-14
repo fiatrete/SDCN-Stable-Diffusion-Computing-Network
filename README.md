@@ -142,6 +142,14 @@ Here is an example JSON object with these parameters:
 
 ### For application developers
 
+- The SDCN service is provided from [https://api.sdcn.info](https://api.sdcn.info)
+- Try the sample code in folder example. You can modify the 'params-xxx.json' file to experiment with different parameter combinations.
+
+```bash
+sdcn_run.py txt2img params-txt2img.json OUTPUT_IMAGE.png
+sdcn_run.py img2img params-img2img.json ORIGINAL_IMAGE.png OUTPUT_IMAGE.png
+```
+
 ### For those who want to contribute computing power
 
 ## TODO list
