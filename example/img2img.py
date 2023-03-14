@@ -23,7 +23,7 @@ params = {
     "model": "3a17d0deffa4592fd91c711a798031a258ab44041809ade8b4591c0225ea9401"
 }
 
-url = 'https://SDCN_SERVER/img2img'
+url = 'https://api.sdcn.info/img2img'
 headers = {
     'accept': 'application/json',
     'Content-Type': 'application/json',

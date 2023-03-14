@@ -26,7 +26,7 @@ def load_params(params_file, init_image_file = None):
     
     return params
 
-SERVICE_PREFIX = 'https://SDCN_SERVER'
+SERVICE_PREFIX = 'https://api.sdcn.info'
 
 def do_request_and_save_image(func_type, params, save_to):
     url = SERVICE_PREFIX + '/' + func_type
