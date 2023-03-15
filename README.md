@@ -50,13 +50,13 @@ I supose you have Stable Diffusion webui and docker installed.
     4. stLouisLuxuriousWheels_v1, [download](https://civitai.com/api/download/models/7840)
     5. taiwanDollLikeness_v10, [download](https://civitai.com/api/download/models/9070)
     6. kobeni_v10, [download](https://civitai.com/api/download/models/7852)
-2. startup Stable Diffusion webui with `--api` argument 
+2. startup Stable Diffusion webui with `--listen --api` argument 
 
 ```bash
 bash webui.sh --listen --api
 ```
 
-1. add your Stable Diffusion webui instance as a SDCN node in `sdcn-server/scripts/config.lua`
+3. add your Stable Diffusion webui instance as a SDCN node in `sdcn-server/scripts/config.lua`
 
 ```lua
 kBackEndWorkers = {
@@ -64,7 +64,7 @@ kBackEndWorkers = {
 }
 ```
 
-1. startup docker in port 6006
+4. startup docker in port 6006
 
 ```bash
 docker build -t sdcn .
@@ -73,16 +73,16 @@ docker run -d -p 6006:6006 sdcn:latest
 
 Now your sdcn-server is available on "[http://127.0.0.1:6006](http://127.0.0.1:6006/)"
 
-1. config SERVICE_PREFIX in example/sdcn_run.py to "[http://127.0.0.1:6006](http://127.0.0.1:6006/)"
+5. config SERVICE_PREFIX in example/sdcn_run.py to "[http://127.0.0.1:6006](http://127.0.0.1:6006/)"
 
 ```python
-SERVICE_PREFIX = 'http://127.0.0.1:6006'
+SERVICE_PREFIX = 'http://yourlocalip:6006'
 ```
 
-1. execute the example with your local sdcn-server:
+6. execute the example with your local sdcn-server:
 
 ```bash
-sdcn_run.py txt2img params-txt2img.json OUTPUT_IMAGE.png
+python3 sdcn_run.py txt2img params-txt2img.json OUTPUT_IMAGE.png
 ```
 
 ### For application developers
@@ -91,8 +91,8 @@ sdcn_run.py txt2img params-txt2img.json OUTPUT_IMAGE.png
 - Try the sample code in folder example. You can modify the 'params-xxx.json' file to experiment with different parameter combinations.
 
 ```bash
-sdcn_run.py txt2img params-txt2img.json OUTPUT_IMAGE.png
-sdcn_run.py img2img params-img2img.json ORIGINAL_IMAGE.png OUTPUT_IMAGE.png
+python3 sdcn_run.py txt2img params-txt2img.json OUTPUT_IMAGE.png
+python3 sdcn_run.py img2img params-img2img.json ORIGINAL_IMAGE.png OUTPUT_IMAGE.png
 ```
 
 ### For those who want to contribute computing power
