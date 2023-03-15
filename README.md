@@ -39,6 +39,52 @@ refer to [API reference](doc/api.md).
 
 ## **How to use**
 
+### Run sdcn-server locally in docker
+
+I supose you have Stable Diffusion webui and docker installed.
+
+1. make sure the following models & loras are installed:
+    1. chillout_mix, [download](https://civitai.com/api/download/models/11745)
+    2. clarity, [download](https://civitai.com/api/download/models/13128)
+    3. koreanDollLikeness_v10, [download](https://civitai.com/api/download/models/8750)
+    4. stLouisLuxuriousWheels_v1, [download](https://civitai.com/api/download/models/7840)
+    5. taiwanDollLikeness_v10, [download](https://civitai.com/api/download/models/9070)
+    6. kobeni_v10, [download](https://civitai.com/api/download/models/7852)
+2. startup Stable Diffusion webui with `--api` argument 
+
+```bash
+bash webui.sh --listen --api
+```
+
+1. add your Stable Diffusion webui instance as a SDCN node in `sdcn-server/scripts/config.lua`
+
+```lua
+kBackEndWorkers = {
+        "http://127.0.0.1:7860"
+}
+```
+
+1. startup docker in port 6006
+
+```bash
+docker build -t sdcn .
+docker run -d -p 6006:6006 sdcn:latest
+```
+
+Now your sdcn-server is available on "[http://127.0.0.1:6006](http://127.0.0.1:6006/)"
+
+1. config SERVICE_PREFIX in example/sdcn_run.py to "[http://127.0.0.1:6006](http://127.0.0.1:6006/)"
+
+```python
+SERVICE_PREFIX = 'http://127.0.0.1:6006'
+```
+
+1. execute the example with your local sdcn-server:
+
+```bash
+sdcn_run.py txt2img params-txt2img.json OUTPUT_IMAGE.png
+```
+
 ### For application developers
 
 - The SDCN service is provided from [https://api.sdcn.info](https://api.sdcn.info)

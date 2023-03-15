@@ -21,7 +21,7 @@ return {
         ["3e5d8fe726b4c0f1e7f0905f32ea3d1c9ce89a54028209e8179d64d323048dac"] = "kobeni_v10",
     },
     kBackEndWorkers = {
-        "http://localhost:6006"
+        "http://127.0.0.1:7860",
     }
 
 }
