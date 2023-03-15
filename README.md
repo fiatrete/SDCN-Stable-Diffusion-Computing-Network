@@ -73,7 +73,9 @@ docker run -d -p 6006:6006 sdcn:latest
 
 Now your sdcn-server is available on "[http://127.0.0.1:6006](http://127.0.0.1:6006/)"
 
-5. config SERVICE_PREFIX in example/sdcn_run.py to "[http://127.0.0.1:6006](http://127.0.0.1:6006/)"
+5. config SERVICE_PREFIX in example/sdcn_run.py to "[http://yourlocalip:6006](http://yourlocalip:6006/)". 
+
+> Notice you can't use 127.0.0.1 or localhost, but the local ip address.
 
 ```python
 SERVICE_PREFIX = 'http://yourlocalip:6006'
