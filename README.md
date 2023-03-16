@@ -97,6 +97,20 @@ python3 sdcn_run.py txt2img params-txt2img.json OUTPUT_IMAGE.png
 python3 sdcn_run.py img2img params-img2img.json ORIGINAL_IMAGE.png OUTPUT_IMAGE.png
 ```
 
+- try with curl
+  - install required tools
+```bash
+brew install curl jq
+```
+  - enter example folder and execute
+```bash
+cd example
+cat params-txt2img.json \
+| curl --location --request POST 'https://api.sdcn.info/txt2img' \
+--header 'Content-Type: application/json' -d @- \
+| jq '.images[0]' |tr -d '\"' | tr -d '\\' | base64 -d > out.png
+```
+
 ### For those who want to contribute computing power
 
 ## TODO list
