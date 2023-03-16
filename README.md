@@ -58,9 +58,11 @@ bash webui.sh --listen --api
 
 3. add your Stable Diffusion webui instance as a SDCN node in `sdcn-server/scripts/config.lua`
 
+> Please note that you cannot use 127.0.0.1 or 'localhost'; instead, you must use the local IP address.
+
 ```lua
 kBackEndWorkers = {
-        "http://127.0.0.1:7860"
+        "http://yourlocalip:7860"
 }
 ```
 
@@ -73,12 +75,10 @@ docker run -d -p 6006:6006 sdcn:latest
 
 Now your sdcn-server is available on "[http://127.0.0.1:6006](http://127.0.0.1:6006/)"
 
-5. config SERVICE_PREFIX in example/sdcn_run.py to "[http://yourlocalip:6006](http://yourlocalip:6006/)". 
-
-> Please note that you cannot use 127.0.0.1 or 'localhost'; instead, you must use the local IP address.
+5. config SERVICE_PREFIX in example/sdcn_run.py to "[http://127.0.0.1:6006](http://127.0.0.1:6006/)". 
 
 ```python
-SERVICE_PREFIX = 'http://yourlocalip:6006'
+SERVICE_PREFIX = 'http://127.0.0.1:6006'
 ```
 
 6. execute the example with your local sdcn-server:
