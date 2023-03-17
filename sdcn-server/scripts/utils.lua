@@ -154,6 +154,7 @@ local function proxy_to_request(url, method, body)
     if not res then
         ngx.log(ngx.ERR, "request failed: ", err)
         ngx.status = 500
+        ngx.print('{"msg": "Internal error, backend failed to response"}')
         return
     end
     

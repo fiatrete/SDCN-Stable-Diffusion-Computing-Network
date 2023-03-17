@@ -20,8 +20,8 @@ return {
         ["5bbaabc04553d5821a3a45e4de5a02b2e66ecb00da677dd8ae862efd8ba59050"] = "taiwanDollLikeness_v10",
         ["3e5d8fe726b4c0f1e7f0905f32ea3d1c9ce89a54028209e8179d64d323048dac"] = "kobeni_v10",
     },
-    kBackEndWorkers = {
-        "http://yourlocalip:7860",
-    }
-
+    kWorkerKeepAlive = 2147483648, -- 2^31, ~68+ years
+    kRedisServerAddr = "127.0.0.1",
+    kRedisPort = 6379,
+    kRedisMaxIdleTimeout = 300,
 }
