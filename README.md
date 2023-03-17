@@ -56,17 +56,9 @@ I supose you have Stable Diffusion webui and docker installed.
 bash webui.sh --listen --api
 ```
 
-3. add your Stable Diffusion webui instance as a SDCN node in `sdcn-server/scripts/config.lua`
+3. run an instance of [redis-server](https://github.com/redis/redis). I suppose you run redis-server on its default port (i.e. 6379).
 
-> Please note that you cannot use 127.0.0.1 or 'localhost'; instead, you must use the local IP address.
-
-```lua
-kBackEndWorkers = {
-        "http://yourlocalip:7860"
-}
-```
-
-4. startup docker in port 6006
+4. startup docker on port 6006
 
 ```bash
 docker build -t sdcn .
@@ -75,13 +67,27 @@ docker run -d -p 6006:6006 sdcn:latest
 
 Now your sdcn-server is available on "[http://127.0.0.1:6006](http://127.0.0.1:6006/)"
 
-5. config SERVICE_PREFIX in example/sdcn_run.py to "[http://127.0.0.1:6006](http://127.0.0.1:6006/)". 
+5. register your Stable Diffusion webui instance as a SDCN node by sending an HTTP request as below:
+
+```bash
+curl -XPOST 'https://api.sdcn.info/admin/regworker' -d '{"worker":"http://yourlocalip:7860","owner":"yourname","nodeId":"yournodeid"}'
+```
+
+You can unregister an instance by sending an HTTP request as below if you need:
+
+```bash
+curl -XPOST 'https://api.sdcn.info/admin/unregworker' -d '{"worker":"http://yourlocalip:7860"}'
+```
+
+> Please note that you cannot use 127.0.0.1 or 'localhost' since our docker container's `hostnet` is not enabled; instead, you must use the local IP address.
+
+6. config SERVICE_PREFIX in example/sdcn_run.py to "[http://127.0.0.1:6006](http://127.0.0.1:6006/)". 
 
 ```python
 SERVICE_PREFIX = 'http://127.0.0.1:6006'
 ```
 
-6. execute the example with your local sdcn-server:
+7. execute the example with your local sdcn-server:
 
 ```bash
 python3 sdcn_run.py txt2img params-txt2img.json OUTPUT_IMAGE.png
