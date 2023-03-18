@@ -14,11 +14,10 @@ def get_image_size(filename):
     return width, height
 
 def resize(width, height):
-    if width > 1024 or height > 1024:
-        ratio = min(1024 / width, 1024 / height)
-        return (ceil(width * ratio), ceil(height * ratio))
-    else:
-        return (width, height)
+    ratio = min(1024 / width, 1024 / height)
+    w, h = (ceil(width * ratio), ceil(height * ratio))
+    print("resize to：%d x %d px" % (w, h))
+    return w, h
 
 def generate_output_filename(input_filename):
     dir_name, base_name = os.path.split(os.path.splitext(input_filename)[0])
