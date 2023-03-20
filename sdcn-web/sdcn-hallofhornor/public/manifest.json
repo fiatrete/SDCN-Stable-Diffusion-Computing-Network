@@ -1,0 +1,10 @@
+{
+  "short_name": "sdcn-admin",
+  "name": "sdcn-web-admin",
+  "icons": [
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}
