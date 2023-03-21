@@ -60,9 +60,16 @@ bash webui.sh --listen --api
 
 4. startup docker on port 6006
 
+Build image by yourself:
 ```bash
-docker build -t sdcn .
-docker run -d -p 6006:6006 sdcn:latest
+docker build -t sdcn-server .
+docker run -d -p 6006:6006 sdcn-server:latest
+```
+
+or use public image on [dockerhub](https://hub.docker.com/r/fiatrete/sdcn-server):
+```bash
+docker pull fiatrete/sdcn-server:latest
+docker run -d -p 6006:6006 fiatrete/sdcn-server:latest
 ```
 
 Now your sdcn-server is available on "[http://127.0.0.1:6006](http://127.0.0.1:6006/)"
