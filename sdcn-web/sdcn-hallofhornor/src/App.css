@@ -1,0 +1,60 @@
+
+.App {
+  width: 100%;
+  height: 100%;
+}
+
+#components-layout-demo-responsive .logo {
+  height: 32px;
+  margin: 16px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.home {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  background-color: #f5f5f5;
+}
+.sidebar {
+  display: flex;
+  flex-basis: 200px;
+  background: #000000;
+  height: 100%;
+  cursor:not-allowed;
+  user-select: none;
+}
+
+.main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  flex-basis: 64px;
+  height: 64px;
+  background: white;
+  justify-content: center;
+  padding: 0;
+  align-items: center;
+}
+
+.home-content {
+  margin: '24px 16px 0';
+  display: 'flex';
+  flex: 1;
+  user-select: none;
+}
+
+.header-title {
+  font-size: 24px;
+  margin: 0;
+}
+
+.footer {
+  display: 'flex';
+  flex-basis: 64px;
+}
+
