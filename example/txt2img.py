@@ -18,7 +18,7 @@ params = {
     "model": "3a17d0deffa4592fd91c711a798031a258ab44041809ade8b4591c0225ea9401",
     "upscale": {
         "denoising_strength": 0.5,
-        "scale": 2,
+        "scale": 1.5,
         "upscaler": "Latent",
     }
 }
