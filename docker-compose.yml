@@ -1,0 +1,13 @@
+version: '3.0'
+services:
+  sdcn-server:
+    container_name: sdcn-server
+    image: fiatrete/sdcn-server
+    depends_on:
+      - redis
+    ports:
+      - 6006:6006
+
+  redis:
+    container_name: redis
+    image: 'redis:alpine'
