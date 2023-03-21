@@ -25,7 +25,7 @@ return {
         ["3e5d8fe726b4c0f1e7f0905f32ea3d1c9ce89a54028209e8179d64d323048dac"] = "kobeni_v10",
     },
     kWorkerKeepAlive = 2147483648, -- 2^31, ~68+ years
-    kRedisServerAddr = "127.0.0.1",
+    kRedisServerAddr = "redis",
     kRedisPort = 6379,
     kRedisMaxIdleTimeout = 300,
 }

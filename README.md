@@ -56,25 +56,14 @@ I supose you have Stable Diffusion webui and docker installed.
 bash webui.sh --listen --api
 ```
 
-3. run an instance of [redis-server](https://github.com/redis/redis). I suppose you run redis-server on its default port (i.e. 6379).
-
-4. startup docker on port 6006
-
-Build image by yourself:
-```bash
-docker build -t sdcn-server .
-docker run -d -p 6006:6006 sdcn-server:latest
+3. start sdcn-server locally in docker with [Docker Compose](https://github.com/docker/compose):
 ```
-
-or use public image on [dockerhub](https://hub.docker.com/r/fiatrete/sdcn-server):
-```bash
-docker pull fiatrete/sdcn-server:latest
-docker run -d -p 6006:6006 fiatrete/sdcn-server:latest
+docker-compose up -d 
 ```
 
 Now your sdcn-server is available on "[http://127.0.0.1:6006](http://127.0.0.1:6006/)"
 
-5. register your Stable Diffusion webui instance as a SDCN node by sending an HTTP request as below:
+4. register your Stable Diffusion webui instance as a SDCN node by sending an HTTP request as below:
 
 ```bash
 curl -XPOST 'https://api.sdcn.info/admin/regworker' -d '{"worker":"http://yourlocalip:7860","owner":"yourname","nodeId":"yournodeid"}'
@@ -88,13 +77,13 @@ curl -XPOST 'https://api.sdcn.info/admin/unregworker' -d '{"worker":"http://your
 
 > Please note that you cannot use 127.0.0.1 or 'localhost' since our docker container's `hostnet` is not enabled; instead, you must use the local IP address.
 
-6. config SERVICE_PREFIX in example/sdcn_run.py to "[http://127.0.0.1:6006](http://127.0.0.1:6006/)". 
+5. config SERVICE_PREFIX in example/sdcn_run.py to "[http://127.0.0.1:6006](http://127.0.0.1:6006/)". 
 
 ```python
 SERVICE_PREFIX = 'http://127.0.0.1:6006'
 ```
 
-7. execute the example with your local sdcn-server:
+6. execute the example with your local sdcn-server:
 
 ```bash
 python3 sdcn_run.py txt2img params-txt2img.json OUTPUT_IMAGE.png
