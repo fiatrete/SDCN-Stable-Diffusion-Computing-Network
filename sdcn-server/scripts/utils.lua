@@ -111,6 +111,14 @@ local function gateway_params_to_webui_params(gateway_params, req_type)
         return nil, "Invalid model"
     end
 
+    if type(gateway_params.upscale) == 'table' then
+        local upscale = gateway_params.upscale
+        result.enable_hr = true
+        result.denoising_strength = require_number_range(upscale.denoising_strength, 0.01, 0.99)
+        result.hr_scale = require_number_range(upscale.scale, 1.0, 2.0)
+        result.upscaler = require_string_in(upscale.upscaler, config.kValidUpscalers)
+    end
+
     result.width = result.width - result.width % 8 -- it seems that openresty's lua version does not support bitwise ops
     result.height = result.height - result.height % 8 -- it seems that openresty's lua version does not support bitwise ops
 
