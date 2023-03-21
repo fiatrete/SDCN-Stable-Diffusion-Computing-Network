@@ -10,6 +10,9 @@ return {
         "LMS",
         "DDIM",
     },
+    kValidUpscalers = {
+        "Latent",
+    },
     kValidModels = {
         ["3a17d0deffa4592fd91c711a798031a258ab44041809ade8b4591c0225ea9401"] = "chillout_mix",
         ["627a6f5c8bf7669d4a224ac041d527debc65d2d435b16e54ead8ee2c901d1634"] = "clarity",
