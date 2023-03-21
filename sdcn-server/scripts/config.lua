@@ -12,6 +12,7 @@ return {
     },
     kValidUpscalers = {
         "Latent",
+        "ESRGAN 4x",
     },
     kValidModels = {
         ["3a17d0deffa4592fd91c711a798031a258ab44041809ade8b4591c0225ea9401"] = "chillout_mix",
