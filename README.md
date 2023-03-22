@@ -44,12 +44,12 @@ refer to [API reference](doc/api.md).
 I supose you have Stable Diffusion webui and docker installed.
 
 1. make sure the following models & loras are installed:
-    1. chillout_mix, [download](https://civitai.com/api/download/models/11745)
-    2. clarity, [download](https://civitai.com/api/download/models/13128)
-    3. koreanDollLikeness_v10, [download](https://civitai.com/api/download/models/8750)
-    4. stLouisLuxuriousWheels_v1, [download](https://civitai.com/api/download/models/7840)
-    5. taiwanDollLikeness_v10, [download](https://civitai.com/api/download/models/9070)
-    6. kobeni_v10, [download](https://civitai.com/api/download/models/7852)
+    1. chillout_mix, [download](https://huggingface.co/fiatrete/sdcn-used-models/resolve/main/chilloutmix_NiPrunedFp32Fix.safetensors)
+    2. clarity, [download](https://huggingface.co/fiatrete/sdcn-used-models/resolve/main/clarity.safetensors)
+    3. koreanDollLikeness_v10, [download](https://huggingface.co/fiatrete/sdcn-used-models/resolve/main/koreandolllikeness_V10.safetensors)
+    4. stLouisLuxuriousWheels_v1, [download](https://huggingface.co/fiatrete/sdcn-used-models/resolve/main/stLouisLuxuriousWheels_v1.safetensors)
+    5. taiwanDollLikeness_v10, [download](https://huggingface.co/fiatrete/sdcn-used-models/resolve/main/taiwanDollLikeness_v10.safetensors)
+    6. kobeni_v10, [download](https://huggingface.co/fiatrete/sdcn-used-models/resolve/main/kobeni_v10.safetensors)
 2. startup Stable Diffusion webui with `--listen --api` argument 
 
 ```bash
