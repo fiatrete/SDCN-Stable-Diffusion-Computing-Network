@@ -1,0 +1,16 @@
+.wrap {
+  width: 100%;
+}
+
+.contentWrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 130px 0;
+}
+
+.answer {
+  color: rgba(0, 0, 0, 0.45);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 22px;
+}

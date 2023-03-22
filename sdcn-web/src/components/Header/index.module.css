@@ -1,0 +1,42 @@
+.wrap {
+  width: 100%;
+  background: #fff;
+  z-index: 1;
+}
+
+.contentWrap {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 8px 60px;
+}
+
+.left {
+}
+
+.right {
+}
+
+.navLink {
+  padding: 5px 10px;
+  text-decoration: none;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.88);
+  border-radius: 6px;
+}
+
+.navLink:focus {
+  background: #f0f0f0;
+}
+
+.navLink:hover {
+  background: #f0f0f0;
+}
+
+.navLinkActive {
+  padding: 5px 10px;
+  text-decoration: none;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.88);
+  border-radius: 6px;
+  background: #f0f0f0;
+}
