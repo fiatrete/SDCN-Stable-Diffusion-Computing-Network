@@ -1,10 +1,5 @@
 .wrap {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 0px 60px;
-  gap: 18px;
+  width: 100%;
 }
 
 .contentWrap {

@@ -1,6 +1,7 @@
 .wrap {
   width: 100%;
-  height: 63.64px;
+  background: #fff;
+  z-index: 1;
 }
 
 .contentWrap {
