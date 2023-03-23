@@ -1,0 +1,4 @@
+.spin :global(.ant-spin-text) {
+    position: relative;
+    top: 24px;
+}
