@@ -6,14 +6,6 @@ module.exports = {
     jest: true, // Jest global variables like `it` etc.
     node: true, // Defines things like process.env when generating through node
   },
-  extends: [
-    'eslint:recommended',
-    'plugin:react/recommended',
-    'plugin:jsx-a11y/recommended',
-    'plugin:react-hooks/recommended',
-    'plugin:jest/recommended',
-    'plugin:testing-library/react',
-  ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaFeatures: {
@@ -22,6 +14,16 @@ module.exports = {
     ecmaVersion: 2022, // Allows for the parsing of modern ECMAScript features
     sourceType: 'module', // Allows for the use of imports
   },
+  extends: [
+    'eslint:recommended',
+    'plugin:react/recommended',
+    'plugin:jsx-a11y/recommended',
+    'plugin:react-hooks/recommended',
+    'plugin:jest/recommended',
+    'plugin:testing-library/react',
+    'plugin:@typescript-eslint/eslint-recommended',
+    'plugin:@typescript-eslint/recommended',
+  ],
   plugins: [
     'import', // eslint-plugin-import plugin. https://www.npmjs.com/package/eslint-plugin-import
   ],
