@@ -5,8 +5,15 @@ import logo from 'assets/images/logo.svg'
 import cx from 'classnames'
 import { Link, NavLink } from 'react-router-dom'
 import styles from './index.module.css'
+import useSignModal from 'hooks/useSignModal'
 
 const Header = () => {
+  const { showSignModel } = useSignModal()
+
+  const signInHandler = () => {
+    showSignModel()
+  }
+
   return (
     <div className={cx('sticky top-0', styles.wrap)}>
       <div
@@ -51,7 +58,7 @@ const Header = () => {
           >
             <Image src={githubIcon} width={28} preview={false} />
           </Button>
-          <Button type='primary' className={cx('hidden')}>
+          <Button type='primary' onClick={signInHandler}>
             Sign in
           </Button>
         </div>
