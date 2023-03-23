@@ -1,2 +1,18 @@
 .wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0px 60px;
+}
+
+.tabs {
+    width: 100%;
+}
+
+.tabs :global(.ant-tabs-nav-wrap) {
+    padding-left: 46px;
+}
+
+.tabs :global(.ant-tabs-content-holder) {
+    padding-left: 46px;
 }
