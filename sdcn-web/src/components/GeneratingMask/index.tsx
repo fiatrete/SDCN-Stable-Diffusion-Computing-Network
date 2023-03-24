@@ -7,7 +7,11 @@ import styles from './index.module.css'
 
 const { Title } = Typography
 
-const GeneratingMask = (props: any) => {
+interface GeneratingMaskProps {
+  open: boolean
+}
+
+const GeneratingMask = ({ open }: GeneratingMaskProps) => {
   const icon = <LoadingOutlined style={{ fontSize: 36 }} spin />
   const tip = (
     <Title level={5} style={{}}>
@@ -17,7 +21,7 @@ const GeneratingMask = (props: any) => {
 
   return (
     <Modal
-      open={props.open}
+      open={open}
       closeIcon={<div></div>}
       maskClosable={false}
       footer={null}
