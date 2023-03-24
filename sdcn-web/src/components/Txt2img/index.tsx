@@ -1,6 +1,6 @@
-import React, { useRef, useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import cx from 'classnames'
-import { Form, Select, Button, Input, Typography } from 'antd'
+import { Form, Select, Button, Input, Typography, FormInstance } from 'antd'
 import {
   ModelFormGroup,
   LoraFormGroup,
@@ -8,6 +8,7 @@ import {
 } from 'components/SettingsFormGroup'
 import { txt2img, txt2imgParams } from 'api/txt2img'
 import ImageWidget from 'components/ImageWidget'
+import { FormFinishInfo } from 'rc-field-form/es/FormContext'
 import GeneratingMask from 'components/GeneratingMask'
 
 import styles from './index.module.css'
@@ -15,16 +16,18 @@ import styles from './index.module.css'
 const { Title } = Typography
 const { TextArea } = Input
 
-function InputAndGenerateArea(props: any) {
+function InputAndGenerateArea({
+  form,
+  onButtonClicked,
+}: {
+  form: FormInstance<null>
+  onButtonClicked: () => void
+}) {
   return (
     <div className={cx('flex flex-col items-start gap-6')}>
       <Title level={5}>Input keyword and generate</Title>
       <div className={cx('flex flex-col w-full items-start gap-6')}>
-        <Form
-          ref={props.promptRef}
-          name='txt2imgPromptForm'
-          style={{ width: '100%' }}
-        >
+        <Form form={form} name='txt2imgPromptForm' style={{ width: '100%' }}>
           <Form.Item
             name='prompt'
             className={cx('self-stretch')}
@@ -38,7 +41,7 @@ function InputAndGenerateArea(props: any) {
             />
           </Form.Item>
         </Form>
-        <Button type='primary' ref={props.buttonRef} size='large'>
+        <Button type='primary' onClick={onButtonClicked} size='large'>
           Generate
         </Button>
       </div>
@@ -52,15 +55,11 @@ const sizes = [
   { value: '768x512', label: '768x512' },
 ]
 
-function SettingsArea(props: any) {
+function SettingsArea({ form }: { form: FormInstance<null> }) {
   return (
     <div className={cx('flex flex-col w-80 gap-6 bg-green-000')}>
       <Title level={5}>Settings</Title>
-      <Form
-        ref={props.settingsRef}
-        name='txt2imgSettingsForm'
-        layout='vertical'
-      >
+      <Form form={form} name='txt2imgSettingsForm' layout='vertical'>
         <ModelFormGroup label='Model' name='model' />
 
         <Form.Item label='Size' name='size' initialValue={sizes[0].value}>
@@ -90,46 +89,40 @@ function SettingsArea(props: any) {
 }
 
 const Txt2img = () => {
-  const GenerateButtonRef = useRef<HTMLButtonElement>(null)
-  const SettingsFormRef = useRef<HTMLFormElement>(null)
-  const PromptFormRef = useRef<HTMLFormElement>(null)
+  const [SettingsForm] = Form.useForm()
+  const [PromptForm] = Form.useForm()
 
   const [imgUri, setImgUri] = useState<string | undefined>()
   const [imgLoading, setImgLoading] = useState<boolean>(false)
 
-  useEffect(() => {
-    if (GenerateButtonRef.current)
-      // Bind click event
-      GenerateButtonRef.current.onclick = onGenerationButtonClicked
-  })
-
   const onGenerationButtonClicked = () => {
     // First form submit
-    if (SettingsFormRef.current) SettingsFormRef.current.submit()
+    SettingsForm.submit()
     // Second form submit
-    if (PromptFormRef.current) PromptFormRef.current.submit()
+    PromptForm.submit()
   }
 
-  let formData: any = {} // For merging form data
+  // For merging form data
+  let apiParams: txt2imgParams
 
-  const onFormSubmit = (name: any, { values }: any) => {
+  const onFormSubmit = (name: string, { values }: FormFinishInfo) => {
     if (name === 'txt2imgSettingsForm') {
       // Received data in first submit, partial data
-      formData = Object.assign(values)
-      console.log('first submit', formData)
+      const [widthStr, heightStr] = values.size.split('x')
+      delete values.size
+      apiParams = Object.assign(values)
+      apiParams.width = parseInt(widthStr)
+      apiParams.height = parseInt(heightStr)
+      apiParams.cfg_scale = 7
+      console.log('first submit', apiParams)
     }
     if (name === 'txt2imgPromptForm') {
       // Received data in second submit, full data
-      formData = Object.assign(formData, values)
-      const [width, height] = formData.size.split('x')
-      delete formData.size
-      formData.width = parseInt(width)
-      formData.height = parseInt(height)
-      formData.cfg_scale = 7
-      console.log('second submit, merged', formData)
+      apiParams = Object.assign(apiParams, values)
+      console.log('second submit, merged', apiParams)
       ;(async () => {
         setImgLoading(true)
-        setImgUri(await txt2img(formData))
+        setImgUri(await txt2img(apiParams))
         setImgLoading(false)
       })()
     }
@@ -147,12 +140,12 @@ const Txt2img = () => {
       >
         <div className={cx('flex flex-col flex-1 bg-red-000')}>
           <InputAndGenerateArea
-            buttonRef={GenerateButtonRef}
-            promptRef={PromptFormRef}
+            onButtonClicked={onGenerationButtonClicked}
+            form={PromptForm}
           />
-          <ImageWidget src={imgUri} loading={imgLoading} />
+          <ImageWidget src={imgUri} />
         </div>
-        <SettingsArea settingsRef={SettingsFormRef} />
+        <SettingsArea form={SettingsForm} />
       </div>
     </Form.Provider>
   )
