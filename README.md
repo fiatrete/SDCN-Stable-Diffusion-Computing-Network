@@ -115,6 +115,8 @@ cat params-txt2img.json \
 
 ### For those who want to contribute computing power
 
+- To be updated
+
 ## TODO list
 
 - To be updated
