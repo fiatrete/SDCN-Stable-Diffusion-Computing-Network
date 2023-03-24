@@ -18,7 +18,7 @@ function SliderSettingItem({
   onChange?: (value: number | null) => void
 }) {
   return (
-    <div className={cx(styles.wrap + ' flex')}>
+    <div className={cx(styles.wrap, 'flex gap-3')}>
       <div className={cx('flex-1 text-base leading-6 h-10 items-center')}>
         <Slider
           min={min ? min : 0}
