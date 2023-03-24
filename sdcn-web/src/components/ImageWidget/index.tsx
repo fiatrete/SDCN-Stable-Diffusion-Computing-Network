@@ -1,7 +1,6 @@
 import React from 'react'
 import cx from 'classnames'
 import { Typography, Image } from 'antd'
-import GeneratingMask from 'components/GeneratingMask'
 
 import styles from './index.module.css'
 
@@ -24,7 +23,6 @@ const ImageWidget = ({ src }: { src?: string }) => {
           Images you generated will be shown here
         </Title>
       )}
-      <GeneratingMask open={loading} />
     </div>
   )
 }

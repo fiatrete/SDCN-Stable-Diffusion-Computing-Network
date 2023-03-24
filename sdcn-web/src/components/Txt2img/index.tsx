@@ -8,6 +8,7 @@ import {
 } from 'components/SettingsFormGroup'
 import { txt2img, txt2imgParams } from 'api/txt2img'
 import ImageWidget from 'components/ImageWidget'
+import GeneratingMask from 'components/GeneratingMask'
 
 import styles from './index.module.css'
 
@@ -137,6 +138,7 @@ const Txt2img = () => {
   return (
     /* when Form submitted, the parent Form.Provider received the submittion via onFormFinish */
     <Form.Provider onFormFinish={onFormSubmit}>
+      <GeneratingMask open={imgLoading} />
       <div
         className={cx(
           styles.wrap +
