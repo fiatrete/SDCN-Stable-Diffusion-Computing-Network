@@ -7,6 +7,7 @@ import {
   GoogleOutlined,
   LoadingOutlined,
 } from '@ant-design/icons'
+import UserStore from 'stores/userStore'
 
 const useSignModal = () => {
   const spinIcon = (
@@ -14,29 +15,13 @@ const useSignModal = () => {
   )
 
   const signInWithGoogleHandler = () => {
-    console.log('GOOGLE')
-
-    // TODO: SIGN IN WITH GOOGLE
     setLoading(true)
-    setTimeout(() => {
-      setLoading(false)
-
-      message.success('SUCCESS')
-
-      hideSignModel()
-    }, 2000)
+    signInWithGoogle()
   }
 
   const signInWithGithubHandler = () => {
-    console.log('GITHUB')
-
-    // TODO: SIGN IN WITH GITHUB
     setLoading(true)
-    setTimeout(() => {
-      setLoading(false)
-
-      message.error('FAILURE')
-    }, 2000)
+    signInWithGithub()
   }
 
   let modal: {
@@ -115,6 +100,31 @@ const useSignModal = () => {
 
   const hideSignModel = () => {
     modal?.destroy()
+  }
+
+  const signInWithGoogle = () => {
+    // TODO: SIGN IN WITH GOOGLE
+    setTimeout(() => {
+      UserStore.updateUser({
+        id: '1',
+        name: 'USER#001',
+      })
+
+      setLoading(false)
+
+      message.success('SUCCESS')
+
+      hideSignModel()
+    }, 500)
+  }
+
+  const signInWithGithub = () => {
+    // TODO: SIGN IN WITH GITHUB
+    setTimeout(() => {
+      setLoading(false)
+
+      message.error('FAILURE')
+    }, 1000)
   }
 
   return {
