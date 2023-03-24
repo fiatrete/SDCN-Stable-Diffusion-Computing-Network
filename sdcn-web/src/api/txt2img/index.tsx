@@ -37,7 +37,7 @@ export async function txt2img(params: txt2imgParams): Promise<string> {
     model: params.model,
   }
 
-  const response = await fetch('/txt2img', {
+  const response = await fetch('https://api.sdcn.info/txt2img', {
     method: 'POST',
     mode: 'cors',
     cache: 'no-cache',
