@@ -1,14 +1,13 @@
-import React from 'react';
-import cx from 'classnames';
-import { InputNumber, Slider } from 'antd';
+import React from 'react'
+import cx from 'classnames'
+import { InputNumber, Slider } from 'antd'
 
-import styles from './index.module.css';
+import styles from './index.module.css'
 
 function SliderSettingItem(props: any) {
-
-  const onChange = (value: number|null) => {
-    props.onChange(value);
-  };
+  const onChange = (value: number | null) => {
+    props.onChange(value)
+  }
 
   return (
     <div className={cx(styles.wrap + ' flex')}>
@@ -31,7 +30,7 @@ function SliderSettingItem(props: any) {
         onChange={onChange}
       />
     </div>
-  );
+  )
 }
 
-export default SliderSettingItem;
+export default SliderSettingItem
