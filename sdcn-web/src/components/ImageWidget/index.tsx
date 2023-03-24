@@ -13,7 +13,7 @@ const ImageWidget = ({ src }: { src?: string }) => {
 
   return (
     <div
-      className={cx(styles.wrap + 'w-full flex justify-center items-center')}
+      className={cx(styles.wrap, 'w-full flex justify-center items-center')}
       style={{ height: '788px' }}
     >
       {urlValid ? (

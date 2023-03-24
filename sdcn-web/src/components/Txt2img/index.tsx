@@ -134,8 +134,8 @@ const Txt2img = () => {
       <GeneratingMask open={imgLoading} />
       <div
         className={cx(
-          styles.wrap +
-            ' flex flex-col md:flex-row w-full bg-yellow-000 gap-24 mt-8',
+          styles.wrap,
+          'flex flex-col md:flex-row w-full bg-yellow-000 gap-24 mt-8',
         )}
       >
         <div className={cx('flex flex-col flex-1 bg-red-000')}>
