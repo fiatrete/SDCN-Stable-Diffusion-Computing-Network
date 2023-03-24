@@ -4,29 +4,37 @@ import { InputNumber, Slider } from 'antd'
 
 import styles from './index.module.css'
 
-function SliderSettingItem(props: any) {
-  const onChange = (value: number | null) => {
-    props.onChange(value)
-  }
-
+function SliderSettingItem({
+  min,
+  max,
+  step,
+  value,
+  onChange,
+}: {
+  min?: number
+  max?: number
+  step?: number
+  value?: number
+  onChange?: (value: number | null) => void
+}) {
   return (
     <div className={cx(styles.wrap + ' flex')}>
       <div className={cx('flex-1 text-base leading-6 h-10 items-center')}>
         <Slider
-          min={props.min ? props.min : 0}
-          max={props.max ? props.max : 1}
-          step={props.step ? props.step : 0.01}
+          min={min ? min : 0}
+          max={max ? max : 1}
+          step={step ? step : 0.01}
           onChange={onChange}
-          value={typeof props.value === 'number' ? props.value : 0}
+          value={typeof value === 'number' ? value : 0}
         />
       </div>
       <InputNumber
         size='large'
-        min={props.min ? props.min : 0}
-        max={props.max ? props.max : 1}
-        step={props.step ? props.step : 0.01}
+        min={min ? min : 0}
+        max={max ? max : 1}
+        step={step ? step : 0.01}
         controls={false}
-        value={props.value}
+        value={value}
         onChange={onChange}
       />
     </div>
