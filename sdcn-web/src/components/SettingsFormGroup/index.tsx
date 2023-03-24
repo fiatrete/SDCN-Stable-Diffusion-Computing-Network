@@ -13,7 +13,11 @@ const modelsData = [
     label: 'clarity',
   },
 ]
-const ModelFormGroup = (props: any) => {
+interface ModelFormGroupProps {
+  label?: string
+  name?: string
+}
+const ModelFormGroup = (props: ModelFormGroupProps) => {
   return (
     <Form.Item
       label={props.label ? props.label : 'Model'}
@@ -43,7 +47,12 @@ const lorasData = [
     label: 'kobeni_v10',
   },
 ]
-const LoraFormGroup = (props: any) => {
+interface LoraFormGroupProps {
+  label: string
+  loraName: string
+  weightName: string
+}
+const LoraFormGroup = (props: LoraFormGroupProps) => {
   return (
     <Fragment>
       <Form.Item label={props.label} name={props.loraName}>
@@ -69,7 +78,12 @@ const samplingMethodsData = [
   { value: 'LMS', label: 'LMS' },
   { value: 'DDIM', label: 'DDIM' },
 ]
-const SamplingFormGroup = (props: any) => {
+interface SamplingFormGroupProps {
+  methodName: string
+  stepsName: string
+  seedName: string
+}
+const SamplingFormGroup = (props: SamplingFormGroupProps) => {
   return (
     <Fragment>
       <Form.Item
