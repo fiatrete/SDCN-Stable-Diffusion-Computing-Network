@@ -1,4 +1,4 @@
-interface txt2imgParams {
+export interface txt2imgParams {
   prompt: string
   lora1: string
   weight1: number
@@ -14,7 +14,7 @@ interface txt2imgParams {
   model: string
 }
 
-async function txt2img(params: txt2imgParams): Promise<string> {
+export async function txt2img(params: txt2imgParams): Promise<string> {
   const data = {
     prompt: params.prompt,
     loras: (() => {
@@ -54,5 +54,3 @@ async function txt2img(params: txt2imgParams): Promise<string> {
   const img_data_url = resp_json.images[0]
   return 'data:image/png;base64,' + img_data_url
 }
-
-export default txt2img

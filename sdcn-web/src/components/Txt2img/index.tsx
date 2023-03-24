@@ -6,8 +6,7 @@ import {
   LoraFormGroup,
   SamplingFormGroup,
 } from 'components/SettingsFormGroup'
-import txt2img from 'api/txt2img'
-
+import { txt2img, txt2imgParams } from 'api/txt2img'
 import ImageWidget from 'components/ImageWidget'
 
 import styles from './index.module.css'
