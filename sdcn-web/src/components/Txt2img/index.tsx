@@ -123,9 +123,9 @@ const Txt2img = () => {
       formData = Object.assign(formData, values)
       const [width, height] = formData.size.split('x')
       delete formData.size
-      formData.width = width
-      formData.height = height
-      formData.cfg_scale = '7'
+      formData.width = parseInt(width)
+      formData.height = parseInt(height)
+      formData.cfg_scale = 7
       console.log('second submit, merged', formData)
       ;(async () => {
         setImgLoading(true)

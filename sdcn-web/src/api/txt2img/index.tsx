@@ -1,4 +1,20 @@
-async function txt2img(params: any): Promise<string> {
+interface txt2imgParams {
+  prompt: string
+  lora1: string
+  weight1: number
+  lora2: string
+  weight2: number
+  seed: number
+  sampler_name: string
+  steps: number
+  cfg_scale: number
+  width: number
+  height: number
+  negative_prompt: string
+  model: string
+}
+
+async function txt2img(params: txt2imgParams): Promise<string> {
   const data = {
     prompt: params.prompt,
     loras: (() => {
@@ -11,12 +27,12 @@ async function txt2img(params: any): Promise<string> {
       }
       return loras
     })(),
-    seed: parseInt(params.seed),
+    seed: params.seed,
     sampler_name: params.sampler_name,
-    steps: parseInt(params.steps),
-    cfg_scale: parseInt(params.cfg_scale),
-    width: parseInt(params.width),
-    height: parseInt(params.height),
+    steps: params.steps,
+    cfg_scale: params.cfg_scale,
+    width: params.width,
+    height: params.height,
     negative_prompt: params.negative_prompt,
     model: params.model,
   }
