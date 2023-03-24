@@ -7,6 +7,8 @@
 
 .tabs {
   width: 100%;
+  max-width: 1320px;
+  padding: 48px 0;
 }
 
 .tabs :global(.ant-tabs-nav-wrap) {
