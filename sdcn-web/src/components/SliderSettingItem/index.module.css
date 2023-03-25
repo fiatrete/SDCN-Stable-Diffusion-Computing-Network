@@ -1,0 +1,12 @@
+.wrap :global(div.ant-slider) {
+  margin: 14px 5px 14px 5px;
+}
+
+.wrap :global(div.ant-input-number) {
+  width: 54px;
+}
+
+.wrap :global(.ant-input-number input) {
+  padding: 0 10px;
+  text-align: center;
+}
