@@ -126,7 +126,7 @@ cat params-txt2img.json \
 3. startup Stable Diffusion webui with `--listen --api --share` argument 
 
 ```bash
-bash webui.sh --listen --api -share
+bash webui.sh --listen --api --share
 ```
 you will get a public URL like `https://f00bfa54-7b3c-476b.gradio.live`.
 
