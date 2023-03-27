@@ -115,7 +115,7 @@ cat params-txt2img.json \
 
 ### For those who want to contribute computing power
 
-1. install last [Stable Diffusion webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui)
+1. install lastest [Stable Diffusion webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui)
 2. make sure the following models & loras are installed:
     1. chillout_mix, [download](https://huggingface.co/fiatrete/sdcn-used-models/resolve/main/chilloutmix_NiPrunedFp32Fix.safetensors)
     2. clarity, [download](https://huggingface.co/fiatrete/sdcn-used-models/resolve/main/clarity.safetensors)
