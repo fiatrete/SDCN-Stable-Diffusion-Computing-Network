@@ -115,7 +115,23 @@ cat params-txt2img.json \
 
 ### For those who want to contribute computing power
 
-- To be updated
+1. install last [Stable Diffusion webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui)
+2. make sure the following models & loras are installed:
+    1. chillout_mix, [download](https://huggingface.co/fiatrete/sdcn-used-models/resolve/main/chilloutmix_NiPrunedFp32Fix.safetensors)
+    2. clarity, [download](https://huggingface.co/fiatrete/sdcn-used-models/resolve/main/clarity.safetensors)
+    3. koreanDollLikeness_v10, [download](https://huggingface.co/fiatrete/sdcn-used-models/resolve/main/koreandolllikeness_V10.safetensors)
+    4. stLouisLuxuriousWheels_v1, [download](https://huggingface.co/fiatrete/sdcn-used-models/resolve/main/stLouisLuxuriousWheels_v1.safetensors)
+    5. taiwanDollLikeness_v10, [download](https://huggingface.co/fiatrete/sdcn-used-models/resolve/main/taiwanDollLikeness_v10.safetensors)
+    6. kobeni_v10, [download](https://huggingface.co/fiatrete/sdcn-used-models/resolve/main/kobeni_v10.safetensors)
+3. startup Stable Diffusion webui with `--listen --api --share` argument 
+
+```bash
+bash webui.sh --listen --api -share
+```
+you will get a public URL like `https://f00bfa54-7b3c-476b.gradio.live`.
+
+4. register the public URL in sdcn.info.
+
 
 ## TODO list
 
