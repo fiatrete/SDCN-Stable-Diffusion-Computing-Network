@@ -1,0 +1,6 @@
+.dashedArea {
+    width: 100%;
+    border: 1px dashed #D9D9D9;
+    border-radius: 8px;
+    transition: border-color .3s ease;
+}

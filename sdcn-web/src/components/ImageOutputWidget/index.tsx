@@ -14,14 +14,27 @@ const ImageWidget = ({ src }: { src?: string }) => {
   return (
     <div
       className={cx(styles.wrap, 'w-full flex justify-center items-center')}
-      style={{ height: '788px' }}
+      style={{ height: '100%' }}
     >
       {urlValid ? (
         <Image src={src} placeholder={true} fallback={fallbackImageURL} />
       ) : (
-        <Title style={{ color: 'rgba(0,0,0,0.25)' }} level={2}>
-          Images you generated will be shown here
-        </Title>
+        <div
+          className={cx(
+            'w-full h-0 pt-[50%] pb-[50%]',
+            styles.dashedArea,
+            'bg-[#FAFAFA]',
+            'flex flex-col justify-center text-center',
+          )}
+        >
+          <Title
+            className={cx()}
+            style={{ color: 'rgba(0,0,0,0.25)' }}
+            level={2}
+          >
+            Images you generated will be shown here
+          </Title>
+        </div>
       )}
     </div>
   )
