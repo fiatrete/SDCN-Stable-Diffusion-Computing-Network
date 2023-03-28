@@ -1,0 +1,13 @@
+.upload :global(.ant-upload-select) {
+    width: 100%;
+}
+
+.border_type {
+    border: 1px dashed #D9D9D9;
+    border-radius: 8px;
+    transition: border-color .3s ease;
+}
+
+.border_type:hover {
+    border-color: #1890ff;
+}
