@@ -6,7 +6,7 @@ import {
   LoraFormGroup,
   SamplingFormGroup,
 } from 'components/SettingsFormGroup'
-import { txt2img, txt2imgParams } from 'api/txt2img'
+import { img2img, img2imgParams } from 'api/img2img'
 import ImageOutputWidget from 'components/ImageOutputWidget'
 import ImageInputWidget from 'components/ImageInputWidget'
 import { FormFinishInfo } from 'rc-field-form/es/FormContext'
@@ -102,7 +102,8 @@ const Img2img = () => {
   const [SettingsForm] = Form.useForm()
   const [PromptForm] = Form.useForm()
 
-  const [imgUri, setImgUri] = useState<string | undefined>()
+  const [outputImgUri, setOutputImgUri] = useState<string | undefined>()
+  const [inputImgUri, setInputImgUri] = useState<string>('')
   const [imgLoading, setImgLoading] = useState<boolean>(false)
 
   const onGenerationButtonClicked = () => {
@@ -113,7 +114,7 @@ const Img2img = () => {
   }
 
   // For merging form data
-  let apiParams: txt2imgParams
+  let apiParams: img2imgParams
 
   const onFormSubmit = (name: string, { values }: FormFinishInfo) => {
     if (name === 'txt2imgSettingsForm') {
@@ -124,6 +125,7 @@ const Img2img = () => {
       apiParams.width = parseInt(widthStr)
       apiParams.height = parseInt(heightStr)
       apiParams.cfg_scale = 7
+      apiParams.init_image = inputImgUri?.split(',')[1]
       console.log('first submit', apiParams)
     }
     if (name === 'txt2imgPromptForm') {
@@ -132,7 +134,7 @@ const Img2img = () => {
       console.log('second submit, merged', apiParams)
       ;(async () => {
         setImgLoading(true)
-        setImgUri(await txt2img(apiParams))
+        setOutputImgUri(await img2img(apiParams))
         setImgLoading(false)
       })()
     }
@@ -154,8 +156,8 @@ const Img2img = () => {
             form={PromptForm}
           />
           <div className={cx('flex h-[788px] gap-2.5')}>
-            <ImageInputWidget onChanged={setImgUri} />
-            <ImageOutputWidget src={imgUri} />
+            <ImageInputWidget onChanged={setInputImgUri} />
+            <ImageOutputWidget src={outputImgUri} />
           </div>
         </div>
         <SettingsArea form={SettingsForm} />
