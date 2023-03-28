@@ -1,0 +1,7 @@
+.wrap :global(h5) {
+  margin: 0;
+}
+
+.wrap :global(textarea) {
+  resize: none;
+}
