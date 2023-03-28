@@ -7,7 +7,7 @@ import {
   SamplingFormGroup,
 } from 'components/SettingsFormGroup'
 import { txt2img, txt2imgParams } from 'api/txt2img'
-import ImageWidget from 'components/ImageWidget'
+import ImageWidget from 'components/ImageOutputWidget'
 import { FormFinishInfo } from 'rc-field-form/es/FormContext'
 import GeneratingMask from 'components/GeneratingMask'
 
@@ -143,7 +143,9 @@ const Txt2img = () => {
             onButtonClicked={onGenerationButtonClicked}
             form={PromptForm}
           />
-          <ImageWidget src={imgUri} />
+          <div style={{ height: '788px' }}>
+            <ImageWidget src={imgUri} />
+          </div>
         </div>
         <SettingsArea form={SettingsForm} />
       </div>
