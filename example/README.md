@@ -20,10 +20,3 @@ python3 sdcn_run.py img2img params-img2img.json ORIGINAL_IMAGE.png OUTPUT_IMAGE.
 # or 
 python3 img2img.py ORIGINAL_IMAGE.png
 ```
-
-
-
-
-
-
-
