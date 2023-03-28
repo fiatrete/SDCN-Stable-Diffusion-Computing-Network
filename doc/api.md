@@ -109,3 +109,37 @@ Here is an example JSON object with these parameters:
 }
 
 ```
+
+### interrogate
+
+Interrogate tasks will generate a description for an input image. The parameters for interrogate tasks are listed below:
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| image | string | The base64-encoded string of your input image |
+| model | string | The model name used to describe the image, avalaible options are `clip` and `deepdanbooru` |
+
+Here is an example JSON object with these parameters:
+
+```
+{
+    "image": "string",
+    "model": "clip"
+}
+```
+
+On success, the response has the following format:
+
+```
+{
+    "caption": "The scription"
+}
+```
+
+On failure, the response has the following format:
+
+```
+{
+    "detail": "The scription"
+}
+```

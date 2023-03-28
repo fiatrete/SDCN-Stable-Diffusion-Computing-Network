@@ -19,11 +19,7 @@ headers = {
 response = requests.request("POST", url, headers=headers, data=json.dumps(params))
 resp_obj = json.loads(response.content)
 
-if "images" in resp_obj.keys():
-    images = resp_obj["images"]
-    for index, img in zip(range(len(images)), images):
-        data = base64.b64decode(img)
-        with open(f"img{index}.png", "wb") as f:
-            f.write(data)
+if "caption" in resp_obj.keys():
+    print(resp_obj["caption"])
 else:
     print(response.content)
