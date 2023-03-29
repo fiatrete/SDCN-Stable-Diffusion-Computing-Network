@@ -1,8 +1,10 @@
+import sys
 import requests
 import json
 import base64
 
-with open("./img2img.png", "rb") as f:
+init_img_filename = sys.argv[1]
+with open(init_img_filename, "rb") as f:
     init_img = base64.b64encode(f.read()).decode()
 
 params = {
