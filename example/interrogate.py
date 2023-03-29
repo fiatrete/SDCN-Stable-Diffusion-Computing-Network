@@ -29,5 +29,8 @@ except requests.exceptions.RequestException as e:
     print(response.content)
     sys.exit(1)
 
-print(response.content)
+if "caption" in resp_obj.keys():
+    print(resp_obj["caption"])
+else:
+    print(response.content)
 
