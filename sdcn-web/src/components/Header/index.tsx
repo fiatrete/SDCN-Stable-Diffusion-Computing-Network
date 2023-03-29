@@ -6,7 +6,7 @@ import cx from 'classnames'
 import { Link, NavLink } from 'react-router-dom'
 import styles from './index.module.css'
 import useSignModal from 'hooks/useSignModal'
-import userStore from 'stores/userStore'
+import accountStore from 'stores/accountStore'
 import { observer } from 'mobx-react-lite'
 import { LogoutOutlined, UserOutlined } from '@ant-design/icons'
 
@@ -18,12 +18,14 @@ const Header = () => {
   }
 
   const avatarElement = () => {
-    const user = userStore.user
-    if (user.avatar) {
-      return <Avatar src={user.avatar} />
-    } else if (user.name.length > 0) {
+    const account = accountStore.user
+    if (account.avatarImgUrl) {
+      return <Avatar src={account.avatarImgUrl} />
+    } else if (account.nickname.length > 0) {
       return (
-        <Avatar style={{ backgroundColor: '#40A9FF' }}>{user.name[0]}</Avatar>
+        <Avatar style={{ backgroundColor: '#40A9FF' }}>
+          {account.nickname[0]}
+        </Avatar>
       )
     } else {
       return (
@@ -40,7 +42,7 @@ const Header = () => {
       type='text'
       icon={<LogoutOutlined />}
       onClick={() => {
-        userStore.reset()
+        accountStore.reset()
       }}
     >
       Logout
@@ -99,7 +101,7 @@ const Header = () => {
           >
             <Image src={githubIcon} width={28} preview={false} />
           </Button>
-          {userStore.isLoggedIn ? (
+          {accountStore.isLoggedIn ? (
             <Popover content={logoutButton} placement='bottomRight'>
               {avatarElement()}
             </Popover>

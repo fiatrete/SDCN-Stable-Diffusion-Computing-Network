@@ -1,5 +1,6 @@
 .wrap {
   width: 100%;
+  padding-left: calc(100vw - 100%);
 }
 
 .contentWrap {

@@ -2,13 +2,16 @@ import React from 'react'
 import cx from 'classnames'
 
 import styles from './index.module.css'
+import NodeList from './NodeList'
+import DonorList from './DonorList'
 
 const Nodes = () => {
   return (
     <div className={cx(styles.wrap)}>
-      <p style={{ width: '100%', marginTop: '50px', textAlign: 'center' }}>
-        Coming soon :-)
-      </p>
+      <div className={cx(styles.contentWrap)}>
+        <NodeList />
+        <DonorList />
+      </div>
     </div>
   )
 }

@@ -7,7 +7,7 @@ import {
   GoogleOutlined,
   LoadingOutlined,
 } from '@ant-design/icons'
-import UserStore from 'stores/userStore'
+import AccountStore from 'stores/accountStore'
 
 const useSignModal = () => {
   const spinIcon = (
@@ -105,9 +105,10 @@ const useSignModal = () => {
   const signInWithGoogle = () => {
     // TODO: SIGN IN WITH GOOGLE
     setTimeout(() => {
-      UserStore.updateUser({
+      AccountStore.updateUser({
         id: '1',
-        name: 'USER#001',
+        email: 'user001@tosee.cn',
+        nickname: 'USER#001',
       })
 
       setLoading(false)
