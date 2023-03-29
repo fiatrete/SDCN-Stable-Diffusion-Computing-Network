@@ -1,6 +1,15 @@
-import React, { useState } from 'react'
+import React, { Fragment, useState } from 'react'
 import cx from 'classnames'
-import { Form, Select, Button, Input, Typography } from 'antd'
+import check from 'check-types'
+import {
+  Form,
+  Select,
+  Button,
+  Input,
+  Typography,
+  message,
+  InputNumber,
+} from 'antd'
 import {
   ModelFormGroup,
   LoraFormGroup,
@@ -17,6 +26,27 @@ import styles from './index.module.css'
 
 const { Title } = Typography
 const { TextArea } = Input
+
+function calclImgSize(
+  inWid: number,
+  inHei: number,
+  setWid: number,
+  setHei: number,
+) {
+  // Set out image size
+  let width = setWid > 0 ? setWid : inWid
+  let height = setHei > 0 ? setHei : inHei
+  // Set limited image size
+  if (width > 1024) {
+    height = (1024 / width) * height
+    width = 1024
+  }
+  if (height > 1024) {
+    width = (1024 / height) * width
+    height = 1024
+  }
+  return [Math.round(width), Math.round(height)]
+}
 
 function InputAndGenerateArea() {
   return (
@@ -44,6 +74,7 @@ function InputAndGenerateArea() {
 }
 
 const sizes = [
+  { value: '-1x-1', label: 'same as input' },
   { value: '512x512', label: '512x512' },
   { value: '512x768', label: '512x768' },
   { value: '768x512', label: '768x512' },
@@ -53,37 +84,39 @@ function SettingsArea() {
   return (
     <div className={cx('flex flex-col w-80 gap-6 bg-green-000')}>
       <Title level={5}>Settings</Title>
-      <ModelFormGroup label='Model' name='model' />
+      <div className={cx('gap-0')}>
+        <ModelFormGroup label='Model' name='model' />
 
-      <Form.Item label='Size' name='size' initialValue={sizes[0].value}>
-        <Select size='large' options={sizes} />
-      </Form.Item>
+        <Form.Item label='Size' name='size' initialValue={sizes[0].value}>
+          <Select size='large' options={sizes} />
+        </Form.Item>
 
-      <LoraFormGroup label='LoRA1' loraName='lora1' weightName='weight1' />
-      <LoraFormGroup label='LoRA2' loraName='lora2' weightName='weight2' />
+        <LoraFormGroup label='LoRA1' loraName='lora1' weightName='weight1' />
+        <LoraFormGroup label='LoRA2' loraName='lora2' weightName='weight2' />
 
-      <Form.Item label='Negative Prompts' name='negative_prompt'>
-        <TextArea
-          size='large'
-          rows={4}
-          placeholder='Negative Prompts'
-          className={cx('self-stretch text-base leading-6 px-4 py-2')}
+        <Form.Item label='Negative Prompts' name='negative_prompt'>
+          <TextArea
+            size='large'
+            rows={4}
+            placeholder='Negative Prompts'
+            className={cx('self-stretch text-base leading-6 px-4 py-2')}
+          />
+        </Form.Item>
+
+        <Form.Item
+          label='Denoising strength'
+          name='denoising_strength'
+          initialValue={0.5}
+        >
+          <SliderSettingItem />
+        </Form.Item>
+
+        <SamplingFormGroup
+          methodName='sampling_method'
+          stepsName='steps'
+          seedName='seed'
         />
-      </Form.Item>
-
-      <Form.Item
-        label='Denoising strength'
-        name='denoising_strength'
-        initialValue={0.5}
-      >
-        <SliderSettingItem />
-      </Form.Item>
-
-      <SamplingFormGroup
-        methodName='sampling_method'
-        stepsName='steps'
-        seedName='seed'
-      />
+      </div>
     </div>
   )
 }
@@ -91,30 +124,62 @@ function SettingsArea() {
 const Img2img = () => {
   const [form] = Form.useForm()
   const [outputImgUri, setOutputImgUri] = useState<string | undefined>()
-  const [inputImgUri, setInputImgUri] = useState<string>('')
+  const [inputImg, setInputImg] = useState<string>('')
   const [imgLoading, setImgLoading] = useState<boolean>(false)
 
-  const onFormSubmit = (name: string, { values }: FormFinishInfo) => {
-    const [widthStr, heightStr] = values.size.split('x')
-    delete values.size
-    const apiParams: img2imgParams = Object.assign(values)
-    apiParams.width = parseInt(widthStr)
-    apiParams.height = parseInt(heightStr)
-    apiParams.cfg_scale = 7
-    apiParams.init_image = inputImgUri?.split(',')[1]
-    console.log('submit', apiParams)
-    ;(async () => {
+  const onFormSubmit = async (name: string, { values }: FormFinishInfo) => {
+    try {
+      check.assert(inputImg, 'input image must be existed')
+
       setImgLoading(true)
+      // Get input image size
+      const [widthStr, heightStr] = values.size.split('x')
+      delete values.size
+      const inWid: number = values.input_width
+      delete values.input_width
+      const inHei: number = values.input_height
+      delete values.input_height
+
+      const apiParams: img2imgParams = Object.assign(values)
+
+      const setWid = parseInt(widthStr)
+      const setHei = parseInt(heightStr)
+      // Set submit image size
+      const [subWidth, subHeight] = calclImgSize(inWid, inHei, setWid, setHei)
+      apiParams.width = subWidth
+      apiParams.height = subHeight
+
+      apiParams.cfg_scale = 7
+      apiParams.init_image = inputImg?.split(',')[1]
+      //console.log('submit', apiParams)
+
       setOutputImgUri(await img2img(apiParams))
+    } catch (err) {
+      if (err instanceof String) message.error(err)
+      if (err instanceof Error) message.error(err.message)
+    } finally {
       setImgLoading(false)
-    })()
+    }
+  }
+
+  const onInputSize = (width: number, height: number) => {
+    form.setFieldValue('input_width', width)
+    form.setFieldValue('input_height', height)
   }
 
   return (
     /* when Form submitted, the parent Form.Provider received the submittion via onFormFinish */
     <Form.Provider onFormFinish={onFormSubmit}>
-      <Form form={form} name='img2imgForm'>
+      <Form form={form} name='img2imgForm' layout='vertical'>
         <GeneratingMask open={imgLoading} />
+        <Fragment>
+          <Form.Item hidden={true} name='input_width'>
+            <InputNumber />
+          </Form.Item>
+          <Form.Item hidden={true} name='input_height'>
+            <InputNumber />
+          </Form.Item>
+        </Fragment>
         <div
           className={cx(
             styles.wrap,
@@ -124,7 +189,7 @@ const Img2img = () => {
           <div className={cx('flex flex-col flex-1 bg-red-000')}>
             <InputAndGenerateArea />
             <div className={cx('flex h-[788px] gap-2.5')}>
-              <ImageInputWidget onChanged={setInputImgUri} />
+              <ImageInputWidget onChanged={setInputImg} onSize={onInputSize} />
               <ImageOutputWidget src={outputImgUri} />
             </div>
           </div>
