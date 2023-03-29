@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { ReactEventHandler, useState } from 'react'
 import cx from 'classnames'
 import { PlusOutlined } from '@ant-design/icons'
 import { message, Upload } from 'antd'
@@ -33,9 +33,10 @@ const customRequest = async (options: RcCustomRequestOptions<void>) => {
 
 interface propTypes {
   onChanged: (src: string) => void
+  onSize?: (width: number, height: number) => void
 }
 
-const ImageInputWidget = ({ onChanged }: propTypes) => {
+const ImageInputWidget = ({ onChanged, onSize }: propTypes) => {
   const [imageUrl, setImageUrl] = useState<string>()
 
   const handleChange: UploadProps['onChange'] = (
@@ -48,6 +49,12 @@ const ImageInputWidget = ({ onChanged }: propTypes) => {
         onChanged(url)
       })
     }
+  }
+
+  const onImgLoad: ReactEventHandler<HTMLImageElement> = ({
+    currentTarget: { naturalWidth, naturalHeight },
+  }) => {
+    if (onSize) onSize(naturalWidth, naturalHeight)
   }
 
   return (
@@ -65,7 +72,12 @@ const ImageInputWidget = ({ onChanged }: propTypes) => {
         onChange={handleChange}
       >
         {imageUrl ? (
-          <img src={imageUrl} alt='source' style={{ width: '100%' }} />
+          <img
+            src={imageUrl}
+            onLoad={onImgLoad}
+            alt='source'
+            style={{ width: '100%' }}
+          />
         ) : (
           <div
             className={cx(
