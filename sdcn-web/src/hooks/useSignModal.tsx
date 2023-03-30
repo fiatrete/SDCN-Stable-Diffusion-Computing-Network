@@ -51,14 +51,14 @@ const useSignModal = () => {
             <Image src={logo} width={200} preview={false} />
           </div>
           <div className={cx('grow flex flex-col justify-center gap-3 mx-8')}>
-            <Button
+            {/* <Button
               type='default'
               size='large'
               icon={<GoogleOutlined />}
               onClick={signInWithGoogleHandler}
             >
               Sign In with Google
-            </Button>
+            </Button> */}
             <Button
               type='default'
               size='large'
@@ -104,28 +104,47 @@ const useSignModal = () => {
 
   const signInWithGoogle = () => {
     // TODO: SIGN IN WITH GOOGLE
-    setTimeout(() => {
-      AccountStore.updateUser({
-        id: '1',
-        email: 'user001@tosee.cn',
-        nickname: 'USER#001',
-      })
-
-      setLoading(false)
-
-      message.success('SUCCESS')
-
-      hideSignModel()
-    }, 500)
+    // setTimeout(() => {
+    //   AccountStore.updateUser({
+    //     id: '1',
+    //     email: 'user001@tosee.cn',
+    //     nickname: 'USER#001',
+    //   })
+    //   setLoading(false)
+    //   message.success('SUCCESS')
+    //   hideSignModel()
+    // }, 500)
   }
 
   const signInWithGithub = () => {
     // TODO: SIGN IN WITH GITHUB
-    setTimeout(() => {
-      setLoading(false)
 
-      message.error('FAILURE')
-    }, 1000)
+    const iWidth = 600
+    const iHeight = 660
+    const iTop = (window.screen.availHeight - 30 - iHeight) / 2
+    const iLeft = (window.screen.availWidth - 10 - iWidth) / 2
+
+    const w = window.open(
+      'https://github.com/login/oauth/authorize?client_id=9e7ce211b204fc09a2aa',
+      'GithubOAuth',
+      `height=${iHeight}, width=${iWidth}, top=${iTop}, left=${iLeft}, toolbar=no, menubar=no,scrollbars=no, resizable=no,location=no, status=no`,
+    )
+
+    const loop = setInterval(() => {
+      if (w && w.closed) {
+        clearInterval(loop)
+        setLoading(false)
+
+        AccountStore.updateUser({
+          id: '1',
+          email: 'user001@tosee.cn',
+          nickname: 'USER#001',
+        })
+        setLoading(false)
+        message.success('SUCCESS')
+        hideSignModel()
+      }
+    }, 500)
   }
 
   return {

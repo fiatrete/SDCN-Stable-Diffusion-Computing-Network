@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import cx from 'classnames'
 
 import styles from './index.module.css'
@@ -9,7 +9,7 @@ import MyNodes from './MyNodes'
 import DonateNode from './DonateNode'
 
 const Nodes = () => {
-  const handleDonateNode = () => {
+  const handleDonateNode = useCallback(() => {
     Modal.info({
       title: 'Donate Node',
       closable: true,
@@ -19,9 +19,9 @@ const Nodes = () => {
       width: 368,
       content: <DonateNode />,
     })
-  }
+  }, [])
 
-  const handleMyNodesButton = () => {
+  const handleMyNodesButton = useCallback(() => {
     Modal.info({
       title: 'My Nodes',
       closable: true,
@@ -31,7 +31,7 @@ const Nodes = () => {
       width: 757,
       content: <MyNodes />,
     })
-  }
+  }, [])
 
   return (
     <div className={cx(styles.wrap)}>

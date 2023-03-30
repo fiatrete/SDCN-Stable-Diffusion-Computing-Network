@@ -3,24 +3,24 @@ import { Node } from 'typings/Node'
 import { NodesResponseData } from 'api/nodes'
 import { AxiosError } from 'axios'
 import NodeStatusTag from 'components/NodeStatusTag'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import * as nodesApi from 'api/nodes'
 import to from 'await-to-js'
 import cx from 'classnames'
 import NodeActionsPanel from 'components/NodeActionsPanel'
 
 const MyNodes = () => {
-  const onLaunch = (node: Node) => {
+  const onLaunch = useCallback((node: Node) => {
     console.log('onLaunch', node)
-  }
+  }, [])
 
-  const onStop = (node: Node) => {
+  const onStop = useCallback((node: Node) => {
     console.log('onStop', node)
-  }
+  }, [])
 
-  const onRevoke = (node: Node) => {
+  const onRevoke = useCallback((node: Node) => {
     console.log('onRevoke', node)
-  }
+  }, [])
 
   const columns = [
     {
@@ -44,16 +44,10 @@ const MyNodes = () => {
       width: '30%',
       render: (node: Node) => (
         <NodeActionsPanel
-          status={node.status}
-          onLaunch={() => {
-            onLaunch(node)
-          }}
-          onStop={() => {
-            onStop(node)
-          }}
-          onRevoke={() => {
-            onRevoke(node)
-          }}
+          node={node}
+          onLaunch={onLaunch}
+          onStop={onStop}
+          onRevoke={onRevoke}
         />
       ),
     },

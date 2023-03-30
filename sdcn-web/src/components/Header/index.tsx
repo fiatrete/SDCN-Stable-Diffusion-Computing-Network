@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import { Avatar, Button, Image, Popover } from 'antd'
 import githubIcon from 'assets/images/icon_github.svg'
 import logo from 'assets/images/logo.svg'
@@ -13,11 +13,11 @@ import { LogoutOutlined, UserOutlined } from '@ant-design/icons'
 const Header = () => {
   const { showSignModel } = useSignModal()
 
-  const signInHandler = () => {
+  const signInHandler = useCallback(() => {
     showSignModel()
-  }
+  }, [showSignModel])
 
-  const avatarElement = () => {
+  const avatarElement = useCallback(() => {
     const account = accountStore.user
     if (account.avatarImgUrl) {
       return <Avatar src={account.avatarImgUrl} />
@@ -35,7 +35,7 @@ const Header = () => {
         />
       )
     }
-  }
+  }, [])
 
   const logoutButton = (
     <Button

@@ -1,5 +1,5 @@
 import { AxiosError } from 'axios'
-import React from 'react'
+import React, { useCallback } from 'react'
 import * as nodesApi from 'api/nodes'
 import to from 'await-to-js'
 import cx from 'classnames'
@@ -8,9 +8,9 @@ import { Button, Form, Input, Typography } from 'antd'
 const { Title, Paragraph, Text, Link } = Typography
 
 const DonateNode = () => {
-  const onDonate = (values: { worker: string }) => {
+  const onDonate = useCallback((values: { worker: string }) => {
     console.log('onDonate', values, values.worker)
-  }
+  }, [])
 
   return (
     <div className={cx('mt-4')}>

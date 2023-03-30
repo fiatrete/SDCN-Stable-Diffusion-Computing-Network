@@ -1,33 +1,54 @@
 import { Button, Popconfirm } from 'antd'
-import React from 'react'
-import { NodeStatus } from 'typings/Node'
+import React, { useCallback, useEffect, useState } from 'react'
+import { Node, NodeStatus } from 'typings/Node'
 
-export type NodeActionHandler = () => void
+export type NodeActionHandler = (node: Node) => void
 
 export interface NodeActionsPanelProps {
-  status: number
+  node: Node
   onLaunch: NodeActionHandler
   onStop: NodeActionHandler
   onRevoke: NodeActionHandler
 }
 
 const NodeActionsPanel = (props: NodeActionsPanelProps) => {
-  let isLaunchButtonDisabled = false
-  let isStopButtonDisabled = false
-  let isRevokeButtonDisabled = false
-  switch (props.status) {
-    case NodeStatus.Online:
-      isLaunchButtonDisabled = true
-      break
-    case NodeStatus.Processing:
-      isLaunchButtonDisabled = true
-      isStopButtonDisabled = true
-      isRevokeButtonDisabled = true
-      break
-    default:
-      isStopButtonDisabled = true
-      break
-  }
+  const { node, onLaunch, onStop, onRevoke } = props
+
+  const [isLaunchButtonDisabled, setIsLaunchButtonDisabled] = useState(false)
+  const [isStopButtonDisabled, setIsStopButtonDisabled] = useState(false)
+  const [isRevokeButtonDisabled, setIsRevokeButtonDisabled] = useState(false)
+
+  useEffect(() => {
+    switch (node.status) {
+      case NodeStatus.Online:
+        setIsLaunchButtonDisabled(true)
+        setIsStopButtonDisabled(false)
+        setIsRevokeButtonDisabled(false)
+        break
+      case NodeStatus.Processing:
+        setIsLaunchButtonDisabled(true)
+        setIsStopButtonDisabled(true)
+        setIsRevokeButtonDisabled(true)
+        break
+      default:
+        setIsLaunchButtonDisabled(false)
+        setIsStopButtonDisabled(true)
+        setIsRevokeButtonDisabled(false)
+        break
+    }
+  }, [node])
+
+  const handleOnLaunch = useCallback(() => {
+    onLaunch(node)
+  }, [onLaunch, node])
+
+  const handleOnStop = useCallback(() => {
+    onStop(node)
+  }, [onStop, node])
+
+  const handleOnRevoke = useCallback(() => {
+    onRevoke(node)
+  }, [onRevoke, node])
 
   return (
     <>
@@ -35,7 +56,7 @@ const NodeActionsPanel = (props: NodeActionsPanelProps) => {
         type='link'
         size='small'
         disabled={isLaunchButtonDisabled}
-        onClick={props.onLaunch}
+        onClick={handleOnLaunch}
       >
         Launch
       </Button>
@@ -43,7 +64,7 @@ const NodeActionsPanel = (props: NodeActionsPanelProps) => {
         type='link'
         size='small'
         disabled={isStopButtonDisabled}
-        onClick={props.onStop}
+        onClick={handleOnStop}
       >
         Stop
       </Button>
@@ -51,7 +72,7 @@ const NodeActionsPanel = (props: NodeActionsPanelProps) => {
         title='Are you sure to revoke the node?'
         okText='Yes'
         cancelText='No'
-        onConfirm={props.onRevoke}
+        onConfirm={handleOnRevoke}
         disabled={isRevokeButtonDisabled}
       >
         <Button

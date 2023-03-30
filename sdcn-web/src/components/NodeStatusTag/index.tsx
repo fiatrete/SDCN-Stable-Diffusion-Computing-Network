@@ -1,5 +1,5 @@
 import { Tag } from 'antd'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { NodeStatus } from 'typings/Node'
 
 export interface NodeStatusTagProps {
@@ -7,22 +7,27 @@ export interface NodeStatusTagProps {
 }
 
 const NodeStatusTag = (props: NodeStatusTagProps) => {
-  let desc = 'offline'
-  let color = 'red'
-  switch (props.status) {
-    case NodeStatus.Online:
-      desc = 'online'
-      color = 'green'
-      break
-    case NodeStatus.Processing:
-      desc = 'processing'
-      color = 'geekblue'
-      break
-    default:
-      desc = 'offline'
-      color = 'red'
-      break
-  }
+  const { status } = props
+
+  const [desc, setDesc] = useState('offline')
+  const [color, setColor] = useState('red')
+
+  useEffect(() => {
+    switch (status) {
+      case NodeStatus.Online:
+        setDesc('online')
+        setColor('green')
+        break
+      case NodeStatus.Processing:
+        setDesc('processing')
+        setColor('geekblue')
+        break
+      default:
+        setDesc('offline')
+        setColor('red')
+        break
+    }
+  }, [status])
 
   return <Tag color={color}>{desc}</Tag>
 }
