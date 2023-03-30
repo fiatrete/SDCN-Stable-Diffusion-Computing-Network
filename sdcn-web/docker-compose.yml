@@ -1,0 +1,7 @@
+version: '3.0'
+services:
+  sdcn-web:
+    container_name: sdcn-web
+    build: .
+    ports:
+      - 3000:3000
