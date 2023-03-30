@@ -10,3 +10,7 @@ body,
   margin: 0;
   padding: 0;
 }
+
+.ant-modal-confirm-content {
+  max-width: 100% !important;
+}

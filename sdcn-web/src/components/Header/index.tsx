@@ -97,9 +97,12 @@ const Header = () => {
             shape='circle'
             href={process.env.REACT_APP_GITHUB_URL}
             target='_blank'
-            className={cx('flex justify-center items-center')}
+            className={cx('flex justify-center items-center mx-2.5')}
           >
-            <Image src={githubIcon} width={28} preview={false} />
+            <Image
+              src='https://img.shields.io/github/stars/fiatrete/SDCN-Stable-Diffusion-Computing-Network?style=social'
+              preview={false}
+            />
           </Button>
           {accountStore.isLoggedIn ? (
             <Popover content={logoutButton} placement='bottomRight'>

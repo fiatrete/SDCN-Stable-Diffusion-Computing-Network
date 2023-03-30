@@ -50,7 +50,7 @@ const useSignModal = () => {
           <div className={cx('grow flex justify-center')}>
             <Image src={logo} width={200} preview={false} />
           </div>
-          <div className={cx('grow flex flex-col justify-center gap-3')}>
+          <div className={cx('grow flex flex-col justify-center gap-3 mx-8')}>
             <Button
               type='default'
               size='large'

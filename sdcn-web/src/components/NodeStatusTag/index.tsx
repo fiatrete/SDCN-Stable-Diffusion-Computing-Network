@@ -2,11 +2,11 @@ import { Tag } from 'antd'
 import React from 'react'
 import { NodeStatus } from 'typings/Node'
 
-export interface StatusTagProps {
+export interface NodeStatusTagProps {
   status: number
 }
 
-const StatusTag = (props: StatusTagProps) => {
+const NodeStatusTag = (props: NodeStatusTagProps) => {
   let desc = 'offline'
   let color = 'red'
   switch (props.status) {
@@ -27,4 +27,4 @@ const StatusTag = (props: StatusTagProps) => {
   return <Tag color={color}>{desc}</Tag>
 }
 
-export default StatusTag
+export default NodeStatusTag
