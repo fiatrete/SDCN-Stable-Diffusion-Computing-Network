@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from 'react'
+import React, { Fragment, useCallback, useState } from 'react'
 import cx from 'classnames'
 import check from 'check-types'
 import {
@@ -127,45 +127,51 @@ const Img2img = () => {
   const [inputImg, setInputImg] = useState<string>('')
   const [imgLoading, setImgLoading] = useState<boolean>(false)
 
-  const onFormSubmit = async (name: string, { values }: FormFinishInfo) => {
-    try {
-      check.assert(inputImg, 'input image must be existed')
+  const onFormSubmit = useCallback(
+    async (name: string, { values }: FormFinishInfo) => {
+      try {
+        check.assert(inputImg, 'input image must be existed')
 
-      setImgLoading(true)
-      // Get input image size
-      const [widthStr, heightStr] = values.size.split('x')
-      delete values.size
-      const inWid: number = values.input_width
-      delete values.input_width
-      const inHei: number = values.input_height
-      delete values.input_height
+        setImgLoading(true)
+        // Get input image size
+        const [widthStr, heightStr] = values.size.split('x')
+        delete values.size
+        const inWid: number = values.input_width
+        delete values.input_width
+        const inHei: number = values.input_height
+        delete values.input_height
 
-      const apiParams: img2imgParams = Object.assign(values)
+        const apiParams: img2imgParams = Object.assign(values)
 
-      const setWid = parseInt(widthStr)
-      const setHei = parseInt(heightStr)
-      // Set submit image size
-      const [subWidth, subHeight] = calclImgSize(inWid, inHei, setWid, setHei)
-      apiParams.width = subWidth
-      apiParams.height = subHeight
+        const setWid = parseInt(widthStr)
+        const setHei = parseInt(heightStr)
+        // Set submit image size
+        const [subWidth, subHeight] = calclImgSize(inWid, inHei, setWid, setHei)
+        apiParams.width = subWidth
+        apiParams.height = subHeight
 
-      apiParams.cfg_scale = 7
-      apiParams.init_image = inputImg?.split(',')[1]
-      //console.log('submit', apiParams)
+        apiParams.cfg_scale = 7
+        apiParams.init_image = inputImg?.split(',')[1]
+        //console.log('submit', apiParams)
 
-      setOutputImgUri(await img2img(apiParams))
-    } catch (err) {
-      if (err instanceof String) message.error(err)
-      if (err instanceof Error) message.error(err.message)
-    } finally {
-      setImgLoading(false)
-    }
-  }
+        setOutputImgUri(await img2img(apiParams))
+      } catch (err) {
+        if (err instanceof String) message.error(err)
+        if (err instanceof Error) message.error(err.message)
+      } finally {
+        setImgLoading(false)
+      }
+    },
+    [inputImg],
+  )
 
-  const onInputSize = (width: number, height: number) => {
-    form.setFieldValue('input_width', width)
-    form.setFieldValue('input_height', height)
-  }
+  const onInputSize = useCallback(
+    (width: number, height: number) => {
+      form.setFieldValue('input_width', width)
+      form.setFieldValue('input_height', height)
+    },
+    [form],
+  )
 
   return (
     /* when Form submitted, the parent Form.Provider received the submittion via onFormFinish */
