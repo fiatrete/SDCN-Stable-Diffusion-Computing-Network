@@ -7,6 +7,11 @@
 - SDCN abstracts the capabilities of stable diffusion into a set of atomic interface calls and hides the computing process from application developers.
 - Application developers can quickly develop their own applications based on the stable diffusion-related capabilities provided by SDCN, without worrying about how these interfaces are implemented or how computing power is provided.
 
+## **Getting Started**
+
+Try out SDCN functionalities in [our website](https://www.sdcn.info/).
+Feel free to file tickets for bugs or feature requests. 
+
 ## **Why SDCN?**
 
 - Everyone should have the ability to use AI freely. AI will be a public good.
