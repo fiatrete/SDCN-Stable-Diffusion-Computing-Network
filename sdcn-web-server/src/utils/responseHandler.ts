@@ -10,11 +10,17 @@ export enum StatusCode {
   InternalServerError = 500,
 }
 
+export enum ErrorCode {
+  Unknown = -1,
+  Success = 0,
+  PermissionDenied = 1000,
+}
+
 export class SdcnError extends Error {
   statusCode: StatusCode;
-  code: number;
+  code: ErrorCode;
   message: string;
-  constructor(statusCode: StatusCode, code: number, message: string) {
+  constructor(statusCode: StatusCode, code: ErrorCode, message: string) {
     super(message);
     this.statusCode = statusCode;
     this.code = code;

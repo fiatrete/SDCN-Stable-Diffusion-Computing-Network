@@ -27,6 +27,7 @@ export default class UserControler {
   }
   private static setAuthUserInfo(context: Context, authUserInfo: AuthUserInfo) {
     logger.debug('Set UserInfo: ', authUserInfo);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     context.session!.authUserInfo = authUserInfo;
   }
 
