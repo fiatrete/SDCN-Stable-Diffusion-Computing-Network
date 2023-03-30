@@ -21,11 +21,7 @@ function InputAndGenerateArea() {
     <div className={cx('flex flex-col items-start gap-6')}>
       <Title level={5}>Input keyword and generate</Title>
       <div className={cx('flex flex-col w-full items-start gap-6')}>
-        <Form.Item
-          name='prompt'
-          className={cx('self-stretch')}
-          style={{ marginBottom: '0px' }}
-        >
+        <Form.Item name='prompt' className={cx('self-stretch mb-0')}>
           <TextArea
             size='large'
             rows={6}
