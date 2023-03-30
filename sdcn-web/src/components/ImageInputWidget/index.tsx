@@ -1,4 +1,4 @@
-import React, { ReactEventHandler, useState } from 'react'
+import React, { ReactEventHandler, useCallback, useState } from 'react'
 import cx from 'classnames'
 import { PlusOutlined } from '@ant-design/icons'
 import { message, Upload } from 'antd'
@@ -39,23 +39,25 @@ interface propTypes {
 const ImageInputWidget = ({ onChanged, onSize }: propTypes) => {
   const [imageUrl, setImageUrl] = useState<string>()
 
-  const handleChange: UploadProps['onChange'] = (
-    info: UploadChangeParam<UploadFile>,
-  ) => {
-    if (info.file.status === 'done') {
-      // Get this url from response in real world.
-      getBase64(info.file.originFileObj as RcFile, (url) => {
-        setImageUrl(url)
-        onChanged(url)
-      })
-    }
-  }
+  const handleChange: UploadProps['onChange'] = useCallback(
+    (info: UploadChangeParam<UploadFile>) => {
+      if (info.file.status === 'done') {
+        // Get this url from response in real world.
+        getBase64(info.file.originFileObj as RcFile, (url) => {
+          setImageUrl(url)
+          onChanged(url)
+        })
+      }
+    },
+    [onChanged],
+  )
 
-  const onImgLoad: ReactEventHandler<HTMLImageElement> = ({
-    currentTarget: { naturalWidth, naturalHeight },
-  }) => {
-    if (onSize) onSize(naturalWidth, naturalHeight)
-  }
+  const onImgLoad: ReactEventHandler<HTMLImageElement> = useCallback(
+    ({ currentTarget: { naturalWidth, naturalHeight } }) => {
+      if (onSize) onSize(naturalWidth, naturalHeight)
+    },
+    [onSize],
+  )
 
   return (
     <div
