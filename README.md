@@ -9,7 +9,7 @@
 
 ## **Getting Started**
 
-Try out SDCN functionalities in [our website](https://www.sdcn.info/).
+Try out SDCN functionalities in [SDCN website](https://www.sdcn.info/).
 Feel free to file tickets for bugs or feature requests. 
 
 ## **Why SDCN?**
