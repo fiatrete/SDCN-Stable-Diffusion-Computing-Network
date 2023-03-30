@@ -23,7 +23,7 @@ const items: TabsProps['items'] = [
 const Playground = () => {
   return (
     <div className={cx(styles.wrap)}>
-      <Tabs className={cx(styles.tabs)} defaultActiveKey='2' items={items} />
+      <Tabs className={cx(styles.tabs)} defaultActiveKey='1' items={items} />
     </div>
   )
 }
