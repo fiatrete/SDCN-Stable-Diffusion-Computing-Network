@@ -11,6 +11,8 @@ import config from './config';
 import koaSession from 'koa-session';
 import { errorHandler } from './utils/responseHandler';
 import NodeControler from './controllers/NodeController';
+import bodyParser from 'koa-bodyparser';
+import SdControler from './controllers/SdController';
 
 dotenv.config();
 
@@ -20,7 +22,8 @@ const router = new Router();
 app.keys = [config.serverConfig.koaSecretKey];
 
 app.use(scopePerRequest(container));
-app.use(new CSRF());
+// This middleware causes our post request crash, thus disable it
+// app.use(new CSRF());
 app.use(
   koaSession(
     {
@@ -33,12 +36,16 @@ app.use(
   ),
 );
 app.use(koaBody());
+app.use(bodyParser());
 app.use(errorHandler);
 
-const userRouter = container.resolve<UserController>('userController').router();
-const nodeRouter = container.resolve<NodeControler>('nodeController').router();
-router.use('/api', userRouter.routes()).use('/api', userRouter.allowedMethods());
-router.use('/api', nodeRouter.routes()).use('/api', nodeRouter.allowedMethods());
+[
+  container.resolve<UserController>('userController').router(),
+  container.resolve<NodeControler>('nodeController').router(),
+  container.resolve<SdControler>('sdController').router(),
+].forEach((subRouter) => {
+  router.use('/api', subRouter.routes()).use('/api', subRouter.allowedMethods());
+});
 
 app.use(router.routes()).use(router.allowedMethods());
 app.listen(config.serverConfig.port, () => {
