@@ -22,7 +22,7 @@
 - **Trustlessness**: SDCN abstracts the capabilities of Stable Diffusion into a set of atomic interface calls and hides the computing process from application developers
 - **Powerful**: Application developers can quickly develop their own applications based on the Stable Diffusion related capabilities provided by SDCN, without worrying about how these interfaces are implemented or how computing power is provided
 
-![SDCN structure](https://github.com/fiatrete/SDCN-Stable-Diffusion-Computing-Network/raw/main/imgs/sdcn_structure_image.png)
+![SDCN structure](imgs/sdcn_structure_image.png)
 
 - SDCN Node
   - Executes image generation tasks
@@ -57,15 +57,6 @@
 Try out SDCN functionalities in [SDCN website](https://www.sdcn.info/).
 
 🎈Feel free to file tickets for bugs or feature requests. 
-
-</br>
-
-
-## Requirements
-
-- macOS 13 Ventura or above
-- [Homebrew](https://github.com/Homebrew/brew)
-- Python3
 
 </br>
 
@@ -114,10 +105,12 @@ cat params-txt2img.json \
 
 - `chillout_mix`, [download](https://huggingface.co/fiatrete/sdcn-used-models/resolve/main/chilloutmix_NiPrunedFp32Fix.safetensors)
 - `clarity`, [download](https://huggingface.co/fiatrete/sdcn-used-models/resolve/main/clarity.safetensors)
+- `anything-v4.5-pruned`, [download](https://huggingface.co/fiatrete/sdcn-used-models/resolve/main/anything-v4.5-pruned.safetensors)
 - `koreanDollLikeness_v10`, [download](https://huggingface.co/fiatrete/sdcn-used-models/resolve/main/koreandolllikeness_V10.safetensors)
 - `stLouisLuxuriousWheels_v1`, [download](https://huggingface.co/fiatrete/sdcn-used-models/resolve/main/stLouisLuxuriousWheels_v1.safetensors)
 - `taiwanDollLikeness_v10`, [download](https://huggingface.co/fiatrete/sdcn-used-models/resolve/main/taiwanDollLikeness_v10.safetensors)
 - `kobeni_v10`, [download](https://huggingface.co/fiatrete/sdcn-used-models/resolve/main/kobeni_v10.safetensors)
+- `thickerLinesAnimeStyle_loraVersion`, [download](https://huggingface.co/fiatrete/sdcn-used-models/resolve/main/thickerLinesAnimeStyle_loraVersion.safetensors)
 
 4. Startup Stable Diffusion WebUI with `--listen --api --share` argument 
 
@@ -126,7 +119,7 @@ bash webui.sh --listen --api --share
 ```
 > *You will get a public URL like `https://f00bfa54-7b3c-476b.gradio.live`*
 
-5. Login `donor account` on sdcn.info and register the public URL to `global node list`
+5. Login `donor account` on [sdcn.info](https://sdcn.info) and register the public URL to `global node list`
 
 
 
@@ -140,10 +133,12 @@ bash webui.sh --listen --api --share
 
 - `chillout_mix`, [download](https://huggingface.co/fiatrete/sdcn-used-models/resolve/main/chilloutmix_NiPrunedFp32Fix.safetensors)
 - `clarity`, [download](https://huggingface.co/fiatrete/sdcn-used-models/resolve/main/clarity.safetensors)
+- `anything-v4.5-pruned`, [download](https://huggingface.co/fiatrete/sdcn-used-models/resolve/main/anything-v4.5-pruned.safetensors)
 - `koreanDollLikeness_v10`, [download](https://huggingface.co/fiatrete/sdcn-used-models/resolve/main/koreandolllikeness_V10.safetensors)
 - `stLouisLuxuriousWheels_v1`, [download](https://huggingface.co/fiatrete/sdcn-used-models/resolve/main/stLouisLuxuriousWheels_v1.safetensors)
 - `taiwanDollLikeness_v10`, [download](https://huggingface.co/fiatrete/sdcn-used-models/resolve/main/taiwanDollLikeness_v10.safetensors)
 - `kobeni_v10`, [download](https://huggingface.co/fiatrete/sdcn-used-models/resolve/main/kobeni_v10.safetensors)
+- `thickerLinesAnimeStyle_loraVersion`, [download](https://huggingface.co/fiatrete/sdcn-used-models/resolve/main/thickerLinesAnimeStyle_loraVersion.safetensors)
 
 3. Startup Stable Diffusion WebUI with `--listen --api` argument 
 
