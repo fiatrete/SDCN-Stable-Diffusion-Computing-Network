@@ -1,14 +1,27 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 
 import 'index.css'
 
 import App from 'App'
+import Playground from 'pages/Playground'
+import Nodes from 'pages/Nodes'
+import Portal from 'pages/Portal'
+import OAuthSuccess from 'pages/OAuth'
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 root.render(
   <BrowserRouter>
-    <App />
+    <Routes>
+      <Route path='/' element={<App />}>
+        <Route index element={<Portal />} />
+        <Route path='play' element={<Playground />} />
+        <Route path='nodes' element={<Nodes />} />
+      </Route>
+      <Route path='/oauth/success' element={<OAuthSuccess />} />
+      <Route path='*' element={<Navigate replace to='/' />} />
+    </Routes>
+    {/* <App /> */}
   </BrowserRouter>,
 )

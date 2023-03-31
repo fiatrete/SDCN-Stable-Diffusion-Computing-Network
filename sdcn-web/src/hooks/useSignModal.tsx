@@ -125,7 +125,8 @@ const useSignModal = () => {
     const iLeft = (window.screen.availWidth - 10 - iWidth) / 2
 
     const w = window.open(
-      'https://github.com/login/oauth/authorize?client_id=9e7ce211b204fc09a2aa',
+      // 'https://github.com/login/oauth/authorize?client_id=9e7ce211b204fc09a2aa',
+      'http://127.0.0.1:3000/oauth/success',
       'GithubOAuth',
       `height=${iHeight}, width=${iWidth}, top=${iTop}, left=${iLeft}, toolbar=no, menubar=no,scrollbars=no, resizable=no,location=no, status=no`,
     )
