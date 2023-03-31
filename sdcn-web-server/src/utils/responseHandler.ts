@@ -56,7 +56,7 @@ export async function errorHandler(context: Context, next: Next) {
 function success(context: Context, data: any) {
   context.status = StatusCode.Success;
   context.body = {
-    code: 0,
+    code: ErrorCode.Success,
     data,
     message: 'success',
   };

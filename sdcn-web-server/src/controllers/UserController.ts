@@ -7,6 +7,8 @@ import { AuthUserInfo } from './auth/AuthInterface';
 import GithubAuth from './auth/GithubAuth';
 import GoogleAuth from './auth/GoogleAuth';
 import _ from 'lodash';
+import config from '../config/index';
+import querystring from 'querystring';
 import responseHandler, { ErrorCode, SdcnError, StatusCode } from '../utils/responseHandler';
 
 interface HelloParam {
@@ -51,8 +53,7 @@ export default class UserControler {
       }
 
       UserControler.setAuthUserInfo(context, authUserInfo);
-      context.status = 200;
-      context.body = `Succeed to auth by ${Authorizor.name}`;
+      context.redirect(config.serverConfig.redirect_uri);
     } catch (error: any) {
       logger.error(`Failed to auth by ${Authorizor.name}: `, error);
       context.status = 500;
@@ -71,6 +72,14 @@ export default class UserControler {
   @RequireLoginAsync
   async testAuth(context: Context) {
     context.body = `You are: ${UserControler.getAuthUserInfo(context).userName}`;
+  }
+
+  async loginWithGithub(context: Context) {
+    const loginWithGithubUrl = `https://github.com/login/oauth/authorize?client_id=${
+      config.serverConfig.githubClientId
+    }&redirect_uri=${querystring.escape(config.serverConfig.githubCallbackUrl)}`;
+    logger.info(`login url: ${loginWithGithubUrl}`);
+    context.redirect(loginWithGithubUrl);
   }
 
   async helloWorld(context: Context) {
@@ -143,6 +152,7 @@ export default class UserControler {
     router.get('/testauth', this.testAuth.bind(this));
     router.get('/world', this.world.bind(this));
     router.get('/connect/github', this.connectGithub.bind(this));
+    router.get('/login/github', this.loginWithGithub.bind(this));
     router.get('/info', this.info.bind(this));
     return router;
   }

@@ -38,7 +38,10 @@ container.register({
     }))
     .singleton(),
   nodeController: asClass(NodeControler)
-    .inject(() => ({ nodeService: container.resolve<NodeService>('nodeService') }))
+    .inject(() => ({
+      nodeService: container.resolve<NodeService>('nodeService'),
+      userService: container.resolve<UserService>('userService'),
+    }))
     .singleton(),
   sdService: asClass(SdService)
     .inject(() => ({ nodeService: container.resolve<NodeService>('nodeService') }))

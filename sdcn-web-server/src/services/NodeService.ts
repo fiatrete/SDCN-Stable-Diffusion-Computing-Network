@@ -27,52 +27,69 @@ export default class NodeService {
     this.nodeRepository = inject.nodeRepository;
   }
 
-  async createNodeID(address: string, userId: string): Promise<string> {
+  async createNodeID(address: string, userId: string) {
     const node_seq = await this.nodeRepository.getNextNodeSeq();
     logger.info(node_seq);
     const nodeHash = await this.nodeRepository.saveNodeHash(BigInt(userId), address, node_seq);
     logger.info(nodeHash);
     const nodeList = await this.nodeRepository.saveNode(node_seq, BigInt(userId), address);
-    return String(nodeList[0]?.id);
+    return nodeList[0];
   }
 
-  async getOrCreateNodeID(address: string, userId: string, createIfNotExists: boolean): Promise<string> {
+  async getOrCreateNode(address: string, userId: string, createIfNotExists: boolean) {
     // TODO: get or generate worker ID from database
     // use node_hash to check exist
     const nodeHash = await this.nodeRepository.getNodeHashByAccountAndWorker(BigInt(userId), address);
 
     if (nodeHash) {
-      logger.info('nodeHash:', nodeHash);
-      logger.info('nodeHash.seq:', nodeHash.seq);
       if (nodeHash.seq === undefined) {
-        logger.info('nodeHash.seq:', nodeHash.seq);
         return await this.createNodeID(address, userId);
       } else {
         const node = await this.nodeRepository.getNodeBySeq(nodeHash.seq!);
         logger.info('node:', node);
-        //TODO  default to online the node, does it right?
-        await this.nodeRepository.onlineNode(nodeHash.seq!);
-        return String(node?.id);
+        return node;
       }
     }
     if (createIfNotExists) {
       return await this.createNodeID(address, userId);
     } else {
-      return '';
+      return undefined;
     }
+  }
+
+  async getWorkerByNodeId(node_seq: bigint) {
+    return await this.nodeRepository.getWorkerBySeq(node_seq);
+  }
+
+  async getNodeByNodeId(node_seq: bigint) {
+    return await this.nodeRepository.getNodeBySeq(node_seq);
   }
 
   async removeNodeFromRepo(node_seq: bigint): Promise<void> {
     await this.nodeRepository.removeNode(node_seq);
   }
 
+  async donateNode(node_seq: bigint): Promise<void> {
+    await this.nodeRepository.donateNode(node_seq);
+  }
+
+  async onlineNode(node_seq: bigint): Promise<void> {
+    await this.nodeRepository.onlineNode(node_seq);
+  }
   async offlineNode(node_seq: bigint): Promise<void> {
     await this.nodeRepository.offlineNode(node_seq);
   }
 
   async hasOwnership(account_id: bigint, node_seq: bigint): Promise<boolean> {
     return await this.nodeRepository.hasNodeOwnership(account_id, node_seq);
-    return true;
+  }
+
+  async getNodeListbyAccountId(account_id: bigint) {
+    return await this.nodeRepository.getNodeListByAccountId(account_id);
+  }
+
+  async getAllUndeletedNodeList() {
+    return await this.nodeRepository.getAllUndeletedNodes();
   }
 
   async redisOperation(op: { (redis: Redis): Promise<void> }): Promise<boolean> {
@@ -89,7 +106,7 @@ export default class NodeService {
     return false;
   }
 
-  async addNode(nodeInfo: { address: string; id: string; userId: string }) {
+  async addNode(nodeInfo: { address: string; nodeId: string; userId: string }) {
     await this.redisOperation(async (redis: Redis) => {
       const evalResult = await redis.eval(
         `
@@ -105,7 +122,7 @@ end
 redis.call("SET", "NodeOwner$" .. nodeId, KEYS[4])
             `,
         4,
-        [nodeInfo.address, kWorkerKeepAlive, nodeInfo.id, nodeInfo.userId],
+        [nodeInfo.address, kWorkerKeepAlive, nodeInfo.nodeId, nodeInfo.userId],
       );
     });
   }

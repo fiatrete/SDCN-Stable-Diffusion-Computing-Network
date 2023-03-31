@@ -5,8 +5,8 @@ import { SortDirection } from '../utils/SortDirection';
 
 interface Node {
   id?: bigint;
-  node_seq: bigint;
-  account_id: bigint;
+  nodeSeq: bigint;
+  accountId: bigint;
   task_count: number;
   worker: string;
   status: number;
@@ -17,8 +17,8 @@ interface Node {
 type NodeFields = keyof Node;
 const nodeFields: Record<NodeFields, string> = {
   id: 'id',
-  node_seq: 'node_seq',
-  account_id: 'account_id',
+  nodeSeq: 'nodeSeq',
+  accountId: 'accountId',
   task_count: 'task_count',
   worker: 'worker',
   status: 'status',
@@ -51,8 +51,8 @@ export default class NodeRepository {
 
   async saveNode(node_seq: bigint, account_id: bigint, worker: string) {
     const node: Node = {
-      node_seq: node_seq,
-      account_id: account_id,
+      nodeSeq: node_seq,
+      accountId: account_id,
       task_count: 0,
       worker: worker,
       status: 1,
@@ -64,30 +64,47 @@ export default class NodeRepository {
   }
 
   async getNodeBySeq(node_seq: bigint) {
-    return await this.Nodes().where({ node_seq: node_seq }).first();
+    return await this.Nodes().where({ nodeSeq: node_seq }).first();
   }
 
-  async getAllNodes() {
-    return await this.Nodes().orderBy(nodeFields.id, SortDirection.Desc);
+  async getWorkerBySeq(node_seq: bigint) {
+    const node = await this.Nodes().where({ nodeSeq: node_seq }).first();
+    if (node === undefined) {
+      return '';
+    } else {
+      return node.worker;
+    }
+  }
+
+  async getAllUndeletedNodes() {
+    return await this.Nodes().where({ deleted: 0 }).orderBy(nodeFields.task_count, SortDirection.Desc);
+  }
+
+  async getNodeListByAccountId(account_id: bigint) {
+    return await this.Nodes().where({ accountId: account_id, deleted: 0 }).orderBy(nodeFields.task_count, SortDirection.Desc);
   }
 
   async hasNodeOwnership(account_id: bigint, node_seq: bigint): Promise<boolean> {
-    const result = await this.Nodes().select('id').where({ account_id, node_seq: node_seq }).limit(1);
+    const result = await this.Nodes().select('id').where({ accountId: account_id, nodeSeq: node_seq }).limit(1);
     return result.length > 0;
   }
 
+  async donateNode(node_seq: bigint) {
+    return await this.Nodes()
+      .update({ deleted: 0, status: 1, last_modify_time: new Date() })
+      .where({ nodeSeq: node_seq });
+  }
+
   async removeNode(node_seq: bigint) {
-    return await this.Nodes().update({ deleted: 1, last_modify_time: new Date() }).where({ node_seq: node_seq });
+    return await this.Nodes().update({ deleted: 1, last_modify_time: new Date() }).where({ nodeSeq: node_seq });
   }
 
   async onlineNode(node_seq: bigint) {
-    return await this.Nodes()
-      .update({ deleted: 0, status: 1, last_modify_time: new Date() })
-      .where({ node_seq: node_seq });
+    return await this.Nodes().update({ status: 1, last_modify_time: new Date() }).where({ nodeSeq: node_seq });
   }
 
   async offlineNode(node_seq: bigint) {
-    return await this.Nodes().update({ status: 0, last_modify_time: new Date() }).where({ node_seq: node_seq });
+    return await this.Nodes().update({ status: 2, last_modify_time: new Date() }).where({ nodeSeq: node_seq });
   }
 
   async raw(sql: string) {
