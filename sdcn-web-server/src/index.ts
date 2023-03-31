@@ -10,6 +10,7 @@ import UserController from './controllers/UserController';
 import config from './config';
 import koaSession from 'koa-session';
 import { errorHandler } from './utils/responseHandler';
+import NodeControler from './controllers/NodeController';
 
 dotenv.config();
 
@@ -35,7 +36,9 @@ app.use(koaBody());
 app.use(errorHandler);
 
 const userRouter = container.resolve<UserController>('userController').router();
+const nodeRouter = container.resolve<NodeControler>('nodeController').router();
 router.use('/api', userRouter.routes()).use('/api', userRouter.allowedMethods());
+router.use('/api', nodeRouter.routes()).use('/api', nodeRouter.allowedMethods());
 
 app.use(router.routes()).use(router.allowedMethods());
 app.listen(config.serverConfig.port, () => {

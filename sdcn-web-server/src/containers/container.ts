@@ -1,7 +1,7 @@
 import { asClass, asValue, createContainer } from 'awilix';
 import NodeControler from '../controllers/NodeController';
 import UserController from '../controllers/UserController';
-import { RedisService, UserRepository } from '../repositories';
+import { NodeRepository, RedisService, UserRepository } from '../repositories';
 import NodeService from '../services/NodeService';
 import UserService from '../services/UserService';
 import database from '../utils/database';
@@ -12,6 +12,9 @@ container.register({
   knex: asValue(database.knex),
   redis: asValue(database.redis),
   userRepository: asClass(UserRepository)
+    .inject(() => ({ knex: database.knex }))
+    .singleton(),
+  nodeRepository: asClass(NodeRepository)
     .inject(() => ({ knex: database.knex }))
     .singleton(),
   redisService: asClass(RedisService)
@@ -27,7 +30,10 @@ container.register({
     .inject(() => ({ userService: container.resolve<UserService>('userService') }))
     .singleton(),
   nodeService: asClass(NodeService)
-    .inject(() => ({ redisService: container.resolve<RedisService>('redisService') }))
+    .inject(() => ({
+      redisService: container.resolve<RedisService>('redisService'),
+      nodeRepository: container.resolve<NodeRepository>('nodeRepository'),
+    }))
     .singleton(),
   nodeController: asClass(NodeControler)
     .inject(() => ({ nodeService: container.resolve<NodeService>('nodeService') }))
