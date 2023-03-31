@@ -16,6 +16,7 @@ export enum ErrorCode {
   PermissionDenied = 1000,
   ResourceUnavailable = 2000,
   InvalidArgument = 3000,
+  UpstreamError = 4000,
 }
 
 export class SdcnError extends Error {
