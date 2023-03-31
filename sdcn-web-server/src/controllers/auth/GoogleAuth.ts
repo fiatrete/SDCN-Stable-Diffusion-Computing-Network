@@ -74,10 +74,12 @@ export default async function GoogleAuth(ctx: Context): Promise<AuthUserInfo> {
   const authUserInfo = {
     authType: 'Google',
     userName: getPrimaryName(userInfo),
-    id: userInfo.resourceName,
+    uuid: userInfo.resourceName,
     email: getPrimaryEmail(userInfo),
     tokenType: tokenType,
     accessToken: accessToken,
+    //TODO add avatar
+    avatar_img: '',
   } as AuthUserInfo;
   assertAuthUserInfoValid(authUserInfo);
 

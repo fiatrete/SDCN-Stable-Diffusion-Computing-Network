@@ -3,8 +3,10 @@ import { Context } from 'koa';
 interface AuthUserInfo {
   authType: 'Github' | 'Google';
   userName: string;
-  id: string;
+  id?: bigint;
+  uuid: string;
   email: string;
+  avatar_img: string;
 }
 
 interface AuthInterface {
@@ -14,7 +16,7 @@ interface AuthInterface {
 function isAuthUserInfoValid(userInfo: AuthUserInfo) {
   return (
     typeof userInfo.userName === 'string' &&
-    typeof userInfo.id === 'string' &&
+    typeof userInfo.uuid === 'string' &&
     (userInfo.email === null || typeof userInfo.email === 'string')
   );
 }

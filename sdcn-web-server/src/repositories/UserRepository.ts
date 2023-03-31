@@ -13,8 +13,11 @@ export default class UserRepository {
     return await this.Users().insert(user).returning('*');
   }
 
-  async getById(id: number) {
-    return await this.Users().where(userFields.id, id).first();
+  async getById(id: bigint) {
+    return await this.Users().where({ id: id }).first();
+  }
+  async getByUuid(uuid: string) {
+    return await this.Users().where(userFields.uuid, uuid).first();
   }
 
   async getAll() {

@@ -63,10 +63,11 @@ export default async function GithubAuth(ctx: Context): Promise<AuthUserInfo> {
   const authUserInfo = {
     authType: 'Github',
     userName: userInfo.login,
-    id: `${userInfo.id}`,
+    uuid: `${userInfo.id}`,
     email: getPrimaryEmail(emailInfo),
     tokenType: tokenType,
     accessToken: accessToken,
+    avatar_img: userInfo.avatar_url,
   } as AuthUserInfo;
   assertAuthUserInfoValid(authUserInfo);
 

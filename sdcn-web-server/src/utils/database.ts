@@ -1,5 +1,6 @@
-import IORedis from 'ioredis';
+import IORedis, { Redis } from 'ioredis';
 import config from '../config';
+import { RedisOptions } from 'ioredis';
 import Knex from 'knex';
 import logger from './logger';
 import _ from 'lodash';

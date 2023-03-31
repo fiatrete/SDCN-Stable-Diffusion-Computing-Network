@@ -1,17 +1,21 @@
 export default interface User {
-  id: number;
-  name: string;
-  age: number;
-  addressHome: string;
+  id: bigint;
+  uuid: string;
+  nickname: string;
+  avatarImg: string;
+  email: string;
+  create_time: Date;
 }
 
 type UserFields = keyof User;
 
 export const userFields: Record<UserFields, string> = {
   id: 'id',
-  name: 'name',
-  age: 'age',
-  addressHome: 'address_home',
+  uuid: 'uuid',
+  nickname: 'nickname',
+  avatarImg: 'avatarImg',
+  email: 'email',
+  create_time: 'create_time',
 };
 
-export const userTable = 's_user';
+export const userTable = 'account';
