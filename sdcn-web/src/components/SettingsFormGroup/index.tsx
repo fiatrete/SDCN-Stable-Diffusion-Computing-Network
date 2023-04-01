@@ -12,6 +12,10 @@ const modelsData = [
     value: '627a6f5c8bf7669d4a224ac041d527debc65d2d435b16e54ead8ee2c901d1634',
     label: 'clarity',
   },
+  {
+    value: '6e430eb51421ce5bf18f04e2dbe90b2cad437311948be4ef8c33658a73c86b2a',
+    label: 'anything-v4.5-pruned',
+  },
 ]
 interface ModelFormGroupProps {
   label?: string
@@ -45,6 +49,10 @@ const lorasData = [
   {
     value: '3e5d8fe726b4c0f1e7f0905f32ea3d1c9ce89a54028209e8179d64d323048dac',
     label: 'kobeni_v10',
+  },
+  {
+    value: '759d6fdf539f44f6991efd27ef1767c7779ac8884defc71dd909e5808b5ea74b',
+    label: 'thickerLinesAnimeStyle_loraVersion',
   },
 ]
 interface LoraFormGroupProps {
