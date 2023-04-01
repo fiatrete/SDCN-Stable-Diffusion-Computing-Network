@@ -40,6 +40,10 @@ export default class UserService {
     return user;
   }
 
+  async getNodeSummaryWithAccountPaged(pageNo: number, pageSize: number) {
+    return await this.userRepository.getNodeSummaryWithAccountPaged(pageNo, pageSize);
+  }
+
   async world() {
     return await this.userRepository.getAll();
   }

@@ -1,5 +1,6 @@
 import { Redis } from 'ioredis';
 import { Primitive } from 'lodash';
+import redisConfig from '../config/redisConfig';
 import { RedisService, NodeRepository } from '../repositories';
 import logger from '../utils/logger';
 
@@ -16,7 +17,7 @@ The meaning of keys in redis
 7. "AllNodes" is used to store all nodes online or offline
 */
 
-const kWorkerKeepAlive = '' + 3000;
+const kNodeKeepAlive = `${redisConfig.nodeKeepAlive}`;
 
 export default class NodeService {
   redisService: RedisService;
@@ -84,8 +85,18 @@ export default class NodeService {
     return await this.nodeRepository.hasNodeOwnership(account_id, node_seq);
   }
 
-  async getNodeListbyAccountId(account_id: bigint) {
-    return await this.nodeRepository.getNodeListByAccountId(account_id);
+  async getNodeListbyAccountId(account_id: bigint, pageNo: number, pageSize: number) {
+    return await this.nodeRepository.getNodeListByAccountId(account_id, pageNo, pageSize);
+  }
+
+  async getNodeListByType(type: number, pageNo: number, pageSize: number) {
+    return await this.nodeRepository.getNodeListbyStatus(type, pageNo, pageSize);
+  }
+  async getNodeCountByType(type: number) {
+    return await this.nodeRepository.getNodeCountbyStatus(type);
+  }
+  async getNodeCountByAcccountId(account_id: bigint) {
+    return await this.nodeRepository.getNodeCountByAcccountId(account_id);
   }
 
   async getAllUndeletedNodeList() {
@@ -122,7 +133,7 @@ end
 redis.call("SET", "NodeOwner$" .. nodeId, KEYS[4])
             `,
         4,
-        [nodeInfo.address, kWorkerKeepAlive, nodeInfo.nodeId, nodeInfo.userId],
+        [nodeInfo.address, kNodeKeepAlive, nodeInfo.nodeId, nodeInfo.userId],
       );
     });
   }

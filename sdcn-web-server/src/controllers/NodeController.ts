@@ -8,7 +8,7 @@ import logger from '../utils/logger';
 import responseHandler, { SdcnError, StatusCode, ErrorCode } from '../utils/responseHandler';
 import { AuthUserInfo } from './auth/AuthInterface';
 import { User } from '../models';
-
+import Joi, { number } from 'joi';
 export default class NodeControler {
   nodeService: NodeService;
   userService: UserService;
@@ -16,10 +16,6 @@ export default class NodeControler {
   constructor(inject: { nodeService: NodeService; userService: UserService }) {
     this.nodeService = inject.nodeService;
     this.userService = inject.userService;
-  }
-
-  private static ComputeNodeHash(address: string, ownerId: string) {
-    return Hasher.sha256(`${address}#${ownerId}`);
   }
 
   @RequireLoginAsync
@@ -37,8 +33,8 @@ export default class NodeControler {
     //TODO check address as http(s)://xxx.xx.xx
     const userId = String(userInfo.id);
     const node = await this.nodeService.getOrCreateNode(address, userId, true);
-
-    if (node === undefined) {
+    logger.info('donate', node, node?.nodeSeq);
+    if (node === undefined || node.nodeSeq === undefined) {
       return responseHandler.fail(
         context,
         new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid Argument'),
@@ -52,6 +48,7 @@ export default class NodeControler {
   async checkParams(context: Context, userInfo: AuthUserInfo): Promise<[string, number]> {
     const body = context.request.body;
     const nodeId = body.nodeId;
+    logger.info('nodeId', nodeId, userInfo);
     if (nodeId === undefined) {
       return ['', 1];
     }
@@ -182,6 +179,18 @@ export default class NodeControler {
 
   @RequireLoginAsync
   async mine(context: Context) {
+    const schema = Joi.object({
+      pageNo: Joi.number().integer().min(1).required(),
+      pageSize: Joi.number().integer().min(1).max(100).required(),
+    });
+    const { value, error } = schema.validate(context.query);
+    if (error) {
+      return responseHandler.fail(
+        context,
+        new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, error.message),
+      );
+    }
+    const { pageNo, pageSize } = value;
     const userInfo = context.session?.authUserInfo as AuthUserInfo;
     if (userInfo.id === undefined) {
       logger.info('userId is undefined');
@@ -190,7 +199,18 @@ export default class NodeControler {
         new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Bad Request'),
       );
     }
-    const nodeList = await this.nodeService.getNodeListbyAccountId(userInfo.id);
+
+    const totalSize = await this.nodeService.getNodeCountByAcccountId(userInfo.id);
+    if (totalSize === 0) {
+      return responseHandler.success(context, {
+        items: {},
+        pageNo: pageNo,
+        pageSize: pageNo,
+        totolPages: 0,
+        totalSize: 0,
+      });
+    }
+    const nodeList = await this.nodeService.getNodeListbyAccountId(userInfo.id, pageNo, pageSize);
     const result: { nodeId: bigint; status: number }[] = [];
     nodeList.forEach((node) => {
       const item = { nodeId: node.nodeSeq, status: node.status };
@@ -198,36 +218,57 @@ export default class NodeControler {
     });
     return responseHandler.success(context, {
       items: result,
-      page: 1,
-      pageSize: result.length,
-      totolPages: 1,
-      totalSize: result.length,
+      pageNo: pageNo,
+      pageSize: pageSize,
+      totolPages: Math.ceil(Number(totalSize / pageSize)),
+      totalSize: totalSize,
     });
   }
 
   async node(context: Context) {
-    const allNodeList = await this.nodeService.getAllUndeletedNodeList();
-    logger.info('allNodeList', allNodeList);
-    const promises = allNodeList.map(async (node) => {
-      logger.info(node, node.accountId);
+    const schema = Joi.object({
+      type: Joi.number().required(),
+      pageNo: Joi.number().integer().min(1).required(),
+      pageSize: Joi.number().integer().min(1).max(100).required(),
+    });
+    const { value, error } = schema.validate(context.query);
+    if (error) {
+      return responseHandler.fail(
+        context,
+        new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, error.message),
+      );
+    }
+    const { type, pageNo, pageSize } = value;
+    const totalSize = await this.nodeService.getNodeCountByType(type);
+    if (totalSize === 0) {
+      return responseHandler.success(context, {
+        items: {},
+        pageNo: pageNo,
+        pageSize: pageNo,
+        totolPages: 0,
+        totalSize: 0,
+      });
+    }
+    const nodeList = await this.nodeService.getNodeListByType(type, pageNo, pageSize);
+    const promises = nodeList.map(async (node) => {
       const user = await this.userService.getUserInfo(node.accountId);
       if (user === undefined) {
         return;
       }
       const userInfo = user as unknown as User;
       const accountInfo = { nickname: userInfo?.nickname, avatarImgUrl: userInfo?.avatarImg, email: userInfo?.email };
-      logger.info(accountInfo);
       const item = { nodeId: node.nodeSeq, account: accountInfo, status: node.status };
       return item;
     });
+
     const result = await Promise.all(promises);
-    logger.info('out-result', result);
+    // logger.info('out-result', result);
     return responseHandler.success(context, {
       items: result,
-      page: 1,
-      pageSize: result.length,
-      totolPages: 1,
-      totalSize: result.length,
+      pageNo: pageNo,
+      pageSize: pageSize,
+      totolPages: Math.ceil(Number(totalSize / pageSize)),
+      totalSize: totalSize,
     });
   }
 

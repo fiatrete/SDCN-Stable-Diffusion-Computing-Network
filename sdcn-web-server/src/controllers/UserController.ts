@@ -10,6 +10,7 @@ import _ from 'lodash';
 import config from '../config/index';
 import querystring from 'querystring';
 import responseHandler, { ErrorCode, SdcnError, StatusCode } from '../utils/responseHandler';
+import Joi from 'joi';
 
 interface HelloParam {
   id: number;
@@ -75,7 +76,7 @@ export default class UserControler {
   }
 
   async loginWithGithub(context: Context) {
-    const loginWithGithubUrl = `https://github.com/login/oauth/authorize?client_id=${
+    const loginWithGithubUrl = `https://github.com/login/oauth/authorize?scope=user:email&client_id=${
       config.serverConfig.githubClientId
     }&redirect_uri=${querystring.escape(config.serverConfig.githubCallbackUrl)}`;
     logger.info(`login url: ${loginWithGithubUrl}`);
@@ -146,6 +147,31 @@ export default class UserControler {
     responseHandler.success(context, result);
   }
 
+  async getNodeSummaryWithAccountPaged(context: Context) {
+    const schema = Joi.object({
+      pageNo: Joi.number().integer().min(1).required(),
+      pageSize: Joi.number().integer().min(1).max(100).required(),
+    });
+    const { value, error } = schema.validate(context.query);
+    if (error) {
+      return responseHandler.fail(
+        context,
+        new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, error.message),
+      );
+    }
+    const { pageNo, pageSize } = value;
+    const result = await this.userService.getNodeSummaryWithAccountPaged(pageNo, pageSize);
+    logger.info(result);
+    const responese = {
+      items: result.items,
+      pageNo: pageNo,
+      pageSize: pageSize,
+      totalSize: result.totalSize,
+      totalPages: result.totalPages,
+    };
+    responseHandler.success(context, responese);
+  }
+
   router() {
     const router = new Router({ prefix: '/user' });
     router.get('/test', this.helloWorld.bind(this));
@@ -154,6 +180,7 @@ export default class UserControler {
     router.get('/connect/github', this.connectGithub.bind(this));
     router.get('/login/github', this.loginWithGithub.bind(this));
     router.get('/info', this.info.bind(this));
+    router.get('/list-by-task', this.getNodeSummaryWithAccountPaged.bind(this));
     return router;
   }
 }
