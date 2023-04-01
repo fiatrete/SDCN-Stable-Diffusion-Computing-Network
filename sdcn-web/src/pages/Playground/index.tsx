@@ -2,6 +2,7 @@ import React from 'react'
 import { Tabs } from 'antd'
 import type { TabsProps } from 'antd'
 import Txt2img from 'components/Txt2img'
+import Img2img from 'components/Img2img'
 import cx from 'classnames'
 
 import styles from './index.module.css'
@@ -15,8 +16,7 @@ const items: TabsProps['items'] = [
   {
     key: '2',
     label: `img2img`,
-    children: `img2img content`,
-    disabled: true,
+    children: <Img2img />,
   },
 ]
 
