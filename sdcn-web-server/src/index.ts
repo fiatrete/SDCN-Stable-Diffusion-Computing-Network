@@ -35,8 +35,11 @@ app.use(
     app,
   ),
 );
-app.use(koaBody());
-app.use(bodyParser());
+app.use(
+  koaBody({
+    jsonLimit: config.serverConfig.requestJsonLimitSize,
+  }),
+);
 app.use(errorHandler);
 
 [
