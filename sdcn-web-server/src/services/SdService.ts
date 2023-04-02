@@ -1,6 +1,6 @@
 import logger from '../utils/logger';
 import _, { result } from 'lodash';
-import { gatewayParamsToWebUI } from './utils/ParamConvert';
+import { gatewayParamsToWebUI_xxx2img, gatewayParamsToWebUI_interrogate } from './utils/ParamConvert';
 import NodeService from './NodeService';
 import { Context } from 'koa';
 import responseHandler, { ErrorCode, SdcnError, StatusCode } from '../utils/responseHandler';
@@ -31,14 +31,7 @@ export default class SdService {
 
     const req = context.request;
     const gatewayParams = req.body;
-    const [webuiParams, error] = gatewayParamsToWebUI(gatewayParams, 1);
-    if (!webuiParams) {
-      throw new SdcnError(
-        StatusCode.InternalServerError,
-        ErrorCode.InvalidArgument,
-        error ? error.message : 'Invalid argument',
-      );
-    }
+    const webuiParams = gatewayParamsToWebUI_xxx2img(gatewayParams, handlerType);
 
     const reqInit: RequestInit = {
       body: JSON.stringify(webuiParams),
@@ -68,7 +61,7 @@ export default class SdService {
   async interrogate(context: Context) {
     const workerAddress = await this.getNextWorkerNode();
 
-    const params = context.request.body;
+    const params = gatewayParamsToWebUI_interrogate(context.request.body);
     if (!params) {
       throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid data');
     }

@@ -1,19 +1,20 @@
 import sdConfig from '../../config/sdConfig';
+import { ErrorCode, SdcnError, StatusCode } from '../../utils/responseHandler';
 
-function requireString(v: unknown, defaultValue: string): string {
+function requireString(v: unknown, defaultValue: string | undefined): string | undefined {
   if (typeof v === 'string') {
-    return v;
+    return v as string;
   }
   return defaultValue;
 }
 
-function requireStringIn(v: unknown, list: string[]): string {
+function requireStringIn(v: unknown, list: string[]): string | undefined {
   for (let i = 0; i < list.length; ++i) {
     if (v === list[i]) {
       return v;
     }
   }
-  return list[0];
+  return undefined;
 }
 
 function requireNumberRangeOr(v: unknown, min: number, max: number, defaultValue: number): number {
@@ -48,9 +49,9 @@ interface DictionaryLike {
 // reqType:
 //  0 --> txt2img
 //  1 --> img2img
-function gatewayParamsToWebUI(gatewayParams: DictionaryLike, reqType: number): [DictionaryLike?, Error?] {
+function gatewayParamsToWebUI_xxx2img(gatewayParams: DictionaryLike, reqType: number): DictionaryLike {
   const webuiParams: DictionaryLike = {
-    prompt: requireString(gatewayParams.prompt, ''),
+    prompt: requireString(gatewayParams.prompt, undefined),
     seed: requireNumberOr(gatewayParams.seed, -1),
     sampler_name: requireStringIn(gatewayParams.sampler_name, sdConfig.kValidSamplers),
     steps: requireNumberRange(gatewayParams.steps, 20, 60),
@@ -63,16 +64,25 @@ function gatewayParamsToWebUI(gatewayParams: DictionaryLike, reqType: number): [
     },
     override_settings_restore_afterwards: false,
   };
+  if (webuiParams.prompt === undefined) {
+    throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid prompt');
+  }
+  if (webuiParams.sampler_name === undefined) {
+    throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid sampler_name');
+  }
 
   if (!webuiParams.override_settings.sd_model_checkpoint) {
-    return [undefined, Error('Invalid model')];
+    throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid model');
   }
-  if (typeof gatewayParams.upscale === 'object') {
+  if (reqType === 0 && typeof gatewayParams.upscale === 'object') {
     const upscale = gatewayParams.upscale;
     webuiParams.enable_hr = true;
-    webuiParams.denoising_strength = requireNumberRange(upscale.denoising_strength, 0.01, 0.99);
-    webuiParams.hr_scale = requireNumberRange(upscale.scale, 1.0, 2.0);
+    webuiParams.denoising_strength = requireNumberRangeOr(upscale.denoising_strength, 0.01, 0.99, 0.5);
+    webuiParams.hr_scale = requireNumberRangeOr(upscale.scale, 1.0, 2.0, 1.0);
     webuiParams.upscaler = requireStringIn(upscale.upscaler, sdConfig.kValidUpscalers);
+    if (webuiParams.upscaler === undefined) {
+      throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid upscaler');
+    }
   }
 
   // width and height must be multiple of 8
@@ -81,28 +91,45 @@ function gatewayParamsToWebUI(gatewayParams: DictionaryLike, reqType: number): [
 
   if (gatewayParams.loras) {
     if (!Array.isArray(gatewayParams.loras)) {
-      return [undefined, Error('Invalid lora param')];
+      throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'nvalid lora');
     }
 
     for (let i = 0; i < gatewayParams.loras.length; ++i) {
       const loraParams = gatewayParams.loras[i];
       if (!Array.isArray(loraParams) || loraParams.length !== 2) {
-        return [undefined, Error('Invalid lora param')];
+        throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'nvalid lora');
       }
       const lora: string = (sdConfig.kValidLoras as DictionaryLike)[loraParams[0]];
       const weight: number = loraParams[1];
       if (!lora || typeof weight !== 'number') {
-        return [undefined, Error('Invalid lora param')];
+        throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'nvalid lora');
       }
       webuiParams.prompt += `,<lora:${lora}:${weight}>`;
     }
   }
 
   if (reqType === 1) {
-    webuiParams.init_images = [requireString(gatewayParams.init_image, '')];
+    webuiParams.init_images = [requireString(gatewayParams.init_image, undefined)];
     webuiParams.denoising_strength = requireNumberRangeOr(gatewayParams.denoising_strength, 0, 1, 0.5);
+    if (webuiParams.init_image === undefined) {
+      throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid init_image');
+    }
   }
-  return [webuiParams, undefined];
+  return webuiParams;
 }
 
-export { gatewayParamsToWebUI };
+function gatewayParamsToWebUI_interrogate(gatewayParams: DictionaryLike): DictionaryLike {
+  const webuiParams = {
+    image: requireString(gatewayParams.image, undefined),
+    model: requireStringIn(gatewayParams.model, sdConfig.kValidUpscalers),
+  };
+  if (webuiParams.image === undefined) {
+    throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid image');
+  }
+  if (webuiParams.model === undefined) {
+    throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid model');
+  }
+  return webuiParams;
+}
+
+export { gatewayParamsToWebUI_xxx2img, gatewayParamsToWebUI_interrogate };
