@@ -30,9 +30,9 @@ export default class NodeService {
 
   async createNodeID(address: string, userId: string) {
     const node_seq = await this.nodeRepository.getNextNodeSeq();
-    logger.info(node_seq);
+    logger.debug(node_seq);
     const nodeHash = await this.nodeRepository.saveNodeHash(BigInt(userId), address, node_seq);
-    logger.info(nodeHash);
+    logger.debug(nodeHash);
     const nodeList = await this.nodeRepository.saveNode(node_seq, BigInt(userId), address);
     return nodeList[0];
   }
@@ -47,7 +47,7 @@ export default class NodeService {
         return await this.createNodeID(address, userId);
       } else {
         const node = await this.nodeRepository.getNodeBySeq(nodeHash.seq!);
-        logger.info('node:', node);
+        logger.debug('node:', node);
         return node;
       }
     }

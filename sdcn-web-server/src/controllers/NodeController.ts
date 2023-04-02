@@ -3,12 +3,13 @@ import Router from 'koa-router';
 import { RequireLoginAsync } from '../annotators/RequireLogin';
 import NodeService from '../services/NodeService';
 import { UserService } from '../services';
-import Hasher from '../utils/Hasher';
 import logger from '../utils/logger';
 import responseHandler, { SdcnError, StatusCode, ErrorCode } from '../utils/responseHandler';
 import { AuthUserInfo } from './auth/AuthInterface';
 import { User } from '../models';
 import Joi, { number } from 'joi';
+import { ResponseSdcnErrorOnThrowAsync } from '../annotators/ResponseSdcnErrorOnThrow';
+
 export default class NodeControler {
   nodeService: NodeService;
   userService: UserService;
@@ -18,67 +19,52 @@ export default class NodeControler {
     this.userService = inject.userService;
   }
 
+  @ResponseSdcnErrorOnThrowAsync
   @RequireLoginAsync
   async donate(context: Context) {
     const body = context.request.body;
     if (body.worker === undefined) {
-      return responseHandler.fail(
-        context,
-        new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid Argument'),
-      );
+      throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid Argument');
     }
     const userInfo = context.session?.authUserInfo as AuthUserInfo;
-    logger.info('userInfo', userInfo);
+    logger.debug('userInfo', userInfo);
     const address = body.worker;
     //TODO check address as http(s)://xxx.xx.xx
     const userId = String(userInfo.id);
     const node = await this.nodeService.getOrCreateNode(address, userId, true);
-    logger.info('donate', node, node?.nodeSeq);
+    logger.debug('donate', node, node?.nodeSeq);
     if (node === undefined || node.nodeSeq === undefined) {
-      return responseHandler.fail(
-        context,
-        new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid Argument'),
-      );
+      throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid Argument');
     }
     await this.nodeService.addNode({ address, nodeId: String(node?.nodeSeq), userId });
     await this.nodeService.donateNode(node?.nodeSeq);
     responseHandler.success(context, { nodeId: node?.nodeSeq, status: node?.status });
   }
 
-  async checkParams(context: Context, userInfo: AuthUserInfo): Promise<[string, number]> {
+  private async checkParams(context: Context, userInfo: AuthUserInfo): Promise<string> {
     const body = context.request.body;
     const nodeId = body.nodeId;
-    logger.info('nodeId', nodeId, userInfo);
+    logger.debug('nodeId', nodeId, userInfo);
     if (nodeId === undefined) {
-      return ['', 1];
+      throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid Argument');
     }
     const hasOwnership = await this.nodeService.hasOwnership(BigInt(userInfo.id!), nodeId);
     if (!hasOwnership) {
-      return ['', 2];
+      throw new SdcnError(StatusCode.Forbidden, ErrorCode.PermissionDenied, 'Permission Denied');
     }
     const worker = await this.nodeService.getWorkerByNodeId(nodeId);
     if (worker === '') {
-      return ['', 1];
+      throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid Argument');
     }
-    return [worker, 0];
+    return worker;
   }
 
+  @ResponseSdcnErrorOnThrowAsync
   @RequireLoginAsync
   async revoke(context: Context) {
     const userInfo = context.session?.authUserInfo as AuthUserInfo;
-    const [worker, status] = await this.checkParams(context, userInfo);
-    if (status === 1) {
-      return responseHandler.fail(
-        context,
-        new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid Argument'),
-      );
-    }
-    if (status === 2) {
-      return responseHandler.fail(
-        context,
-        new SdcnError(StatusCode.Forbidden, ErrorCode.PermissionDenied, 'Permission Denied'),
-      );
-    }
+    const worker = await this.checkParams(context, userInfo);
+
     const nodeId = context.request.body.nodeId;
     logger.info('removeNode:', worker, nodeId, userInfo.id!);
     const node = await this.nodeService.getNodeByNodeId(nodeId);
@@ -90,41 +76,24 @@ export default class NodeControler {
     return responseHandler.success(context, { nodeId: nodeId });
   }
 
+  @ResponseSdcnErrorOnThrowAsync
   @RequireLoginAsync
   async launch(context: Context) {
     const userInfo = context.session?.authUserInfo as AuthUserInfo;
-    const [worker, status] = await this.checkParams(context, userInfo);
-    if (status === 1) {
-      return responseHandler.fail(
-        context,
-        new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid Argument'),
-      );
-    }
-    if (status === 2) {
-      return responseHandler.fail(
-        context,
-        new SdcnError(StatusCode.Forbidden, ErrorCode.PermissionDenied, 'Permission Denied'),
-      );
-    }
+    const worker = await this.checkParams(context, userInfo);
 
     const userId = String(userInfo.id);
-    logger.info('launch:', worker, userInfo.id!);
+    logger.debug('launch:', worker, userInfo.id!);
     const node = await this.nodeService.getOrCreateNode(worker, userId, false);
-    logger.info('launch', node);
+    logger.debug('launch', node);
 
     if (node === undefined) {
-      logger.info('return 400 to user');
-      return responseHandler.fail(
-        context,
-        new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Bad Request'),
-      );
+      logger.debug('return 400 to user');
+      throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Bad Request');
     }
     if (node.deleted === 1) {
-      logger.info('node is deleted, can not be launch');
-      return responseHandler.fail(
-        context,
-        new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Node is already deleted'),
-      );
+      logger.debug('node is deleted, can not be launch');
+      throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Node is already deleted');
     }
     const nodeId = context.request.body.nodeId;
     await this.nodeService.addNode({ address: worker, nodeId: String(node.nodeSeq), userId });
@@ -133,42 +102,24 @@ export default class NodeControler {
     return responseHandler.success(context, { nodeId: nodeId, status: node.status });
   }
 
+  @ResponseSdcnErrorOnThrowAsync
   @RequireLoginAsync
   async stop(context: Context) {
     const userInfo = context.session?.authUserInfo as AuthUserInfo;
 
-    const [worker, status] = await this.checkParams(context, userInfo);
-    if (status === 1) {
-      return responseHandler.fail(
-        context,
-        new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid Argument'),
-      );
-    }
-    if (status === 2) {
-      return responseHandler.fail(
-        context,
-        new SdcnError(StatusCode.Forbidden, ErrorCode.PermissionDenied, 'Permission Denied'),
-      );
-    }
-
+    const worker = await this.checkParams(context, userInfo);
     const nodeId = context.request.body.nodeId;
-    logger.info('stop:', worker, nodeId, userInfo.id!);
+    logger.debug('stop:', worker, nodeId, userInfo.id!);
 
     const node = await this.nodeService.getNodeByNodeId(nodeId);
     if (node === undefined) {
-      logger.info('return 400 to user');
-      return responseHandler.fail(
-        context,
-        new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Bad Request'),
-      );
+      logger.debug('return 400 to user');
+      throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Bad Request');
     }
-    logger.info(node);
+    logger.debug(node);
     if (node.deleted === 1) {
-      logger.info('node is deleted, can not be launch');
-      return responseHandler.fail(
-        context,
-        new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Node is already deleted'),
-      );
+      logger.debug('node is deleted, can not be launch');
+      throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Node is already deleted');
     }
     if (node?.deleted === 0 && node?.status === 1) {
       await this.nodeService.removeNode({ address: worker });
@@ -177,6 +128,7 @@ export default class NodeControler {
     return responseHandler.success(context, { nodeId: nodeId, status: node.status });
   }
 
+  @ResponseSdcnErrorOnThrowAsync
   @RequireLoginAsync
   async mine(context: Context) {
     const schema = Joi.object({
@@ -185,19 +137,13 @@ export default class NodeControler {
     });
     const { value, error } = schema.validate(context.query);
     if (error) {
-      return responseHandler.fail(
-        context,
-        new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, error.message),
-      );
+      throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, error.message);
     }
     const { pageNo, pageSize } = value;
     const userInfo = context.session?.authUserInfo as AuthUserInfo;
     if (userInfo.id === undefined) {
-      logger.info('userId is undefined');
-      return responseHandler.fail(
-        context,
-        new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Bad Request'),
-      );
+      logger.debug('userId is undefined');
+      throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Bad Request');
     }
 
     const totalSize = await this.nodeService.getNodeCountByAcccountId(userInfo.id);
@@ -225,6 +171,7 @@ export default class NodeControler {
     });
   }
 
+  @ResponseSdcnErrorOnThrowAsync
   async node(context: Context) {
     const schema = Joi.object({
       type: Joi.number().required(),
@@ -233,10 +180,7 @@ export default class NodeControler {
     });
     const { value, error } = schema.validate(context.query);
     if (error) {
-      return responseHandler.fail(
-        context,
-        new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, error.message),
-      );
+      throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, error.message);
     }
     const { type, pageNo, pageSize } = value;
     const totalSize = await this.nodeService.getNodeCountByType(type);

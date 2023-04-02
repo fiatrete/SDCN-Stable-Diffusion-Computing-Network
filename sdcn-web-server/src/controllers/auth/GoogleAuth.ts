@@ -3,6 +3,7 @@ import serverConfig from '../../config/serverConfig';
 import logger from '../../utils/logger';
 import querystring from 'querystring';
 import { assertAuthUserInfoValid, AuthUserInfo } from './AuthInterface';
+import { ErrorCode, SdcnError, StatusCode } from '../../utils/responseHandler';
 
 const kGoogleAccessTokenUrl = 'https://oauth2.googleapis.com/token';
 const kGoogleUserUrl = 'https://people.googleapis.com/v1/people/me?personFields=names,emailAddresses';
@@ -13,7 +14,11 @@ const kRedirectUrl = 'http://localhost:8000/api/user/connect/google'; // NOTE: T
 // https://developers.google.com/people/api/rest/v1/people/get
 export default async function GoogleAuth(ctx: Context): Promise<AuthUserInfo> {
   if (ctx.query.code === undefined) {
-    throw new Error(ctx.query.error ? <string>ctx.query.error : 'Missing auth code');
+    throw new SdcnError(
+      StatusCode.BadRequest,
+      ErrorCode.InvalidArgument,
+      ctx.query.error ? <string>ctx.query.error : 'Missing auth code',
+    );
   }
 
   let init: RequestInit = {
@@ -38,7 +43,11 @@ export default async function GoogleAuth(ctx: Context): Promise<AuthUserInfo> {
   const accessToken = accessTokenResult.access_token;
   const tokenType = accessTokenResult.token_type;
   if (!accessToken || !tokenType) {
-    throw Error('Failed to get access token, may an expired auth code');
+    throw new SdcnError(
+      StatusCode.BadRequest,
+      ErrorCode.InvalidArgument,
+      'Failed to get access token, may an expired auth code',
+    );
   }
   logger.debug(`Got google access token: ${accessToken}, type: ${tokenType}`);
 
@@ -52,7 +61,7 @@ export default async function GoogleAuth(ctx: Context): Promise<AuthUserInfo> {
   logger.debug(`Requesting user info`);
   userInfoRes = await fetch(kGoogleUserUrl, init);
   const userInfo = await userInfoRes.json();
-  logger.log('User: ', userInfo);
+  logger.debug('User: ', userInfo);
 
   function getPrimaryName(userInfo: any) {
     for (let i = 0; i < userInfo.names.length; ++i) {

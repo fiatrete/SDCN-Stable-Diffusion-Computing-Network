@@ -11,6 +11,7 @@ import config from '../config/index';
 import querystring from 'querystring';
 import responseHandler, { ErrorCode, SdcnError, StatusCode } from '../utils/responseHandler';
 import Joi from 'joi';
+import { ResponseSdcnErrorOnThrowAsync } from '../annotators/ResponseSdcnErrorOnThrow';
 
 interface HelloParam {
   id: number;
@@ -30,42 +31,38 @@ export default class UserControler {
   }
   private static setAuthUserInfo(context: Context, authUserInfo: AuthUserInfo) {
     logger.debug('Set UserInfo: ', authUserInfo);
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     context.session!.authUserInfo = authUserInfo;
   }
 
+  @ResponseSdcnErrorOnThrowAsync
   private async userLogin(Authorizor: { (context: Context): Promise<AuthUserInfo> }, context: Context) {
-    try {
-      const authUserInfo = await Authorizor(context);
-      logger.info(authUserInfo);
-      const user = await this.userService.checkAccount(authUserInfo.uuid);
-      logger.info('user:', user);
-      if (user.id === undefined) {
-        user.nickname = authUserInfo.userName;
-        user.email = authUserInfo.email;
-        user.uuid = authUserInfo.uuid;
-        user.avatarImg = authUserInfo.avatar_img;
-        user.create_time = new Date();
-        const newUser = await this.userService.createAccount(user);
-        authUserInfo.id = newUser[0].id;
-        logger.info('newUser:', newUser);
-      } else {
-        authUserInfo.id = user.id;
-      }
-
-      UserControler.setAuthUserInfo(context, authUserInfo);
-      context.redirect(config.serverConfig.redirect_uri);
-    } catch (error: any) {
-      logger.error(`Failed to auth by ${Authorizor.name}: `, error);
-      context.status = 500;
-      context.body = `Failed to auth by ${Authorizor.name}`;
+    const authUserInfo = await Authorizor(context);
+    const user = await this.userService.checkAccount(authUserInfo.uuid);
+    logger.debug('user:', user);
+    if (user.id === undefined) {
+      user.nickname = authUserInfo.userName;
+      user.email = authUserInfo.email;
+      user.uuid = authUserInfo.uuid;
+      user.avatarImg = authUserInfo.avatar_img;
+      user.create_time = new Date();
+      const newUser = await this.userService.createAccount(user);
+      authUserInfo.id = newUser[0].id;
+      logger.debug('newUser:', newUser);
+    } else {
+      authUserInfo.id = user.id;
     }
+
+    UserControler.setAuthUserInfo(context, authUserInfo);
+    context.redirect(config.serverConfig.redirect_uri);
+    // TODO: Redirecto to a failure page on error?
   }
 
+  @ResponseSdcnErrorOnThrowAsync
   async connectGithub(context: Context) {
     await this.userLogin(GithubAuth, context);
   }
 
+  @ResponseSdcnErrorOnThrowAsync
   async connectGoogle(context: Context) {
     await this.userLogin(GoogleAuth, context);
   }
@@ -75,11 +72,11 @@ export default class UserControler {
     context.body = `You are: ${UserControler.getAuthUserInfo(context).userName}`;
   }
 
+  @ResponseSdcnErrorOnThrowAsync
   async loginWithGithub(context: Context) {
     const loginWithGithubUrl = `https://github.com/login/oauth/authorize?scope=user:email&client_id=${
       config.serverConfig.githubClientId
     }&redirect_uri=${querystring.escape(config.serverConfig.githubCallbackUrl)}`;
-    logger.info(`login url: ${loginWithGithubUrl}`);
     context.redirect(loginWithGithubUrl);
   }
 
@@ -130,23 +127,22 @@ export default class UserControler {
     responseHandler.success(context, await this.userService.world());
   }
 
+  @ResponseSdcnErrorOnThrowAsync
   async info(context: Context) {
     const userInfo = context.session?.authUserInfo as AuthUserInfo;
-    logger.info('userInfo', userInfo);
+    logger.debug('userInfo', userInfo);
     if (userInfo.id === undefined) {
-      return responseHandler.fail(
-        context,
-        new SdcnError(StatusCode.Forbidden, ErrorCode.PermissionDenied, 'Permission Denied'),
-      );
+      throw new SdcnError(StatusCode.Forbidden, ErrorCode.PermissionDenied, 'Permission Denied');
     }
     const id = userInfo.id as bigint;
     const user = await this.userService.getUserInfo(BigInt(id));
-    logger.info('info', user);
+    logger.debug('info', user);
     const result = { nickname: user?.nickname, avatarImgUrl: user?.avatarImg, email: user?.email };
-    logger.info('result', result);
+    logger.debug('result', result);
     responseHandler.success(context, result);
   }
 
+  @ResponseSdcnErrorOnThrowAsync
   async getNodeSummaryWithAccountPaged(context: Context) {
     const schema = Joi.object({
       pageNo: Joi.number().integer().min(1).required(),
@@ -154,14 +150,11 @@ export default class UserControler {
     });
     const { value, error } = schema.validate(context.query);
     if (error) {
-      return responseHandler.fail(
-        context,
-        new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, error.message),
-      );
+      throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, error.message);
     }
     const { pageNo, pageSize } = value;
     const result = await this.userService.getNodeSummaryWithAccountPaged(pageNo, pageSize);
-    logger.info(result);
+    logger.debug(result);
     const responese = {
       items: result.items,
       pageNo: pageNo,

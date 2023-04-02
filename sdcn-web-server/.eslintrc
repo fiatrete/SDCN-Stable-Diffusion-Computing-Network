@@ -9,7 +9,8 @@
   ],
   "rules": {
     "no-console": 1,
-    "prettier/prettier": 2
+    "prettier/prettier": 2,
+    "@typescript-eslint/no-non-null-assertion": "off"
   },
   "env": {
     "browser": true,

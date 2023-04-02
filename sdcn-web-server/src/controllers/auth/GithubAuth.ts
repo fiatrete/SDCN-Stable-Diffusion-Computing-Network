@@ -1,6 +1,7 @@
 import { Context } from 'koa';
 import serverConfig from '../../config/serverConfig';
 import logger from '../../utils/logger';
+import { ErrorCode, SdcnError, StatusCode } from '../../utils/responseHandler';
 import { assertAuthUserInfoValid, AuthUserInfo } from './AuthInterface';
 
 const kGithubAccessTokenUrl = 'https://github.com/login/oauth/access_token';
@@ -9,7 +10,7 @@ const kGithubEmailUrl = 'https://api.github.com/user/emails';
 
 export default async function GithubAuth(ctx: Context): Promise<AuthUserInfo> {
   if (ctx.query.code === undefined) {
-    throw new Error('Missing auth code');
+    throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Missing auth code');
   }
   let init: RequestInit = {
     body: JSON.stringify({
@@ -31,7 +32,11 @@ export default async function GithubAuth(ctx: Context): Promise<AuthUserInfo> {
   const tokenType = accessTokenResult.token_type;
   logger.debug(`Got github access token: ${accessToken}, type: ${tokenType}`);
   if (!accessToken || !tokenType) {
-    throw Error('Failed to get access token, may an expired auth code');
+    throw new SdcnError(
+      StatusCode.BadRequest,
+      ErrorCode.InvalidArgument,
+      'Failed to get access token, may an expired auth code',
+    );
   }
 
   init = {
@@ -44,12 +49,12 @@ export default async function GithubAuth(ctx: Context): Promise<AuthUserInfo> {
   logger.debug(`Requesting user info`);
   githubRes = await fetch(kGithubUserUrl, init);
   const userInfo = await githubRes.json();
-  logger.log('User: ', userInfo);
+  logger.debug('User: ', userInfo);
 
   logger.debug(`Reuqesting user email`);
   githubRes = await fetch(kGithubEmailUrl, init);
   const emailInfo = await githubRes.json();
-  logger.log('Email: ', emailInfo);
+  logger.debug('Email: ', emailInfo);
 
   function getPrimaryEmail(emailInfo: any[]) {
     for (let i = 0; i < emailInfo.length; ++i) {

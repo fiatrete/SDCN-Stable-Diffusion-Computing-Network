@@ -17,16 +17,18 @@ export default class UserService {
   }
 
   async helloCreate(user?: User) {
-    logger.info(`insert before: ${user}`);
+    logger.debug(`insert before: ${user}`);
     if (!_.isNil(user) && !_.isNaN(user)) {
       const result = await this.userRepository.save(user);
-      logger.info(`insert after: ${result}`);
+      logger.debug(`insert after: ${result}`);
     }
   }
 
   async checkAccount(uuid: string): Promise<User> {
     const user = await this.userRepository.getByUuid(uuid);
-    logger.info(`user info ${uuid}, ${user?.id}, ${user?.uuid}, ${user?.nickname}, ${user?.email}, ${user?.avatarImg}`);
+    logger.debug(
+      `user info ${uuid}, ${user?.id}, ${user?.uuid}, ${user?.nickname}, ${user?.email}, ${user?.avatarImg}`,
+    );
     return user as User;
   }
 
@@ -36,7 +38,7 @@ export default class UserService {
 
   async getUserInfo(id: bigint) {
     const user = await this.userRepository.getById(id);
-    logger.info(`user info ${id}, ${user?.id}, ${user?.nickname}, ${user?.email}, ${user?.avatarImg}`);
+    logger.debug(`user info ${id}, ${user?.id}, ${user?.nickname}, ${user?.email}, ${user?.avatarImg}`);
     return user;
   }
 
