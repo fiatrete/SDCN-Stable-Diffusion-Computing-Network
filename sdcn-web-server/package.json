@@ -18,16 +18,7 @@
     "prettier-watch:darwin:linux": "onchange 'src/**/*.ts' -- prettier --write {{changed}}",
     "prettier-watch:default": "onchange 'src/**/*.ts' -- prettier --write {{changed}}",
     "test": "jest",
-    "test:dev": "jest --watchAll",
-    "prepare": "husky install"
-  },
-  "husky": {
-    "hooks": {
-      "applypatch-msg": "echo \"[Husky] applypatch-msg\"",
-      "pre-applypatch": "echo \"[Husky] pre-applypatch\"",
-      "post-applypatch": "echo \"[Husky] post-applypatch\"",
-      "pre-commit": "npm run test && npm run prettier-format && npm run lint"
-    }
+    "test:dev": "jest --watchAll"
   },
   "keywords": [],
   "author": "",
@@ -47,7 +38,6 @@
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-jest": "^27.2.1",
     "eslint-plugin-prettier": "^4.2.1",
-    "husky": "^8.0.3",
     "nodemon": "^2.0.22",
     "onchange": "^7.1.0",
     "prettier": "^2.8.6",
