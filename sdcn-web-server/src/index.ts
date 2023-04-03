@@ -4,6 +4,7 @@ import koaBody from 'koa-body';
 import CSRF from 'koa-csrf';
 import logger from './utils/logger';
 import dotenv from 'dotenv';
+import cors from 'koa-cors';
 import { scopePerRequest } from 'awilix-koa';
 import container from './containers/container';
 import UserController from './controllers/UserController';
@@ -22,6 +23,12 @@ const router = new Router();
 app.keys = [config.serverConfig.koaSecretKey];
 
 app.use(scopePerRequest(container));
+app.use(
+  cors({
+    origin: 'http://localhost:3000', // TODO: Config
+    credentials: true,
+  }),
+);
 // This middleware causes our post request crash, thus disable it
 // app.use(new CSRF());
 app.use(

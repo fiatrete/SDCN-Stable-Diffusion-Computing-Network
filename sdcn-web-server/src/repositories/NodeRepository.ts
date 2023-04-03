@@ -7,7 +7,7 @@ interface Node {
   id?: bigint;
   nodeSeq: bigint;
   accountId: bigint;
-  task_count: number;
+  taskCount: number;
   worker: string;
   status: number;
   deleted: number;
@@ -19,7 +19,7 @@ const nodeFields: Record<NodeFields, string> = {
   id: 'id',
   nodeSeq: 'nodeSeq',
   accountId: 'accountId',
-  task_count: 'task_count',
+  taskCount: 'taskCount',
   worker: 'worker',
   status: 'status',
   deleted: 'deleted',
@@ -53,7 +53,7 @@ export default class NodeRepository {
     const node: Node = {
       nodeSeq: node_seq,
       accountId: account_id,
-      task_count: 0,
+      taskCount: 0,
       worker: worker,
       status: 1,
       deleted: 0,
@@ -96,21 +96,21 @@ export default class NodeRepository {
         .where({ deleted: 0 })
         .offset((pageNo - 1) * pageSize)
         .limit(pageSize)
-        .orderBy(nodeFields.task_count, SortDirection.Desc);
+        .orderBy(nodeFields.taskCount, SortDirection.Desc);
       return nodes;
     } else if (type === 1) {
       const nodes = await this.Nodes()
         .where({ status: 1, deleted: 0 })
         .offset((pageNo - 1) * pageSize)
         .limit(pageSize)
-        .orderBy(nodeFields.task_count, SortDirection.Desc);
+        .orderBy(nodeFields.taskCount, SortDirection.Desc);
       return nodes;
     }
     return [];
   }
 
   async getAllUndeletedNodes() {
-    return await this.Nodes().where({ deleted: 0 }).orderBy(nodeFields.task_count, SortDirection.Desc);
+    return await this.Nodes().where({ deleted: 0 }).orderBy(nodeFields.taskCount, SortDirection.Desc);
   }
 
   async getNodeCountByAcccountId(account_id: bigint) {
@@ -124,7 +124,7 @@ export default class NodeRepository {
       .where({ accountId: account_id, deleted: 0 })
       .offset((pageNo - 1) * pageSize)
       .limit(pageSize)
-      .orderBy(nodeFields.task_count, SortDirection.Desc);
+      .orderBy(nodeFields.taskCount, SortDirection.Desc);
   }
 
   async hasNodeOwnership(account_id: bigint, node_seq: bigint): Promise<boolean> {

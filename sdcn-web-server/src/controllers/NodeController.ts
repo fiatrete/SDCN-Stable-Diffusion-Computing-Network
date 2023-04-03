@@ -149,7 +149,7 @@ export default class NodeControler {
     const totalSize = await this.nodeService.getNodeCountByAcccountId(userInfo.id);
     if (totalSize === 0) {
       return responseHandler.success(context, {
-        items: {},
+        items: [],
         pageNo: pageNo,
         pageSize: pageNo,
         totolPages: 0,
@@ -159,7 +159,7 @@ export default class NodeControler {
     const nodeList = await this.nodeService.getNodeListbyAccountId(userInfo.id, pageNo, pageSize);
     const result: { nodeId: bigint; status: number }[] = [];
     nodeList.forEach((node) => {
-      const item = { nodeId: node.nodeSeq, status: node.status };
+      const item = { nodeId: node.nodeSeq, status: node.status, taskHandlerCount: node.taskCount };
       result.push(item);
     });
     return responseHandler.success(context, {
@@ -186,7 +186,7 @@ export default class NodeControler {
     const totalSize = await this.nodeService.getNodeCountByType(type);
     if (totalSize === 0) {
       return responseHandler.success(context, {
-        items: {},
+        items: [],
         pageNo: pageNo,
         pageSize: pageNo,
         totolPages: 0,
@@ -201,7 +201,12 @@ export default class NodeControler {
       }
       const userInfo = user as unknown as User;
       const accountInfo = { nickname: userInfo?.nickname, avatarImgUrl: userInfo?.avatarImg, email: userInfo?.email };
-      const item = { nodeId: node.nodeSeq, account: accountInfo, status: node.status };
+      const item = {
+        nodeId: node.nodeSeq,
+        account: accountInfo,
+        status: node.status,
+        taskHandlerCount: node.taskCount,
+      };
       return item;
     });
 

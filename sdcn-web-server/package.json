@@ -35,6 +35,7 @@
   "devDependencies": {
     "@types/jest": "^29.5.0",
     "@types/koa-bodyparser": "^4.3.10",
+    "@types/koa-cors": "^0.0.2",
     "@types/koa-csrf": "^5.0.1",
     "@types/koa-router": "^7.4.4",
     "@types/koa-session": "^6.4.0",
@@ -71,6 +72,7 @@
     "koa-body": "^6.0.1",
     "koa-bodyparser": "^4.4.0",
     "koa-compose": "^4.1.0",
+    "koa-cors": "^0.0.16",
     "koa-csrf": "^5.0.1",
     "koa-favicon": "^2.1.0",
     "koa-jwt": "^4.0.4",
