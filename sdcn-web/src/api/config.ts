@@ -1,5 +1,5 @@
 class ApiConfig {
-  private baseApiUrl = 'http://43.154.195.80:8080'
+  private baseApiUrl = 'http://localhost:9080'
 
   private successCode = 200
 

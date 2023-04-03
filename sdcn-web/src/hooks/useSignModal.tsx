@@ -4,21 +4,20 @@ import cx from 'classnames'
 import logo from 'assets/images/logo.svg'
 import {
   GithubOutlined,
-  GoogleOutlined,
+  // GoogleOutlined,
   LoadingOutlined,
 } from '@ant-design/icons'
-import AccountStore from 'stores/accountStore'
 import config from 'api/config'
 
-const useSignModal = () => {
+const useSignInModal = () => {
   const spinIcon = (
     <LoadingOutlined style={{ fontSize: 36, color: '#FFF' }} spin />
   )
 
-  const signInWithGoogleHandler = () => {
-    setLoading(true)
-    signInWithGoogle()
-  }
+  // const signInWithGoogleHandler = () => {
+  //   setLoading(true)
+  //   signInWithGoogle()
+  // }
 
   const signInWithGithubHandler = () => {
     setLoading(true)
@@ -103,29 +102,14 @@ const useSignModal = () => {
     modal?.destroy()
   }
 
-  const signInWithGoogle = () => {
-    // TODO: SIGN IN WITH GOOGLE
-    // setTimeout(() => {
-    //   AccountStore.updateUser({
-    //     id: '1',
-    //     email: 'user001@tosee.cn',
-    //     nickname: 'USER#001',
-    //   })
-    //   setLoading(false)
-    //   message.success('SUCCESS')
-    //   hideSignModel()
-    // }, 500)
-  }
+  // const signInWithGoogle = () => {
+  // }
 
   const signInWithGithub = () => {
-    // TODO: SIGN IN WITH GITHUB
-
     const iWidth = 600
     const iHeight = 660
     const iTop = (window.screen.availHeight - 30 - iHeight) / 2
     const iLeft = (window.screen.availWidth - 10 - iWidth) / 2
-
-    console.log(`${config.getBaseApiUrl()}/api/user/login/github`)
 
     const w = window.open(
       `${config.getBaseApiUrl()}/api/user/login/github`,
@@ -137,15 +121,9 @@ const useSignModal = () => {
       if (w && w.closed) {
         clearInterval(loop)
         setLoading(false)
-
-        AccountStore.updateUser({
-          id: '1',
-          email: 'user001@tosee.cn',
-          nickname: 'USER#001',
-        })
-        setLoading(false)
-        message.success('SUCCESS')
         hideSignModel()
+
+        window.location.reload()
       }
     }, 500)
   }
@@ -156,4 +134,4 @@ const useSignModal = () => {
   }
 }
 
-export default useSignModal
+export default useSignInModal

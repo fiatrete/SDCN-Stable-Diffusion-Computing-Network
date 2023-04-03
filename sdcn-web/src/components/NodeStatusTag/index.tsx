@@ -9,8 +9,8 @@ export interface NodeStatusTagProps {
 const NodeStatusTag = (props: NodeStatusTagProps) => {
   const { status } = props
 
-  const [desc, setDesc] = useState('offline')
-  const [color, setColor] = useState('red')
+  const [desc, setDesc] = useState('unknown')
+  const [color, setColor] = useState('')
 
   useEffect(() => {
     switch (status) {
@@ -18,13 +18,17 @@ const NodeStatusTag = (props: NodeStatusTagProps) => {
         setDesc('online')
         setColor('green')
         break
+      case NodeStatus.Offline:
+        setDesc('offline')
+        setColor('red')
+        break
       case NodeStatus.Processing:
         setDesc('processing')
         setColor('geekblue')
         break
       default:
-        setDesc('offline')
-        setColor('red')
+        setDesc('unknown')
+        setColor('')
         break
     }
   }, [status])

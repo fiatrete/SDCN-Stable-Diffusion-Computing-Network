@@ -1,14 +1,20 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import cx from 'classnames'
 import styles from './index.module.css'
 import { Donor } from 'typings/Node'
-import to from 'await-to-js'
-import { DonorsResponseData } from 'api/nodes'
-import { AxiosError } from 'axios'
-import * as nodesApi from 'api/nodes'
 import { Table } from 'antd'
 
-const DonorList = () => {
+export interface DonorListProps {
+  getDonorsList: (page: number, size: number) => void
+  pageNo: number
+  pageSize: number
+  totalSize: number
+  donors: Donor[]
+}
+
+const DonorList = (props: DonorListProps) => {
+  const { getDonorsList, pageNo, pageSize, totalSize, donors } = props
+
   const columns = [
     {
       title: 'Nodes',
@@ -26,25 +32,10 @@ const DonorList = () => {
     },
   ]
 
-  const [donors, setDonors] = useState<Donor[]>([])
-
   useEffect(() => {
-    const getDonorsList = async () => {
-      const [_donorsError, _donors] = await to<DonorsResponseData, AxiosError>(
-        nodesApi.donors(1),
-      )
-
-      if (_donorsError !== null) {
-        console.error('getDonorsListError', _donorsError)
-        setDonors([])
-        return
-      }
-
-      setDonors(_donors.items)
-    }
-
-    getDonorsList()
-  }, [])
+    // 加载第一页数据
+    getDonorsList(1, pageSize)
+  }, [getDonorsList, pageSize])
 
   return (
     <div className={cx('mb-9', styles.wrap)}>
@@ -59,9 +50,14 @@ const DonorList = () => {
         <Table<Donor>
           columns={columns}
           dataSource={donors}
-          rowKey={(donor) => donor.account.id}
+          rowKey={(donor) => donor.account.email}
           pagination={{
+            current: pageNo,
+            pageSize: pageSize,
+            total: totalSize,
+            onChange: getDonorsList,
             hideOnSinglePage: true,
+            showSizeChanger: false,
           }}
         />
       </div>

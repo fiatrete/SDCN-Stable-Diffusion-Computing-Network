@@ -1,20 +1,25 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import cx from 'classnames'
 
 import styles from './index.module.css'
 import { Node } from 'typings/Node'
 import { Table } from 'antd'
 import NodeStatusTag from 'components/NodeStatusTag'
-import to from 'await-to-js'
-import { NodesResponseData } from 'api/nodes'
-import { AxiosError } from 'axios'
-import * as nodesApi from 'api/nodes'
+export interface NodeListProps {
+  getNodesList: (page: number, size: number) => void
+  pageNo: number
+  pageSize: number
+  totalSize: number
+  nodes: Node[]
+}
 
-const NodeList = () => {
+const NodeList = (props: NodeListProps) => {
+  const { getNodesList, pageNo, pageSize, totalSize, nodes } = props
+
   const columns = [
     {
       title: 'Node ID',
-      dataIndex: 'nodeSeq',
+      dataIndex: 'nodeId',
       width: '30%',
     },
     {
@@ -34,25 +39,10 @@ const NodeList = () => {
     },
   ]
 
-  const [nodes, setNodes] = useState<Node[]>([])
-
   useEffect(() => {
-    const getNodesList = async () => {
-      const [_nodesError, _nodes] = await to<NodesResponseData, AxiosError>(
-        nodesApi.nodes(1),
-      )
-
-      if (_nodesError !== null) {
-        console.error('getNodesListError', _nodesError)
-        setNodes([])
-        return
-      }
-
-      setNodes(_nodes.items)
-    }
-
-    getNodesList()
-  }, [])
+    // 加载第一页数据
+    getNodesList(1, pageSize)
+  }, [getNodesList, pageSize])
 
   return (
     <div className={cx('mb-12', styles.wrap)}>
@@ -69,7 +59,12 @@ const NodeList = () => {
           dataSource={nodes}
           rowKey='nodeId'
           pagination={{
+            current: pageNo,
+            pageSize: pageSize,
+            total: totalSize,
+            onChange: getNodesList,
             hideOnSinglePage: true,
+            showSizeChanger: false,
           }}
         />
       </div>

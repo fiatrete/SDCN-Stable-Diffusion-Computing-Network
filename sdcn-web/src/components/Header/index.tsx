@@ -1,30 +1,51 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import { Avatar, Button, Image, Popover } from 'antd'
-import githubIcon from 'assets/images/icon_github.svg'
 import logo from 'assets/images/logo.svg'
 import cx from 'classnames'
 import { Link, NavLink } from 'react-router-dom'
 import styles from './index.module.css'
-import useSignModal from 'hooks/useSignModal'
-import accountStore from 'stores/accountStore'
+import useSignInModal from 'hooks/useSignModal'
+import userStore from 'stores/userStore'
 import { observer } from 'mobx-react-lite'
 import { LogoutOutlined, UserOutlined } from '@ant-design/icons'
+import { User } from 'typings/User'
+import { AxiosError } from 'axios'
+import to from 'await-to-js'
+import * as userApi from 'api/user'
 
 const Header = () => {
-  const { showSignModel } = useSignModal()
+  const { showSignModel } = useSignInModal()
 
   const signInHandler = useCallback(() => {
     showSignModel()
   }, [showSignModel])
 
+  const updateUserInfo = useCallback(async () => {
+    const [_userInfoError, _userInfo] = await to<User, AxiosError>(
+      userApi.userInfo(),
+    )
+
+    if (_userInfoError !== null) {
+      console.error('updateUserInfoError', _userInfoError)
+      userStore.reset()
+      return
+    }
+
+    userStore.updateUser(_userInfo)
+  }, [])
+
+  useEffect(() => {
+    updateUserInfo()
+  }, [updateUserInfo])
+
   const avatarElement = useCallback(() => {
-    const account = accountStore.user
-    if (account.avatarImgUrl) {
-      return <Avatar src={account.avatarImgUrl} />
-    } else if (account.nickname.length > 0) {
+    const user = userStore.user
+    if (user.avatarImgUrl) {
+      return <Avatar src={user.avatarImgUrl} />
+    } else if (user.nickname.length > 0) {
       return (
         <Avatar style={{ backgroundColor: '#40A9FF' }}>
-          {account.nickname[0]}
+          {user.nickname[0]}
         </Avatar>
       )
     } else {
@@ -42,7 +63,7 @@ const Header = () => {
       type='text'
       icon={<LogoutOutlined />}
       onClick={() => {
-        accountStore.reset()
+        userStore.reset()
       }}
     >
       Logout
@@ -90,8 +111,6 @@ const Header = () => {
           >
             Playground
           </NavLink>
-        </nav>
-        <div className={cx('flex items-center gap-x-6', styles.right)}>
           <Button
             type='ghost'
             shape='circle'
@@ -104,7 +123,18 @@ const Header = () => {
               preview={false}
             />
           </Button>
-          {accountStore.isLoggedIn ? (
+        </nav>
+        <div className={cx('flex items-center gap-x-6', styles.right)}>
+          {/* <Button
+            type='ghost'
+            shape='circle'
+            href={process.env.REACT_APP_GITHUB_URL}
+            target='_blank'
+            className={cx('flex justify-center items-center')}
+          >
+            <Image src={githubIcon} width={28} preview={false} />
+          </Button> */}
+          {userStore.isLoggedIn ? (
             <Popover content={logoutButton} placement='bottomRight'>
               {avatarElement()}
             </Popover>

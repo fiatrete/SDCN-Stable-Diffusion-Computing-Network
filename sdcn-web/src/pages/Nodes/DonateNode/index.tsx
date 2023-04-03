@@ -1,16 +1,53 @@
 import { AxiosError } from 'axios'
-import React, { useCallback } from 'react'
+import React, { useCallback, useState } from 'react'
 import * as nodesApi from 'api/nodes'
 import to from 'await-to-js'
 import cx from 'classnames'
-import { Button, Form, Input, Typography } from 'antd'
+import { Button, Form, Input, message, Spin, Typography } from 'antd'
+import { Node } from 'typings/Node'
+import { LoadingOutlined } from '@ant-design/icons'
 
 const { Title, Paragraph, Text, Link } = Typography
 
-const DonateNode = () => {
-  const onDonate = useCallback((values: { worker: string }) => {
-    console.log('onDonate', values, values.worker)
-  }, [])
+export interface DonateNodeProps {
+  refresh: () => void
+  close: () => void
+}
+
+const DonateNode = (props: DonateNodeProps) => {
+  const { refresh, close } = props
+
+  const [loading, setLoading] = useState(false)
+  const spinIcon = (
+    <LoadingOutlined style={{ fontSize: 36, color: '#FFF' }} spin />
+  )
+
+  const onDonate = useCallback(
+    async (values: { worker: string }) => {
+      console.log('onDonate', values, values.worker)
+      const workerUrl = values.worker
+
+      setLoading(true)
+      const [_nodeError] = await to<Node, AxiosError>(
+        nodesApi.donateNode(workerUrl),
+      )
+
+      setLoading(false)
+      if (_nodeError !== null) {
+        message.error(_nodeError.message)
+        console.error('donateNodeError', _nodeError, workerUrl)
+        return
+      }
+
+      message.success('donate successful')
+
+      // 成功后重新加载页面数据
+      refresh()
+      // 关闭弹窗
+      close()
+    },
+    [refresh, close],
+  )
 
   return (
     <div className={cx('mt-4')}>
@@ -63,6 +100,15 @@ const DonateNode = () => {
           link
         </Paragraph>
       </Typography>
+
+      {loading ? (
+        <Spin
+          indicator={spinIcon}
+          className={cx(
+            'absolute top-0 left-0 w-full h-full rounded-lg bg-black/60 flex justify-center items-center',
+          )}
+        />
+      ) : null}
     </div>
   )
 }

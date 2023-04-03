@@ -5,7 +5,7 @@ import { Donor, Node } from 'typings/Node'
 
 export interface NodesResponseData {
   items: Node[]
-  page: number
+  pageNo: number
   pageSize: number
   totalSize: number
   totalPages: number
@@ -22,7 +22,7 @@ export interface NodesResponseData {
 export async function nodes(
   pageNo: number,
   pageSize = 10,
-  status: 0 | 1 = 0,
+  type: 0 | 1 = 0,
 ): Promise<NodesResponseData> {
   return new Promise((resolve, reject) => {
     axios
@@ -30,7 +30,7 @@ export async function nodes(
         `${config.getBaseApiUrl()}/api/node`,
         {
           params: {
-            status,
+            type,
             pageNo,
             pageSize,
           },
@@ -51,7 +51,7 @@ export async function nodes(
 
 export interface DonorsResponseData {
   items: Donor[]
-  page: number
+  pageNo: number
   pageSize: number
   totalSize: number
   totalPages: number
@@ -71,7 +71,7 @@ export async function donors(
   return new Promise((resolve, reject) => {
     axios
       .get<ApiResponse<DonorsResponseData>>(
-        `${config.getBaseApiUrl()}/api/list-by-task`,
+        `${config.getBaseApiUrl()}/api/user/list-by-task`,
         {
           params: {
             pageNo,
@@ -107,15 +107,114 @@ export async function myNodes(
   return new Promise((resolve, reject) => {
     axios
       .get<ApiResponse<NodesResponseData>>(
-        `${config.getBaseApiUrl()}/api/mine/node`,
+        `${config.getBaseApiUrl()}/api/node/mine`,
         {
           params: {
-            status,
             pageNo,
             pageSize,
           },
         },
       )
+      .then((resp) => {
+        if (resp.data.code === config.getSuccessCode()) {
+          resolve(resp.data.data)
+        } else {
+          reject(new Error(`Failed: ${resp.data.code}`))
+        }
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}
+
+/**
+ * Donate Node
+ *
+ * @param worker Worker URL
+ * @returns Node Info
+ */
+export async function donateNode(worker: string): Promise<Node> {
+  return new Promise((resolve, reject) => {
+    axios
+      .post<ApiResponse<Node>>(`${config.getBaseApiUrl()}/api/node/donate`, {
+        worker,
+      })
+      .then((resp) => {
+        if (resp.data.code === config.getSuccessCode()) {
+          resolve(resp.data.data)
+        } else {
+          reject(new Error(`Failed: ${resp.data.code}`))
+        }
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}
+
+/**
+ * Revoke Node
+ *
+ * @param nodeId 节点ID
+ * @returns Node Info
+ */
+export async function revokeNode(nodeId: number): Promise<Node> {
+  return new Promise((resolve, reject) => {
+    axios
+      .post<ApiResponse<Node>>(`${config.getBaseApiUrl()}/api/node/revoke`, {
+        nodeId,
+      })
+      .then((resp) => {
+        if (resp.data.code === config.getSuccessCode()) {
+          resolve(resp.data.data)
+        } else {
+          reject(new Error(`Failed: ${resp.data.code}`))
+        }
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}
+
+/**
+ * Launch Node
+ *
+ * @param nodeId 节点ID
+ * @returns Node Info
+ */
+export async function launchNode(nodeId: number): Promise<Node> {
+  return new Promise((resolve, reject) => {
+    axios
+      .post<ApiResponse<Node>>(`${config.getBaseApiUrl()}/api/node/launch`, {
+        nodeId,
+      })
+      .then((resp) => {
+        if (resp.data.code === config.getSuccessCode()) {
+          resolve(resp.data.data)
+        } else {
+          reject(new Error(`Failed: ${resp.data.code}`))
+        }
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}
+
+/**
+ * Stop Node
+ *
+ * @param nodeId 节点ID
+ * @returns Node Info
+ */
+export async function stopNode(nodeId: number): Promise<Node> {
+  return new Promise((resolve, reject) => {
+    axios
+      .post<ApiResponse<Node>>(`${config.getBaseApiUrl()}/api/node/stop`, {
+        nodeId,
+      })
       .then((resp) => {
         if (resp.data.code === config.getSuccessCode()) {
           resolve(resp.data.data)

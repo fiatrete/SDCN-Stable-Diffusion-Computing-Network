@@ -10,7 +10,7 @@ const OAuthSuccess = () => {
 
   return (
     <div className={cx('flex justify-center mt-48 text-xl text-gray-600')}>
-      授权成功
+      Sign In Successful.
     </div>
   )
 }
