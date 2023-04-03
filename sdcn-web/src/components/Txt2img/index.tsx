@@ -69,7 +69,7 @@ function SettingsArea() {
         </Form.Item>
 
         <SamplingFormGroup
-          methodName='sampling_method'
+          methodName='sampler_name'
           stepsName='steps'
           seedName='seed'
         />
@@ -94,8 +94,6 @@ const Txt2img = () => {
         apiParams.height = parseInt(heightStr)
         apiParams.cfg_scale = 7
         //console.log('submit txt2img', apiParams)
-
-        apiParams.sampler_name = values.sampling_method
 
         setImgLoading(true)
         setImgUri(await txt2img(apiParams))

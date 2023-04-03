@@ -114,7 +114,7 @@ function SettingsArea() {
         </Form.Item>
 
         <SamplingFormGroup
-          methodName='sampling_method'
+          methodName='sampler_name'
           stepsName='steps'
           seedName='seed'
         />
@@ -155,8 +155,6 @@ const Img2img = () => {
         apiParams.cfg_scale = 7
         apiParams.init_image = inputImg?.split(',')[1]
         //console.log('submit', apiParams)
-
-        apiParams.sampler_name = values.sampling_method
 
         setOutputImgUri(await img2img(apiParams))
       } catch (err) {
