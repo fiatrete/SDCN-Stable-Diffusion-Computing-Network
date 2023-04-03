@@ -109,11 +109,12 @@ function gatewayParamsToWebUI_xxx2img(gatewayParams: DictionaryLike, reqType: nu
   }
 
   if (reqType === 1) {
-    webuiParams.init_images = [requireString(gatewayParams.init_image, undefined)];
+    const initImg = requireString(gatewayParams.init_image, undefined);
     webuiParams.denoising_strength = requireNumberRangeOr(gatewayParams.denoising_strength, 0, 1, 0.5);
-    if (webuiParams.init_image === undefined) {
+    if (initImg === undefined) {
       throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid init_image');
     }
+    webuiParams.init_images = [initImg];
   }
   return webuiParams;
 }
