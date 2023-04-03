@@ -8,6 +8,7 @@ import {
   LoadingOutlined,
 } from '@ant-design/icons'
 import AccountStore from 'stores/accountStore'
+import config from 'api/config'
 
 const useSignModal = () => {
   const spinIcon = (
@@ -124,9 +125,10 @@ const useSignModal = () => {
     const iTop = (window.screen.availHeight - 30 - iHeight) / 2
     const iLeft = (window.screen.availWidth - 10 - iWidth) / 2
 
+    console.log(`${config.getBaseApiUrl()}/api/user/login/github`)
+
     const w = window.open(
-      // 'https://github.com/login/oauth/authorize?client_id=9e7ce211b204fc09a2aa',
-      'http://127.0.0.1:3000/oauth/success',
+      `${config.getBaseApiUrl()}/api/user/login/github`,
       'GithubOAuth',
       `height=${iHeight}, width=${iWidth}, top=${iTop}, left=${iLeft}, toolbar=no, menubar=no,scrollbars=no, resizable=no,location=no, status=no`,
     )

@@ -1,5 +1,5 @@
 class ApiConfig {
-  private baseApiUrl = 'http://localhost:8989/sdcn' // TODO: Mock
+  private baseApiUrl = 'http://43.154.195.80:8080'
 
   private successCode = 200
 
