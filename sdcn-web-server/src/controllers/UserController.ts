@@ -67,64 +67,12 @@ export default class UserControler {
     await this.userLogin(GoogleAuth, context);
   }
 
-  @RequireLoginAsync
-  async testAuth(context: Context) {
-    context.body = `You are: ${UserControler.getAuthUserInfo(context).userName}`;
-  }
-
   @ResponseSdcnErrorOnThrowAsync
   async loginWithGithub(context: Context) {
     const loginWithGithubUrl = `https://github.com/login/oauth/authorize?scope=user:email&client_id=${
       config.serverConfig.githubClientId
     }&redirect_uri=${querystring.escape(config.serverConfig.githubCallbackUrl)}`;
     context.redirect(loginWithGithubUrl);
-  }
-
-  async helloWorld(context: Context) {
-    responseHandler.success(context, await this.userService.helloWorld());
-  }
-
-  async helloB(context: Context, next: Next) {
-    logger.info(`request body: ${JSON.stringify(context.request.body)}`);
-    logger.info(`request query: ${JSON.stringify(context.query)}`);
-    logger.info(`request query string: ${context.querystring}`);
-    const { id: rawId, name, tags } = context.query;
-    logger.info(`is array: ${_.isArray(rawId)}`);
-    logger.info(`type: ${typeof rawId}`);
-    logger.info(`id: ${rawId}, name: ${name}`);
-    logger.info('-----------------');
-    logger.info(_.isArray(rawId));
-    logger.info(_.isString(rawId));
-    logger.info(_.isNaN(rawId));
-    logger.info(_.isNumber(rawId));
-    logger.info(_.toString(rawId));
-    logger.info(rawId);
-
-    const params: HelloParam = {
-      id: _.isArray(rawId)
-        ? _.parseInt((rawId as Array<string>)[0])
-        : _.isString(rawId)
-        ? _.parseInt(rawId as string)
-        : _.isNumber(rawId)
-        ? rawId
-        : 1,
-      name: _.isArray(name) ? (name as Array<string>)[0] : '',
-      tags: Array.isArray(tags) ? tags : [],
-    };
-    logger.info(`request param: ${JSON.stringify(params)}`);
-    context.state.params = params;
-
-    await next();
-  }
-
-  async helloCreate(context: Context) {
-    const requestBody = context.request.body;
-    await this.userService.helloCreate(requestBody);
-    responseHandler.success(context, true);
-  }
-
-  async world(context: Context) {
-    responseHandler.success(context, await this.userService.world());
   }
 
   @ResponseSdcnErrorOnThrowAsync
@@ -167,9 +115,6 @@ export default class UserControler {
 
   router() {
     const router = new Router({ prefix: '/user' });
-    router.get('/test', this.helloWorld.bind(this));
-    router.get('/testauth', this.testAuth.bind(this));
-    router.get('/world', this.world.bind(this));
     router.get('/connect/github', this.connectGithub.bind(this));
     router.get('/login/github', this.loginWithGithub.bind(this));
     router.get('/info', this.info.bind(this));
