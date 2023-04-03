@@ -36,25 +36,29 @@ export default class UserControler {
 
   @ResponseSdcnErrorOnThrowAsync
   private async userLogin(Authorizor: { (context: Context): Promise<AuthUserInfo> }, context: Context) {
-    const authUserInfo = await Authorizor(context);
-    const user = await this.userService.checkAccount(authUserInfo.uuid);
-    logger.debug('user:', user);
-    if (user.id === undefined) {
-      user.nickname = authUserInfo.userName;
-      user.email = authUserInfo.email;
-      user.uuid = authUserInfo.uuid;
-      user.avatarImg = authUserInfo.avatar_img;
-      user.create_time = new Date();
-      const newUser = await this.userService.createAccount(user);
-      authUserInfo.id = newUser[0].id;
-      logger.debug('newUser:', newUser);
-    } else {
-      authUserInfo.id = user.id;
-    }
+    try {
+      const authUserInfo = await Authorizor(context);
+      const user = await this.userService.checkAccount(authUserInfo.uuid);
+      logger.debug('user:', user);
+      if (user.id === undefined) {
+        user.nickname = authUserInfo.userName;
+        user.email = authUserInfo.email;
+        user.uuid = authUserInfo.uuid;
+        user.avatarImg = authUserInfo.avatar_img;
+        user.create_time = new Date();
+        const newUser = await this.userService.createAccount(user);
+        authUserInfo.id = newUser[0].id;
+        logger.debug('newUser:', newUser);
+      } else {
+        authUserInfo.id = user.id;
+      }
 
-    UserControler.setAuthUserInfo(context, authUserInfo);
-    context.redirect(config.serverConfig.redirect_uri);
-    // TODO: Redirecto to a failure page on error?
+      UserControler.setAuthUserInfo(context, authUserInfo);
+      context.redirect(config.serverConfig.redirect_uri);
+    } catch (error: unknown) {
+      context.redirect(config.serverConfig.failure_redirect_uri);
+      throw error;
+    }
   }
 
   @ResponseSdcnErrorOnThrowAsync
@@ -69,9 +73,7 @@ export default class UserControler {
 
   @ResponseSdcnErrorOnThrowAsync
   async loginWithGithub(context: Context) {
-    const loginWithGithubUrl = `https://github.com/login/oauth/authorize?scope=user:email&client_id=${
-      config.serverConfig.githubClientId
-    }&redirect_uri=${querystring.escape(config.serverConfig.githubCallbackUrl)}`;
+    const loginWithGithubUrl = `https://github.com/login/oauth/authorize?scope=user:email&client_id=${config.serverConfig.githubClientId}`;
     context.redirect(loginWithGithubUrl);
   }
 
