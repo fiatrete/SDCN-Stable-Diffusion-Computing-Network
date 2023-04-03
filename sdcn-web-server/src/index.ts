@@ -23,12 +23,6 @@ const router = new Router();
 app.keys = [config.serverConfig.koaSecretKey];
 
 app.use(scopePerRequest(container));
-app.use(
-  cors({
-    origin: 'http://localhost:3000', // TODO: Config
-    credentials: true,
-  }),
-);
 // This middleware causes our post request crash, thus disable it
 // app.use(new CSRF());
 app.use(
