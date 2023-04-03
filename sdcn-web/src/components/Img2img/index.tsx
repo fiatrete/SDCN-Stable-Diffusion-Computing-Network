@@ -156,6 +156,8 @@ const Img2img = () => {
         apiParams.init_image = inputImg?.split(',')[1]
         //console.log('submit', apiParams)
 
+        apiParams.sampler_name = values.sampling_method
+
         setOutputImgUri(await img2img(apiParams))
       } catch (err) {
         if (err instanceof String) message.error(err)

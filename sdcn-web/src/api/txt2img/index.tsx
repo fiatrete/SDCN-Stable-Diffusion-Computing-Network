@@ -1,3 +1,5 @@
+import config from 'api/config'
+
 export interface txt2imgParams {
   prompt: string
   lora1: string
@@ -37,7 +39,7 @@ export async function txt2img(params: txt2imgParams): Promise<string> {
     model: params.model,
   }
 
-  const response = await fetch('https://api.sdcn.info/txt2img', {
+  const response = await fetch(`${config.getBaseApiUrl()}/api/sd/txt2img`, {
     method: 'POST',
     mode: 'cors',
     cache: 'no-cache',
@@ -50,7 +52,8 @@ export async function txt2img(params: txt2imgParams): Promise<string> {
     referrerPolicy: 'no-referrer',
     body: JSON.stringify(data),
   })
+
   const resp_json = await response.json()
-  const img_data_url = resp_json.images[0]
+  const img_data_url = resp_json.data.images[0]
   return 'data:image/png;base64,' + img_data_url
 }

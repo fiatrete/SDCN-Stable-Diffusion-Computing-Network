@@ -1,3 +1,5 @@
+import config from 'api/config'
+
 export interface img2imgParams {
   init_image: string
   denoising_strength: number
@@ -41,7 +43,7 @@ export async function img2img(params: img2imgParams): Promise<string> {
     model: params.model,
   }
 
-  const response = await fetch('https://api.sdcn.info/img2img', {
+  const response = await fetch(`${config.getBaseApiUrl()}/api/sd/img2img`, {
     method: 'POST',
     mode: 'cors',
     cache: 'no-cache',
@@ -55,6 +57,6 @@ export async function img2img(params: img2imgParams): Promise<string> {
     body: JSON.stringify(data),
   })
   const resp_json = await response.json()
-  const img_data_url = resp_json.images[0]
+  const img_data_url = resp_json.data.images[0]
   return 'data:image/png;base64,' + img_data_url
 }
