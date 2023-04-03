@@ -35,8 +35,8 @@ app.use(
   koaSession(
     {
       key: 'koa:sess',
-      maxAge: 24 * 60 * 60 * 1000,
-      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 7,
+      httpOnly: false,
       rolling: true,
     },
     app,
