@@ -78,6 +78,8 @@ const sizes = [
   { value: '512x512', label: '512x512' },
   { value: '512x768', label: '512x768' },
   { value: '768x512', label: '768x512' },
+  { value: '768x1024', label: '768x1024' },
+  { value: '1024x768', label: '1024x768' },
 ]
 
 function SettingsArea() {

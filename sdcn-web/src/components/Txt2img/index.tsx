@@ -41,6 +41,8 @@ const sizes = [
   { value: '512x512', label: '512x512' },
   { value: '512x768', label: '512x768' },
   { value: '768x512', label: '768x512' },
+  { value: '768x1024', label: '768x1024' },
+  { value: '1024x768', label: '1024x768' },
 ]
 
 function SettingsArea() {
@@ -119,7 +121,7 @@ const Txt2img = () => {
           <div className={cx('w-full flex flex-col flex-1 bg-red-000')}>
             <InputAndGenerateArea />
             <div className={cx('h-[788px] w-full flex justify-center')}>
-              <div className={cx('w-[600px] flex')}>
+              <div className={cx('w-[576px] flex')}>
                 <ImageWidget src={imgUri} />
               </div>
             </div>

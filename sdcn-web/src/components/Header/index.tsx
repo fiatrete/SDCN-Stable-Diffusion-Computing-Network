@@ -62,12 +62,12 @@ const Header = () => {
         </div>
         <nav className={cx('grow flex items-center gap-x-1')}>
           <NavLink
-            to={'/play'}
+            to={'/api-reference'}
             className={({ isActive }) =>
               isActive ? cx(styles.navLinkActive) : cx(styles.navLink)
             }
           >
-            Playground
+            API Reference
           </NavLink>
           <NavLink
             to={'/nodes'}
@@ -79,6 +79,14 @@ const Header = () => {
           </NavLink>
           <NavLink to={'/#faq'} className={cx(styles.navLink)}>
             FAQ
+          </NavLink>
+          <NavLink
+            to={'/play'}
+            className={({ isActive }) =>
+              isActive ? cx(styles.navLinkActive) : cx(styles.navLink)
+            }
+          >
+            Playground
           </NavLink>
         </nav>
         <div className={cx('flex items-center gap-x-6', styles.right)}>
