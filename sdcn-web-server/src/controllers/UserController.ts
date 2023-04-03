@@ -78,6 +78,7 @@ export default class UserControler {
   }
 
   @ResponseSdcnErrorOnThrowAsync
+  @RequireLoginAsync
   async info(context: Context) {
     const userInfo = context.session?.authUserInfo as AuthUserInfo;
     logger.debug('userInfo', userInfo);
