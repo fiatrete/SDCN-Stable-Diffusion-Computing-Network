@@ -12,7 +12,7 @@ export enum StatusCode {
 
 export enum ErrorCode {
   Unknown = -1,
-  Success = 0,
+  Success = 200,
   PermissionDenied = 1000,
   ResourceUnavailable = 2000,
   InvalidArgument = 3000,
