@@ -29,7 +29,7 @@ app.use(
   koaSession(
     {
       key: 'koa:sess',
-      maxAge: 24 * 60 * 60 * 7,
+      maxAge: 24 * 60 * 60 * 7 * 1000,
       httpOnly: false,
       rolling: true,
       domain: 'sdcn.info',
