@@ -34,6 +34,7 @@ export async function nodes(
             pageNo,
             pageSize,
           },
+          withCredentials: true,
         },
       )
       .then((resp) => {
@@ -77,6 +78,7 @@ export async function donors(
             pageNo,
             pageSize,
           },
+          withCredentials: true,
         },
       )
       .then((resp) => {
@@ -113,6 +115,7 @@ export async function myNodes(
             pageNo,
             pageSize,
           },
+          withCredentials: true,
         },
       )
       .then((resp) => {
@@ -137,9 +140,15 @@ export async function myNodes(
 export async function donateNode(worker: string): Promise<Node> {
   return new Promise((resolve, reject) => {
     axios
-      .post<ApiResponse<Node>>(`${config.getBaseApiUrl()}/api/node/donate`, {
-        worker,
-      })
+      .post<ApiResponse<Node>>(
+        `${config.getBaseApiUrl()}/api/node/donate`,
+        {
+          worker,
+        },
+        {
+          withCredentials: true,
+        },
+      )
       .then((resp) => {
         if (resp.data.code === config.getSuccessCode()) {
           resolve(resp.data.data)
@@ -162,9 +171,15 @@ export async function donateNode(worker: string): Promise<Node> {
 export async function revokeNode(nodeId: number): Promise<Node> {
   return new Promise((resolve, reject) => {
     axios
-      .post<ApiResponse<Node>>(`${config.getBaseApiUrl()}/api/node/revoke`, {
-        nodeId,
-      })
+      .post<ApiResponse<Node>>(
+        `${config.getBaseApiUrl()}/api/node/revoke`,
+        {
+          nodeId,
+        },
+        {
+          withCredentials: true,
+        },
+      )
       .then((resp) => {
         if (resp.data.code === config.getSuccessCode()) {
           resolve(resp.data.data)
@@ -187,9 +202,15 @@ export async function revokeNode(nodeId: number): Promise<Node> {
 export async function launchNode(nodeId: number): Promise<Node> {
   return new Promise((resolve, reject) => {
     axios
-      .post<ApiResponse<Node>>(`${config.getBaseApiUrl()}/api/node/launch`, {
-        nodeId,
-      })
+      .post<ApiResponse<Node>>(
+        `${config.getBaseApiUrl()}/api/node/launch`,
+        {
+          nodeId,
+        },
+        {
+          withCredentials: true,
+        },
+      )
       .then((resp) => {
         if (resp.data.code === config.getSuccessCode()) {
           resolve(resp.data.data)
@@ -212,9 +233,15 @@ export async function launchNode(nodeId: number): Promise<Node> {
 export async function stopNode(nodeId: number): Promise<Node> {
   return new Promise((resolve, reject) => {
     axios
-      .post<ApiResponse<Node>>(`${config.getBaseApiUrl()}/api/node/stop`, {
-        nodeId,
-      })
+      .post<ApiResponse<Node>>(
+        `${config.getBaseApiUrl()}/api/node/stop`,
+        {
+          nodeId,
+        },
+        {
+          withCredentials: true,
+        },
+      )
       .then((resp) => {
         if (resp.data.code === config.getSuccessCode()) {
           resolve(resp.data.data)

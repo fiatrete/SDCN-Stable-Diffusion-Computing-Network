@@ -13,6 +13,7 @@ export async function userInfo(): Promise<User> {
     axios
       .get<ApiResponse<User>>(`${config.getBaseApiUrl()}/api/user/info`, {
         params: {},
+        withCredentials: true,
       })
       .then((resp) => {
         if (resp.data.code === config.getSuccessCode()) {
