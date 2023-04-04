@@ -15,19 +15,19 @@ export default class SdService {
     this.nodeService = inject.nodeService;
   }
 
-  private async getNextWorkerNode(): Promise<string> {
-    const { workerAddress } = await this.nodeService.getNextWorkerNode();
+  private async getNextWorkerNode(): Promise<{ workerAddress: string | null; nodeId: string | null }> {
+    const { workerAddress, nodeId } = await this.nodeService.getNextWorkerNode();
     if (!workerAddress) {
       throw new SdcnError(StatusCode.InternalServerError, ErrorCode.ResourceUnavailable, 'No available worker found');
     }
-    return workerAddress;
+    return { workerAddress, nodeId };
   }
 
   // handerType:
   //      0 --> txt2img
   //      1 --> img2img
   private async xxx2img(context: Context, handlerType: number): Promise<void> {
-    const workerAddress = await this.getNextWorkerNode();
+    const { workerAddress, nodeId } = await this.getNextWorkerNode();
 
     const req = context.request;
     const gatewayParams = req.body;
@@ -47,6 +47,7 @@ export default class SdService {
     const resultObj = await upstreamRes.json();
     resultObj.info = undefined;
     resultObj.parameters = undefined;
+    this.nodeService.increaseTasksHandled(nodeId as string);
     responseHandler.success(context, resultObj);
   }
 
@@ -59,7 +60,7 @@ export default class SdService {
   }
 
   async interrogate(context: Context) {
-    const workerAddress = await this.getNextWorkerNode();
+    const { workerAddress, nodeId } = await this.getNextWorkerNode();
 
     const params = gatewayParamsToWebUI_interrogate(context.request.body);
     if (!params) {
@@ -78,6 +79,7 @@ export default class SdService {
     }
 
     const upstreamResObj = await upstreamRes.json();
+    this.nodeService.increaseTasksHandled(nodeId as string);
     responseHandler.success(context, { caption: upstreamResObj.caption });
   }
 }
