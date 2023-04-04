@@ -33,8 +33,8 @@ class Persist {
   }
 
   removeUser() {
-    cookies.remove('koa:sess')
-    cookies.remove('koa:sess.sig')
+    cookies.remove('koa:sess', { domain: 'sdcn.info' })
+    cookies.remove('koa:sess.sig', { domain: 'sdcn.info' })
     localStorage.removeItem('USER')
   }
 }
