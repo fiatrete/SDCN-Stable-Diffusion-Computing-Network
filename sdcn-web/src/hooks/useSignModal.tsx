@@ -1,5 +1,5 @@
 import React from 'react'
-import { Modal, Image, Button, Spin, ModalFuncProps, message } from 'antd'
+import { Modal, Image, Button, Spin, ModalFuncProps } from 'antd'
 import cx from 'classnames'
 import logo from 'assets/images/logo.svg'
 import {
