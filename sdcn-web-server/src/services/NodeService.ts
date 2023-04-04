@@ -85,8 +85,12 @@ export default class NodeService {
     return await this.nodeRepository.hasNodeOwnership(account_id, node_seq);
   }
 
-  async getNodeListbyAccountId(account_id: bigint, pageNo: number, pageSize: number) {
-    return await this.nodeRepository.getNodeListByAccountId(account_id, pageNo, pageSize);
+  async getNodeListbyAccountIdPaged(account_id: bigint, pageNo: number, pageSize: number) {
+    return await this.nodeRepository.getNodeListByAccountIdPaged(account_id, pageNo, pageSize);
+  }
+
+  async getNodeListbyAccountId(account_id: bigint) {
+    return await this.nodeRepository.getNodeListByAccountId(account_id);
   }
 
   async getNodeListByType(type: number, pageNo: number, pageSize: number) {
@@ -214,5 +218,16 @@ return result
       result = evalResult as string;
     });
     return result;
+  }
+  async getNodeTaskCount(nodeId: bigint): Promise<number> {
+    let taskCount = 0;
+    await this.redisOperation(async (redis: Redis) => {
+      taskCount = parseInt((await redis.get('NodeTaskHandled$' + nodeId)) as string);
+      if (Number.isNaN(taskCount)) {
+        taskCount = 0;
+      }
+    });
+
+    return taskCount;
   }
 }

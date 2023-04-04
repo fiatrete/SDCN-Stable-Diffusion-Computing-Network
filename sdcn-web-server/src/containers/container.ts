@@ -29,7 +29,10 @@ container.register({
     }))
     .singleton(),
   userController: asClass(UserController)
-    .inject(() => ({ userService: container.resolve<UserService>('userService') }))
+    .inject(() => ({
+      userService: container.resolve<UserService>('userService'),
+      nodeService: container.resolve<NodeService>('nodeService'),
+    }))
     .singleton(),
   nodeService: asClass(NodeService)
     .inject(() => ({

@@ -119,12 +119,16 @@ export default class NodeRepository {
     return count;
   }
 
-  async getNodeListByAccountId(account_id: bigint, pageNo: number, pageSize: number) {
+  async getNodeListByAccountIdPaged(account_id: bigint, pageNo: number, pageSize: number) {
     return await this.Nodes()
       .where({ accountId: account_id, deleted: 0 })
       .offset((pageNo - 1) * pageSize)
       .limit(pageSize)
       .orderBy(nodeFields.taskCount, SortDirection.Desc);
+  }
+
+  async getNodeListByAccountId(account_id: bigint) {
+    return await this.Nodes().where({ accountId: account_id }).orderBy(nodeFields.taskCount, SortDirection.Desc);
   }
 
   async hasNodeOwnership(account_id: bigint, node_seq: bigint): Promise<boolean> {

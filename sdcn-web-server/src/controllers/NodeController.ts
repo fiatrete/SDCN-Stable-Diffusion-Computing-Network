@@ -156,7 +156,7 @@ export default class NodeControler {
         totalSize: 0,
       });
     }
-    const nodeList = await this.nodeService.getNodeListbyAccountId(userInfo.id, pageNo, pageSize);
+    const nodeList = await this.nodeService.getNodeListbyAccountIdPaged(userInfo.id, pageNo, pageSize);
     const result: { nodeId: bigint; status: number }[] = [];
     nodeList.forEach((node) => {
       const item = { nodeId: node.nodeSeq, status: node.status, taskHandlerCount: node.taskCount };
@@ -199,13 +199,14 @@ export default class NodeControler {
       if (user === undefined) {
         return;
       }
+      const taskCount = await this.nodeService.getNodeTaskCount(node.nodeSeq);
       const userInfo = user as unknown as User;
       const accountInfo = { nickname: userInfo?.nickname, avatarImgUrl: userInfo?.avatarImg, email: userInfo?.email };
       const item = {
         nodeId: node.nodeSeq,
         account: accountInfo,
         status: node.status,
-        taskHandlerCount: node.taskCount,
+        taskHandlerCount: taskCount,
       };
       return item;
     });

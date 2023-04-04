@@ -5,6 +5,7 @@ import { SortDirection } from '../utils/SortDirection';
 interface NodeSummaryWithAccount {
   nodeCount: number;
   account: {
+    accountId: bigint;
     nickname: string;
     avatarImgUrl: string;
     email: string;
@@ -59,9 +60,9 @@ export default class UserRepository {
       .offset(offset)
       .limit(pageSize);
 
-    const items = result.map(({ nodeCount, nickname, avatarImg, email, taskCount }) => ({
+    const items = result.map(({ nodeCount, nickname, avatarImg, email, taskCount, accountId }) => ({
       nodeCount: nodeCount,
-      account: { nickname, avatarImgUrl: avatarImg, email },
+      account: { nickname, avatarImgUrl: avatarImg, email, accountId },
       taskHandlerCount: taskCount,
     }));
 

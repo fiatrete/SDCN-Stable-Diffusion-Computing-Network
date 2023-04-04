@@ -1,7 +1,7 @@
 import { Context, Next } from 'koa';
 import Router from 'koa-router';
 import { RequireLoginAsync } from '../annotators/RequireLogin';
-import UserService from '../services/UserService';
+import { UserService, NodeService } from '../services';
 import logger from '../utils/logger';
 import { AuthUserInfo } from './auth/AuthInterface';
 import GithubAuth from './auth/GithubAuth';
@@ -12,6 +12,7 @@ import querystring from 'querystring';
 import responseHandler, { ErrorCode, SdcnError, StatusCode } from '../utils/responseHandler';
 import Joi from 'joi';
 import { ResponseSdcnErrorOnThrowAsync } from '../annotators/ResponseSdcnErrorOnThrow';
+import { User } from '../models';
 
 interface HelloParam {
   id: number;
@@ -21,9 +22,11 @@ interface HelloParam {
 
 export default class UserControler {
   userService: UserService;
+  nodeService: NodeService;
 
-  constructor(inject: { userService: UserService }) {
+  constructor(inject: { userService: UserService; nodeService: NodeService }) {
     this.userService = inject.userService;
+    this.nodeService = inject.nodeService;
   }
 
   private static getAuthUserInfo(context: Context): AuthUserInfo {
@@ -104,14 +107,46 @@ export default class UserControler {
       throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, error.message);
     }
     const { pageNo, pageSize } = value;
-    const result = await this.userService.getNodeSummaryWithAccountPaged(pageNo, pageSize);
-    logger.debug(result);
+    const accountInfoList = await this.userService.getNodeSummaryWithAccountPaged(pageNo, pageSize);
+    logger.debug('accountInfoList', accountInfoList);
+    const promises = accountInfoList.items.map(async (accountInfo) => {
+      const nodeList = await this.nodeService.getNodeListbyAccountId(accountInfo.account.accountId);
+      let totalTaskCount = 0;
+
+      const taskCountList: number[] = [];
+
+      await Promise.all(
+        nodeList.map(async (node) => {
+          const taskCount = await this.nodeService.getNodeTaskCount(node.nodeSeq);
+          taskCountList.push(taskCount);
+        }),
+      );
+      taskCountList.forEach((taskCount) => {
+        totalTaskCount += taskCount;
+      });
+
+      const account = {
+        nickname: accountInfo.account.nickname,
+        avatarImgUrl: accountInfo.account.avatarImgUrl,
+        email: accountInfo.account.email,
+      };
+      const item = {
+        nodeCount: accountInfo.nodeCount,
+        account: account,
+        taskHandlerCount: totalTaskCount,
+      };
+      return item;
+    });
+
+    const items = await Promise.all(promises);
+
+    logger.debug('items', items);
     const responese = {
-      items: result.items,
+      items: items,
       pageNo: pageNo,
       pageSize: pageSize,
-      totalSize: result.totalSize,
-      totalPages: result.totalPages,
+      totalSize: accountInfoList.totalSize,
+      totalPages: accountInfoList.totalPages,
     };
     responseHandler.success(context, responese);
   }

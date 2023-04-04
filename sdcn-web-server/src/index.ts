@@ -32,6 +32,7 @@ app.use(
       maxAge: 24 * 60 * 60 * 7,
       httpOnly: false,
       rolling: true,
+      domain: 'sdcn.info',
     },
     app,
   ),
