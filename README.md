@@ -184,6 +184,7 @@ python3 sdcn_run.py txt2img params-txt2img.json OUTPUT_IMAGE.png
 
 ## Roadmap
 
+- [ ] Rename project to DAN
 - [x] Management GUI for computing power donors
     - [x] Add login to the SDCN website
     - [x] CRUD management of computing power provided by donors
