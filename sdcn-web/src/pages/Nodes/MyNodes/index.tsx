@@ -27,12 +27,14 @@ const MyNodes = (props: MyNodesProps) => {
     {
       title: 'Node ID',
       dataIndex: 'nodeId',
-      width: '25%',
+    },
+    {
+      title: 'Worker URL',
+      dataIndex: 'worker',
     },
     {
       title: 'Tasks handled',
       dataIndex: 'taskHandlerCount',
-      width: '25%',
     },
     {
       title: 'Current Status',
@@ -42,7 +44,6 @@ const MyNodes = (props: MyNodesProps) => {
     {
       title: 'Actions',
       key: 'actions',
-      width: '30%',
       render: (node: Node) => (
         <NodeActionsPanel
           node={node}

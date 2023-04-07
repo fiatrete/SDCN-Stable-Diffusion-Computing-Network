@@ -115,7 +115,7 @@ const Nodes = () => {
       icon: null,
       footer: null,
       transitionName: '',
-      width: 757,
+      width: 900,
       content: (
         <MyNodes
           refresh={() => {
