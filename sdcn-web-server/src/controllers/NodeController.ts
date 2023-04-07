@@ -157,11 +157,11 @@ export default class NodeControler {
       });
     }
     const nodeList = await this.nodeService.getNodeListbyAccountIdPaged(userInfo.id, pageNo, pageSize);
-
     const promises = nodeList.map(async (node) => {
       const taskCount = await this.nodeService.getNodeTaskCount(node.nodeSeq);
       const item = {
         nodeId: node.nodeSeq,
+        worker: node.worker,
         status: node.status,
         taskHandlerCount: taskCount,
       };
