@@ -122,7 +122,7 @@ function gatewayParamsToWebUI_xxx2img(gatewayParams: DictionaryLike, reqType: nu
 function gatewayParamsToWebUI_interrogate(gatewayParams: DictionaryLike): DictionaryLike {
   const webuiParams = {
     image: requireString(gatewayParams.image, undefined),
-    model: requireStringIn(gatewayParams.model, sdConfig.kValidUpscalers),
+    model: requireStringIn(gatewayParams.model, sdConfig.kValidInterrogateModel),
   };
   if (webuiParams.image === undefined) {
     throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid image');
