@@ -151,26 +151,22 @@ bash webui.sh --listen --api
 docker-compose up -d 
 ```
 
->*Now your sdcn-server is available on "[http://127.0.0.1:6006](http://127.0.0.1:6006/)"*
+>*Now your sdcn-server is available on "[http://127.0.0.1:8080](http://127.0.0.1:8080/)"*
 
 5. Register your Stable Diffusion WebUI instance as a SDCN node:
 
-```bash
-curl -XPOST 'https://api.sdcn.info/admin/regworker' -d '{"worker":"http://yourlocalip:7860","owner":"yourname","nodeId":"yournodeid"}'
-```
+- Login your account using SDCN's web page;
+- Navigate to `Nodes` -> `Donate Node`
+- Enter your worker node's address
+- Click `Donate`
+
+> ⚠️ *Please note that you must use non-loopback IP address! You cannot use 127.0.0.1 or 'localhost' since our docker container's `hostnet` is not enabled.* 
 
 
-
-> ⚠️ *Please note that you must use the local IP address! You cannot use 127.0.0.1 or 'localhost' since our docker container's `hostnet` is not enabled.* </br></br> 👉 *You can unregister an instance if you need:*
->```bash
->curl -XPOST 'https://api.sdcn.info/admin/unregworker' -d '{"worker":"http://yourlocalip:7860"}'
->```
-
-
-6. Config SERVICE_PREFIX in `example/sdcn_run.py` to "[http://127.0.0.1:6006](http://127.0.0.1:6006/)". 
+6. Config SERVICE_PREFIX in `example/sdcn_run.py` to "[http://127.0.0.1:8080](http://127.0.0.1:8080/)". 
 
 ```python
-SERVICE_PREFIX = 'http://127.0.0.1:6006'
+SERVICE_PREFIX = 'http://127.0.0.1:8080'
 ```
 
 7. Execute the example with your local sdcn-server:

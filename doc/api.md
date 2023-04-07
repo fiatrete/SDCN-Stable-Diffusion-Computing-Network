@@ -1,29 +1,36 @@
 # API reference
 At present, only HTTP requests are supported to complete image generation tasks.
 
-The request format:
+The APIs has similar respones.
 
-- Method: POST
-- Body: A set of generation task parameters encoded in JSON format
+On success, then server will response http `status code` 200 and an object in JSON as below:
 
-The response format:
-
-```
+```JSON
 {
-  "msg": "string",
-  "images": [
-    "string"
-  ]
+    "code": 200,
+    "data": `The returned object`,
+    "message": "success"
 }
-
 ```
 
-- In case of success, an array called `images` will be returned, which contains the generated result images in base64 encoding. The `msg` field will not be included.
-- In case of failure, the `images` field will not be included, and the `msg` field will contain the error message.
+On failure, the server will response a non-ok http `status code` (i.e. not 200, may be 401 for an example) and an object JSON as below:
+
+```JSON
+{
+    "code": `Error code`,
+    "message": `A string describe the error`
+}
+```
 
 ### txt2img
 
-For `txt2img` tasks, all the parameters are listed below:
+For `txt2img` tasks, the url path is:
+
+```
+/api/sd/txt2img
+```
+
+And all the parameters are listed below:
 
 | Parameter | Type | Description |
 | --- | --- | --- |
@@ -68,9 +75,29 @@ The following is an example:
 
 ```
 
+On success, the response should something like:
+
+```JSON
+{
+    "code": 200,
+    "data": {
+        "images": [
+            "string of base 64 encoded png file"
+        ]
+    },
+    "message": "success"
+}
+```
+
 ### img2img
 
-For `img2img` tasks, the following parameters are required:
+For `img2img` tasks, the url path is:
+
+```
+/api/sd/img2img
+```
+
+And all the parameters are listed below:
 
 | Parameter | Type | Description |
 | --- | --- | --- |
@@ -110,6 +137,20 @@ Here is an example JSON object with these parameters:
 
 ```
 
+On success, the response should something like:
+
+```JSON
+{
+    "code": 200,
+    "data": {
+        "images": [
+            "string of base 64 encoded png file"
+        ]
+    },
+    "message": "success"
+}
+```
+
 ### interrogate
 
 Interrogate tasks will generate a description for an input image. The parameters for interrogate tasks are listed below:
@@ -131,15 +172,15 @@ Here is an example JSON object with these parameters:
 On success, the response has the following format:
 
 ```
-{
-    "caption": "The scription"
-}
-```
 
-On failure, the response has the following format:
+On success, the response should something like:
 
-```
+```JSON
 {
-    "detail": "The scription"
+    "code": 200,
+    "data": {
+        "caption": "The scription"
+    },
+    "message": "success"
 }
 ```
