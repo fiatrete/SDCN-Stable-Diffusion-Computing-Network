@@ -15,7 +15,7 @@ params = {
     "model": "deepdanbooru"
 }
 
-url = 'https://api.sdcn.info/api/sd/interrogate'
+url = 'https://api.opendan.ai/api/sd/interrogate'
 headers = {
     'accept': 'application/json',
     'Content-Type': 'application/json',

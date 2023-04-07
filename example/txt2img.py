@@ -23,7 +23,7 @@ params = {
     }
 }
 
-url = 'https://api.sdcn.info/api/sd/txt2img'
+url = 'https://api.opendan.ai/api/sd/txt2img'
 headers = {
     'accept': 'application/json',
     'Content-Type': 'application/json',

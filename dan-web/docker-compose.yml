@@ -1,0 +1,7 @@
+version: '3.0'
+services:
+  dan-web:
+    container_name: dan-web
+    build: .
+    ports:
+      - 3000:3000
