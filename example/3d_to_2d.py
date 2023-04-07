@@ -43,7 +43,7 @@ def interrogate(filename):
 	    "model": "clip"
 	}
 
-	url = 'https://api.sdcn.info/interrogate'
+	url = 'https://api.sdcn.info/api/sd/interrogate'
 	headers = {
 	    'accept': 'application/json',
 	    'Content-Type': 'application/json',
@@ -92,8 +92,7 @@ params = {
 
 }
 
-# url = 'https://api.sdcn.info/txt2img'
-url = 'http://127.0.0.1:6006/img2img'
+url = 'https://api.sdcn.info/api/sd/txt2img'
 headers = {
     'accept': 'application/json',
     'Content-Type': 'application/json',
@@ -107,8 +106,8 @@ except requests.exceptions.RequestException as e:
     print(response.content)
     sys.exit(1)
 
-if "images" in resp_obj.keys():
-    images = resp_obj["images"]
+if "data" in resp_obj.keys():
+    images = resp_obj.get('data').get('images')
     for index, img in zip(range(len(images)), images):
         data = base64.b64decode(img)
         with open(target_filename, "wb") as f:

@@ -64,7 +64,7 @@ params = {
     "model": "3a17d0deffa4592fd91c711a798031a258ab44041809ade8b4591c0225ea9401"
 }
 
-url = 'https://api.sdcn.info/img2img'
+url = 'https://api.sdcn.info/api/sd/img2img'
 headers = {
     'accept': 'application/json',
     'Content-Type': 'application/json',
@@ -78,8 +78,8 @@ except requests.exceptions.RequestException as e:
     print(response.content)
     sys.exit(1)
 
-if "images" in resp_obj.keys():
-    images = resp_obj["images"]
+if "data" in resp_obj.keys():
+    images = resp_obj.get('data').get('images')
     for index, img in zip(range(len(images)), images):
         data = base64.b64decode(img)
         with open(target_filename, "wb") as f:

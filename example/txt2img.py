@@ -23,18 +23,17 @@ params = {
     }
 }
 
-url = 'https://api.sdcn.info/txt2img'
+url = 'https://api.sdcn.info/api/sd/txt2img'
 headers = {
     'accept': 'application/json',
     'Content-Type': 'application/json',
 }
 
 response = requests.request("POST", url, headers=headers, data=json.dumps(params))
-print(response.content)
 resp_obj = json.loads(response.content)
 
-if "images" in resp_obj.keys():
-    images = resp_obj["images"]
+if "data" in resp_obj.keys():
+    images = resp_obj.get('data').get('images')
     for index, img in zip(range(len(images)), images):
         data = base64.b64decode(img)
         with open(f"{index}.png", "wb") as f:

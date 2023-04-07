@@ -26,7 +26,7 @@ def load_params(params_file, init_image_file = None):
     
     return params
 
-SERVICE_PREFIX = 'https://api.sdcn.info'
+SERVICE_PREFIX = 'https://api.sdcn.info/api/sd'
 
 def do_request_and_save_image(func_type, params, save_to):
     url = SERVICE_PREFIX + '/' + func_type
@@ -37,9 +37,8 @@ def do_request_and_save_image(func_type, params, save_to):
 
     response = requests.request("POST", url, headers=headers, data=json.dumps(params))
     resp_obj = json.loads(response.content)
-
-    if "images" in resp_obj.keys():
-        images = resp_obj["images"]
+    if "data" in resp_obj.keys():
+        images = resp_obj.get('data').get('images')
         for _, img in zip(range(len(images)), images):
             data = base64.b64decode(img)
             with open(save_to, "wb") as f:

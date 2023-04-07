@@ -25,7 +25,7 @@ params = {
     "model": "3a17d0deffa4592fd91c711a798031a258ab44041809ade8b4591c0225ea9401"
 }
 
-url = 'https://api.sdcn.info/img2img'
+url = 'https://api.sdcn.info/api/sd/img2img'
 headers = {
     'accept': 'application/json',
     'Content-Type': 'application/json',
@@ -34,8 +34,8 @@ headers = {
 response = requests.request("POST", url, headers=headers, data=json.dumps(params))
 resp_obj = json.loads(response.content)
 
-if "images" in resp_obj.keys():
-    images = resp_obj["images"]
+if "data" in resp_obj.keys():
+    images = resp_obj.get('data').get('images')
     for index, img in zip(range(len(images)), images):
         data = base64.b64decode(img)
         with open(f"img{index}.png", "wb") as f:

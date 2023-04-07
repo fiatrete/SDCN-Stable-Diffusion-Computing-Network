@@ -15,7 +15,7 @@ params = {
     "model": "deepdanbooru"
 }
 
-url = 'https://api.sdcn.info/interrogate'
+url = 'https://api.sdcn.info/api/sd/interrogate'
 headers = {
     'accept': 'application/json',
     'Content-Type': 'application/json',
@@ -25,12 +25,13 @@ try:
     response = requests.request("POST", url, headers=headers, data=json.dumps(params))
     response.raise_for_status()
     resp_obj = json.loads(response.content)
+    # print(resp_obj)
 except requests.exceptions.RequestException as e:
     print(response.content)
     sys.exit(1)
 
-if "caption" in resp_obj.keys():
-    print(resp_obj["caption"])
+if "data" in resp_obj.keys():
+    print(resp_obj["data"]["caption"])
 else:
     print(response.content)
 
