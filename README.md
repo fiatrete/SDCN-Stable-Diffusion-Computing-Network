@@ -1,4 +1,4 @@
-<p align="center"><a href="https://opendan.ai" target="_blank" rel="noopener noreferrer"><img width="300" src="https://www.opendan.ai/static/media/logo.823df5d8bd4130705ca160adc4e0b3c3.svg" alt="DAN logo"></a></p>
+<p align="center"><a href="https://opendan.ai" target="_blank" rel="noopener noreferrer"><img width="300" src="imgs/logo.svg" alt="DAN logo"></a></p>
 
 <p align="center">
   <a href="https://github.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License"></a>
