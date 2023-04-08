@@ -32,7 +32,7 @@ app.use(
       maxAge: 24 * 60 * 60 * 7 * 1000,
       httpOnly: false,
       rolling: true,
-      domain: 'opendan.ai',
+      domain: config.serverConfig.domain,
     },
     app,
   ),

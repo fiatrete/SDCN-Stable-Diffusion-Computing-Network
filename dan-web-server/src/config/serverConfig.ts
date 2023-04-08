@@ -14,7 +14,7 @@ const googleClientId = process.env.GOOGLE_CLIENT_ID as string;
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET as string;
 const redirect_uri = process.env.REDIRECT_URI || 'http://localhost:9080/oauth/success';
 const failure_redirect_uri = process.env.FALURE_REDIRECT_URI || 'http://localhost:9080/oauth/failure';
-
+const domain = process.env.DOMAIN || 'opendan.ai';
 const requestJsonLimitSize = process.env.REQUEST_JSON_LIMIT_SIZE || '10mb';
 
 export default {
@@ -30,5 +30,6 @@ export default {
   googleClientSecret,
   redirect_uri,
   failure_redirect_uri,
+  domain,
   requestJsonLimitSize,
 };
