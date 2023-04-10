@@ -17,7 +17,7 @@ const DonorList = (props: DonorListProps) => {
 
   const columns = [
     {
-      title: 'Nodes',
+      title: 'Active Nodes',
       dataIndex: 'nodeCount',
       width: '33%',
     },
