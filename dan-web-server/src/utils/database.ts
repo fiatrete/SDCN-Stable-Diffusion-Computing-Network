@@ -26,7 +26,6 @@ const knex = Knex({
   },
   // Hook for modifying returned rows, before passing them forward to user. https://knexjs.org/guide/#postprocessresponse
   postProcessResponse: (result) => {
-    logger.info(`--------post process response: ${result}`);
     if (Array.isArray(result)) {
       return result.map((row) => mapRowKeysToCamelCase(row));
     } else {
@@ -35,7 +34,6 @@ const knex = Knex({
   },
   // transforming identifier names automatically to quoted versions for each dialect. https://knexjs.org/guide/#wrapidentifier
   wrapIdentifier: (value, origImpl) => {
-    logger.info(`--------wrap indentifier: ${value}`);
     if (value === '*') {
       return origImpl(value);
     } else {

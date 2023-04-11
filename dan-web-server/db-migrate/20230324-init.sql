@@ -36,3 +36,16 @@ create table node (
 );
 comment on column node.status is '0:deactivate, 1:activate';
 
+-- task of node
+create table node_task (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  node_seq bigint,
+  task_type integer,
+  model text,
+  status integer NOT NULL default 0,
+  finish_time timestamptz,
+  create_time timestamptz,
+  last_modify_time timestamptz
+);
+comment on column node_task.status is '0:default(pending), 1:processing, 2:success, 3:failure';
+comment on column node_task.task_type is '0:txt2img, 1:img2img';
