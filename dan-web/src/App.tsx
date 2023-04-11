@@ -8,9 +8,16 @@ import ReactGA from 'react-ga4'
 
 import Footer from 'components/Footer'
 import Header from 'components/Header'
+import { env } from 'env'
 
 function App() {
-  ReactGA.initialize('G-KEQX55HT1W')
+  console.log(env)
+
+  try {
+    ReactGA.initialize(env.REACT_APP_GOOGLE_ANALYTICS_ID)
+  } catch (error) {
+    console.error(error)
+  }
 
   return (
     <div className={cx('App min-h-full w-full flex flex-col')}>

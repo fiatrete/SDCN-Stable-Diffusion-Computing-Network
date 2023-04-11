@@ -10,6 +10,7 @@ import Nodes from 'pages/Nodes'
 import Portal from 'pages/Portal'
 import OAuthSuccess from 'pages/OAuth/Success'
 import OAuthFailure from 'pages/OAuth/Failure'
+import ApiReference from 'pages/ApiReference'
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 root.render(
@@ -19,11 +20,11 @@ root.render(
         <Route index element={<Portal />} />
         <Route path='play' element={<Playground />} />
         <Route path='nodes' element={<Nodes />} />
+        <Route path='api-reference' element={<ApiReference />} />
       </Route>
       <Route path='/oauth/success' element={<OAuthSuccess />} />
       <Route path='/oauth/failure' element={<OAuthFailure />} />
       <Route path='*' element={<Navigate replace to='/' />} />
     </Routes>
-    {/* <App /> */}
   </BrowserRouter>,
 )

@@ -1,3 +1,4 @@
+import { env } from 'env'
 import { User } from 'typings/User'
 import Cookies from 'universal-cookie'
 
@@ -33,8 +34,10 @@ class Persist {
   }
 
   removeUser() {
-    cookies.remove('koa:sess', { domain: 'opendan.ai' })
-    cookies.remove('koa:sess.sig', { domain: 'opendan.ai' })
+    console.log('Cookie.Domain', env.REACT_APP_COOKIE_DOMAIN)
+
+    cookies.remove('koa:sess', { domain: env.REACT_APP_COOKIE_DOMAIN })
+    cookies.remove('koa:sess.sig', { domain: env.REACT_APP_COOKIE_DOMAIN })
     localStorage.removeItem('USER')
   }
 }
