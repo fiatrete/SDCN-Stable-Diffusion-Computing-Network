@@ -43,7 +43,7 @@ And all the parameters are listed below:
 | cfg_scale | integer | A classifier-free guidance scale; smaller values result in higher quality images, and larger values yield images closer to the provided prompt |
 | width | integer | The desired width of the resulting image |
 | height | integer | The desired height of the resulting image |
-| model | string | The model (weights) used to generate the image |
+| model | string | The model used to generate the image |
 | upscale | object | Optional, add it if you want to upscale the result |
 | upscale.denoising_strength | float | Controls the level of denoising; smaller values yield results that are closer to the original generated image, but may be blurry; larger values may lead the output looks different from the original generated image and may looks strange. Valid range is [0, 1], but I recomment you make it between 0.4 and 0.6. |
 | upscale.scale | float | The upscale rate. Valid range is (1.0, 2.0] |
