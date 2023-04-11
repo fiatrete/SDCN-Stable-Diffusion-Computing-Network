@@ -204,7 +204,7 @@ python3 dan_run.py txt2img params-txt2img.json OUTPUT_IMAGE.png
     - [ ] Sharing mechanisms for images generated through API or playground
     - [ ] A page to display shared images in a waterfall flow
 - [ ] Constraints for the use of computing resources
-    - [ ] APP-Key mechanism
+    - [ ] API-Key mechanism
     - [ ] honor(credit) system
 - [ ] Task scheduling mechanism
     - [ ] Schedule to nodes with required models already loaded
