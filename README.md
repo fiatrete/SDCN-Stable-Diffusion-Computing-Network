@@ -180,7 +180,7 @@ python3 dan_run.py txt2img params-txt2img.json OUTPUT_IMAGE.png
 
 ## Roadmap
 
-- [ ] Rename project to DAN
+- [x] Rename project to DAN
 - [x] Management GUI for computing power donors
     - [x] Add login to the DAN website
     - [x] CRUD management of computing power provided by donors
@@ -205,6 +205,7 @@ python3 dan_run.py txt2img params-txt2img.json OUTPUT_IMAGE.png
     - [ ] A page to display shared images in a waterfall flow
 - [ ] Constraints for the use of computing resources
     - [ ] APP-Key mechanism
+    - [ ] honor(credit) system
 - [ ] Task scheduling mechanism
     - [ ] Schedule to nodes with required models already loaded
     - [ ] Global load balancing
