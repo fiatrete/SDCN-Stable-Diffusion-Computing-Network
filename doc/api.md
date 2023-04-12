@@ -83,7 +83,7 @@ And all the parameters are listed below:
 | --- | --- | --- |
 | prompt | string | A positive prompt that describes what you want the image to be |
 | negative_prompt | string | A negative prompt that describes what you don't want in the image |
-| loras | Array | A list of LoRAs to be applied and their weights. |
+| loras | array | A list of LoRAs to be applied and their weights. |
 | seed | integer | -1 for a random seed |
 | sampler_name | string | The name of the sampling algorithm used |
 | steps | integer | Number of inference steps |
@@ -95,6 +95,26 @@ And all the parameters are listed below:
 | upscale.denoising_strength | float | Controls the level of denoising; smaller values yield results that are closer to the original generated image, but may be blurry; larger values may lead the output looks different from the original generated image and may looks strange. Valid range is [0, 1], but I recomment you make it between 0.4 and 0.6. |
 | upscale.scale | float | The upscale rate. Valid range is (1.0, 2.0] |
 | upscale.upscaler | string | The upscaler algorithm name |
+| control_net | array | Optional, an array of `control net` parameters. But currently only up to 1 control net is supported, if you specify more than 1 set of paramters, the rest (i.e. not the first one) will be ignored. |
+| control_net[i].image | string | The reference image file, encoded in base64 |
+| control_net[i].preprocess | string | How the reference image should be preprocessed, you can specify the preprocess method name. Valid options are: `canny` and `openopse` |
+| control_net[i].model | string | The control net model. Valid options are: `sd15_canny` and `sd15_openpose` |
+| control_net[i].preprocess_param1 | unknown | Optional. Some control net model (e.g. `sd15_canny`) requires parameters, this is the first parameter. For detail, see the table below. If you don't known what to fill in here, just leave it undefined. |
+| control_net[i].preprocess_param2 | unknown | Optional. Some control net model (e.g. `sd15_canny`) requires parameters, this is the second parameter. For detail, see the table below. If you don't known what to fill in here, just leave it undefined. |
+| control_net[i].weight | number | Before merging control net into the main SD model, all weights will be scaled by this value. Valid range is [0, 2], default value is 1. |
+| control_net[i].resize_mode | number | 0 means `just resize`, 1 means `resize and crop`, 2 means `resize and fill`, otherwise use default value: 0 |
+| control_net[i].guidance_start | number | The control net will be applied in [guidance_start, guidance_end] percents inference steps. Valid range is [0, 1], default: 0. |
+| control_net[i].guidance_end | number | The control net will be applied in [guidance_start, guidance_end] percents inference steps. Valid range is [0, 1], default: 1. |
+| control_net[i].guessmode | bool | Optional. Default: false. If true, you can just remove all prompts, and then the control net encoder will recognize the content of the input control map. For this mode, we recommend to use 50 steps and guidance scale between 3 and 5. |
+
+Control net preprocess parameters:
+
+| Control net model | Parameter | Type |  Description |
+| --- | --- | --- | --- |
+| sd15_canny | preprocess_param1 | number | The first threshold of canny algorithm. For more information, see [opencv doc](https://docs.opencv.org/3.4/da/d22/tutorial_py_canny.html) |
+| sd15_canny | preprocess_param2 | number | The first threshold of canny algorithm. For more information, see [opencv doc](https://docs.opencv.org/3.4/da/d22/tutorial_py_canny.html) |
+| sd15_openpose | preprocess_param1 | Ignored | Ignored |
+| sd15_openpose | preprocess_param2 | Ignored | Ignored |
 
 The following is an example:
 
@@ -117,7 +137,21 @@ The following is an example:
         "denoising_strength": 0.5,
         "scale": 2,
         "upscaler": "Latent",
-    }
+    },
+    "control_net": [
+        {
+            "image": "string",
+            "preprocess": "canny",
+            "model": "sd15_canny",
+            "preprocess_param1": 100,
+            "preprocess_param2": 200,
+            "weight": 1,
+            "resize_mode": 2,
+            "guidance_start": 0,
+            "guidance_end": 1,
+            "guessmode": False
+        }
+    ]
 }
 
 ```
@@ -152,7 +186,7 @@ And all the parameters are listed below:
 | denoising_strength | float | Controls the level of denoising; smaller values yield results that are closer to the original image. Valid range is [0, 1] |
 | prompt | string | A positive prompt that describes what you want in the resulting image |
 | negative_prompt | string | A negative prompt that describes what you don't want in the resulting image |
-| loras | Array | A list of LoRAs to be applied and their weights. |
+| loras | array | A list of LoRAs to be applied and their weights. |
 | seed | integer | -1 for a random seed |
 | sampler_name | string | The name of the sampling algorithm used |
 | steps | integer | Number of inference steps |
@@ -160,6 +194,7 @@ And all the parameters are listed below:
 | width | integer | The desired width of the resulting image |
 | height | integer | The desired height of the resulting image |
 | model | string | The model (weights) used to generate the image |
+| control_net | array | See `txt2img`. |
 
 Here is an example JSON object with these parameters:
 
@@ -179,7 +214,21 @@ Here is an example JSON object with these parameters:
     "width": 512,
     "height": 512,
     "negative_prompt": "",
-    "model": "XXXXXXXX"
+    "model": "XXXXXXXX",
+    "control_net": [
+        {
+            "image": "string",
+            "preprocess": "canny",
+            "model": "sd15_canny",
+            "preprocess_param1": 100,
+            "preprocess_param2": 200,
+            "weight": 1,
+            "resize_mode": 2,
+            "guidance_start": 0,
+            "guidance_end": 1,
+            "guessmode": False
+        }
+    ]
 }
 
 ```
