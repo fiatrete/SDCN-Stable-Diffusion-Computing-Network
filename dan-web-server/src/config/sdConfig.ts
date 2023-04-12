@@ -3,7 +3,15 @@
 export default {
   kValidSamplers: ['DPM++ SDE Karras', 'Euler a', 'Euler', 'DPM++ SDE', 'LMS', 'DDIM'],
   kValidUpscalers: ['Latent', 'ESRGAN 4x'],
-  kValidInterrogateModels: [ "clip", "deepdanbooru" ],
+  kValidInterrogateModels: ["clip", "deepdanbooru"],
+  kValidControlNetModels: {
+    "sd15_canny": "control_sd15_canny",
+    "sd15_openpose": "control_sd15_openpose",
+  },
+  kValidControlNetPreprocess: [
+    "canny",
+    "openpose",
+  ],
   kValidModels: {
     '3a17d0deffa4592fd91c711a798031a258ab44041809ade8b4591c0225ea9401': 'chillout_mix',
     '627a6f5c8bf7669d4a224ac041d527debc65d2d435b16e54ead8ee2c901d1634': 'clarity',
