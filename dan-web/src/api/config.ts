@@ -1,6 +1,7 @@
+import { env } from 'env'
+
 class ApiConfig {
-  // private baseApiUrl = 'http://localhost:9080'
-  private baseApiUrl = 'https://api.opendan.ai'
+  private baseApiUrl = env.REACT_APP_BASE_API_URL
 
   private successCode = 200
 
