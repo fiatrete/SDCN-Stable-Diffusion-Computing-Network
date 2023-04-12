@@ -68,8 +68,8 @@ export default class RedisService {
     const pipeline = this.redis.multi();
     pipeline.lrem(this.taskQueueProcessingRedisKey, 1, taskId);
     pipeline.set(`${this.taskStatusRedisKeyPrefix}${taskId}`, JSON.stringify(taskResult));
-    pipeline.expire(`${this.taskInfoRedisKeyPrefix}${taskId}`, 60 * 2);
-    pipeline.expire(`${this.taskStatusRedisKeyPrefix}${taskId}`, 60 * 2);
+    pipeline.expire(`${this.taskInfoRedisKeyPrefix}${taskId}`, 60 * 30); // 30 min
+    pipeline.expire(`${this.taskStatusRedisKeyPrefix}${taskId}`, 60 * 30); // 30 min
     await pipeline.exec();
   }
 

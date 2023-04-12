@@ -74,24 +74,11 @@ function convertPluginParams(gatewayParams: DictionaryLike) {
 
   if (gatewayParams.control_net && gatewayParams.control_net[0]) {
     const cnet = gatewayParams.control_net[0] as DictionaryLike;
-    let cnetPreprocess = undefined;
-    let preprocessParam1 = undefined;
-    let preprocessParam2 = undefined;
-    if (cnet.preprocess) {
-      cnetPreprocess = requireStringIn(cnet.preprocess, sdConfig.kValidControlNetPreprocess);
-      if (!cnet.preprocess) {
-        logger.error(`Invalid control net preprocess: ${cnet.preprocess}`);
-        throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid control net preprocess');
-      }
 
-      switch (cnet.preprocess) {
-        case 'canny':
-          preprocessParam1 = requireNumberRangeOr(cnet.preprocess_param1, 0, 255, 100);
-          preprocessParam2 = requireNumberRangeOr(cnet.preprocess_param2, 0, 255, 200);
-          break;
-        case 'openpose':
-          break;
-      }
+    const cnetPreprocess = requireStringIn(cnet.preprocess, sdConfig.kValidControlNetPreprocess);
+    if (!cnetPreprocess) {
+      logger.error(`Invalid control net preprocess: ${cnet.preprocess}`);
+      throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid control net preprocess');
     }
 
     const cnetModel = (sdConfig.kValidControlNetModels as DictionaryLike)[cnet.model];
@@ -100,12 +87,29 @@ function convertPluginParams(gatewayParams: DictionaryLike) {
       throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid control net model');
     }
 
+    const cnetImage = requireString(cnet.image, undefined);
+    if (!cnetImage) {
+      logger.error(`Invalid control net image: ${cnet.model}`);
+      throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Control net requires an input image');
+    }
+
+    let preprocessParam1 = undefined;
+    let preprocessParam2 = undefined;
+    switch (cnetPreprocess) {
+      case 'canny':
+        preprocessParam1 = requireNumberRangeOr(cnet.preprocess_param1, 0, 255, 100);
+        preprocessParam2 = requireNumberRangeOr(cnet.preprocess_param2, 0, 255, 200);
+        break;
+      case 'openpose':
+        break;
+    }
+
     const resizeModeNumber = requireNumberRangeOr(cnet.resize_mode, 0, kMaxControlNetResizeMode, 0);
     const resizeMode = ControlNetResizeMode[resizeModeNumber];
     alwayson_scripts.ControlNet = {
       args: [
         {
-          input_image: requireString(cnet.image, undefined),
+          input_image: cnetImage,
           module: cnetPreprocess,
           model: cnetModel,
           weight: requireNumberRangeOr(cnet.weight, 0, 2, 1),
@@ -121,10 +125,6 @@ function convertPluginParams(gatewayParams: DictionaryLike) {
         },
       ],
     };
-    const args = alwayson_scripts.ControlNet.args[0];
-    if (!args.input_image) {
-      throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Control net requires an input image');
-    }
   }
 
   if (Object.keys(alwayson_scripts).length === 0) {
