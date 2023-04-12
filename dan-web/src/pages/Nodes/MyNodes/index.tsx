@@ -57,8 +57,8 @@ const MyNodes = (props: MyNodesProps) => {
 
   const PAGE_SIZE = 10
   const [nodes, setNodes] = useState<Node[]>([])
-  const [pageNo, setPageNo] = useState(1) // 当前页码
-  const [totalSize, setTotalSize] = useState(0) // 总数量
+  const [pageNo, setPageNo] = useState(1)
+  const [totalSize, setTotalSize] = useState(0)
 
   const getMyNodesList = useCallback(
     async (page: number, size: number = PAGE_SIZE) => {
@@ -100,7 +100,6 @@ const MyNodes = (props: MyNodesProps) => {
 
       message.success('launch successful')
 
-      // 成功后重新加载数据
       getMyNodesList(pageNo)
       refresh()
     },
@@ -123,7 +122,6 @@ const MyNodes = (props: MyNodesProps) => {
 
       message.success('stop successful')
 
-      // 成功后重新加载数据
       getMyNodesList(pageNo)
       refresh()
     },
@@ -146,7 +144,6 @@ const MyNodes = (props: MyNodesProps) => {
 
       message.success('revoke successful')
 
-      // 成功后重新加载数据
       getMyNodesList(pageNo)
       refresh()
     },
@@ -154,7 +151,7 @@ const MyNodes = (props: MyNodesProps) => {
   )
 
   useEffect(() => {
-    // 加载第一页数据
+    // Load data for page.1
     getMyNodesList(1)
   }, [getMyNodesList])
 

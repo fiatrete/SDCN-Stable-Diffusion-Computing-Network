@@ -33,7 +33,7 @@ const DonorList = (props: DonorListProps) => {
   ]
 
   useEffect(() => {
-    // 加载第一页数据
+    // Load data for page.1
     getDonorsList(1, pageSize)
   }, [getDonorsList, pageSize])
 

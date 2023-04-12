@@ -1,4 +1,10 @@
-import React, { ReactEventHandler, useCallback, useState } from 'react'
+import React, {
+  ReactEventHandler,
+  forwardRef,
+  useCallback,
+  useImperativeHandle,
+  useState,
+} from 'react'
 import cx from 'classnames'
 import { PlusOutlined } from '@ant-design/icons'
 import { message, Upload } from 'antd'
@@ -34,70 +40,89 @@ const customRequest = async (options: RcCustomRequestOptions<void>) => {
 interface propTypes {
   onChanged: (src: string) => void
   onSize?: (width: number, height: number) => void
+  disabled?: boolean
 }
 
-const ImageInputWidget = ({ onChanged, onSize }: propTypes) => {
-  const [imageUrl, setImageUrl] = useState<string>()
+export interface ImageInputWidgetRefHandle {
+  reset: () => void
+}
 
-  const handleChange: UploadProps['onChange'] = useCallback(
-    (info: UploadChangeParam<UploadFile>) => {
-      if (info.file.status === 'done') {
-        // Get this url from response in real world.
-        getBase64(info.file.originFileObj as RcFile, (url) => {
-          setImageUrl(url)
-          onChanged(url)
-        })
-      }
-    },
-    [onChanged],
-  )
+const ImageInputWidget = forwardRef<ImageInputWidgetRefHandle, propTypes>(
+  ({ onChanged, onSize, disabled }, forwardedRef) => {
+    const [imageUrl, setImageUrl] = useState<string>()
 
-  const onImgLoad: ReactEventHandler<HTMLImageElement> = useCallback(
-    ({ currentTarget: { naturalWidth, naturalHeight } }) => {
-      if (onSize) onSize(naturalWidth, naturalHeight)
-    },
-    [onSize],
-  )
+    useImperativeHandle(
+      forwardedRef,
+      () => ({
+        reset: () => {
+          setImageUrl('')
+        },
+      }),
+      [],
+    )
 
-  return (
-    <div
-      className={cx(styles.wrap, 'w-full flex justify-center items-center')}
-      style={{ height: '100%' }}
-    >
-      <Upload
-        name='srcPicture'
-        listType='picture'
-        className={cx(styles.upload, 'w-full')}
-        showUploadList={false}
-        customRequest={customRequest}
-        beforeUpload={beforeUpload}
-        onChange={handleChange}
+    const handleChange: UploadProps['onChange'] = useCallback(
+      (info: UploadChangeParam<UploadFile>) => {
+        if (info.file.status === 'done') {
+          // Get this url from response in real world.
+          getBase64(info.file.originFileObj as RcFile, (url) => {
+            setImageUrl(url)
+            onChanged(url)
+          })
+        }
+      },
+      [onChanged],
+    )
+
+    const onImgLoad: ReactEventHandler<HTMLImageElement> = useCallback(
+      ({ currentTarget: { naturalWidth, naturalHeight } }) => {
+        if (onSize) onSize(naturalWidth, naturalHeight)
+      },
+      [onSize],
+    )
+
+    return (
+      <div
+        className={cx(styles.wrap, 'w-full flex justify-center items-center')}
+        style={{ height: '100%' }}
       >
-        {imageUrl ? (
-          <img
-            src={imageUrl}
-            onLoad={onImgLoad}
-            alt='source'
-            style={{ width: '100%' }}
-          />
-        ) : (
-          <div
-            className={cx(
-              'w-full h-0 pt-[50%] pb-[50%]',
-              styles.border_type,
-              'bg-[#FAFAFA]',
-              'flex flex-col items-center justify-center gap-4',
-            )}
-          >
-            <PlusOutlined className={cx('text-[32px]')} />
-            <div className={cx('text-base')}>
-              Drop Image Here or Click to Upload
+        <Upload
+          name='srcPicture'
+          listType='picture'
+          className={cx(styles.upload, 'w-full')}
+          showUploadList={false}
+          customRequest={customRequest}
+          beforeUpload={beforeUpload}
+          onChange={handleChange}
+          disabled={disabled ?? false}
+        >
+          {imageUrl ? (
+            <img
+              src={imageUrl}
+              onLoad={onImgLoad}
+              alt='source'
+              style={{ width: '100%' }}
+            />
+          ) : (
+            <div
+              className={cx(
+                'w-full h-0 pt-[50%] pb-[50%]',
+                styles.border_type,
+                'bg-[#FAFAFA]',
+                'flex flex-col items-center justify-center gap-4',
+              )}
+            >
+              <PlusOutlined className={cx('text-[32px]')} />
+              <div className={cx('text-base')}>
+                Drop Image Here or Click to Upload
+              </div>
             </div>
-          </div>
-        )}
-      </Upload>
-    </div>
-  )
-}
+          )}
+        </Upload>
+      </div>
+    )
+  },
+)
+ImageInputWidget.displayName = 'ImageInputWidget'
 
 export default ImageInputWidget

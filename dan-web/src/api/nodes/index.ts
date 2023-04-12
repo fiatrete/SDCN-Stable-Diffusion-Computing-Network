@@ -12,12 +12,12 @@ export interface NodesResponseData {
 }
 
 /**
- * 获取Nodes列表
+ * Get Nodes List
  *
- * @param pageNo 页码
- * @param pageSize 每页数量
- * @param status 0-全部 1-正在运行的
- * @returns Nodes列表
+ * @param pageNo pageNo
+ * @param pageSize pageSize
+ * @param status 0-ALL 1-RUNNING
+ * @returns Nodes List
  */
 export async function nodes(
   pageNo: number,
@@ -59,11 +59,11 @@ export interface DonorsResponseData {
 }
 
 /**
- * 获取Donors列表
+ * Get Donors List
  *
- * @param pageNo 页码
- * @param pageSize 每页数量
- * @returns Nodes列表
+ * @param pageNo pageNo
+ * @param pageSize pageSize
+ * @returns Donors List
  */
 export async function donors(
   pageNo: number,
@@ -95,12 +95,11 @@ export async function donors(
 }
 
 /**
- * 获取我的Nodes列表
+ * Get My Nodes List
  *
- * @param pageNo 页码
- * @param pageSize 每页数量
- * @param status 0-全部 1-正在运行的
- * @returns Nodes列表
+ * @param pageNo pageNo
+ * @param pageSize pageSize
+ * @returns My Nodes List
  */
 export async function myNodes(
   pageNo: number,
@@ -165,7 +164,7 @@ export async function donateNode(worker: string): Promise<Node> {
 /**
  * Revoke Node
  *
- * @param nodeId 节点ID
+ * @param nodeId NODE ID
  * @returns Node Info
  */
 export async function revokeNode(nodeId: number): Promise<Node> {
@@ -196,7 +195,7 @@ export async function revokeNode(nodeId: number): Promise<Node> {
 /**
  * Launch Node
  *
- * @param nodeId 节点ID
+ * @param nodeId NODE ID
  * @returns Node Info
  */
 export async function launchNode(nodeId: number): Promise<Node> {
@@ -227,7 +226,7 @@ export async function launchNode(nodeId: number): Promise<Node> {
 /**
  * Stop Node
  *
- * @param nodeId 节点ID
+ * @param nodeId NODE ID
  * @returns Node Info
  */
 export async function stopNode(nodeId: number): Promise<Node> {

@@ -21,8 +21,8 @@ const Nodes = () => {
   const PAGE_SIZE = 10
 
   const [nodes, setNodes] = useState<Node[]>([])
-  const [nodesPageNo, setNodesPageNo] = useState(1) // 当前页码
-  const [nodesTotalSize, setNodesTotalSize] = useState(0) // 总数量
+  const [nodesPageNo, setNodesPageNo] = useState(1)
+  const [nodesTotalSize, setNodesTotalSize] = useState(0)
 
   const getNodesList = useCallback(
     async (page: number, size: number = PAGE_SIZE) => {
@@ -49,8 +49,8 @@ const Nodes = () => {
   )
 
   const [donors, setDonors] = useState<Donor[]>([])
-  const [donorsPageNo, setDonorsPageNo] = useState(1) // 当前页码
-  const [donorsTotalSize, setDonorsTotalSize] = useState(0) // 总数量
+  const [donorsPageNo, setDonorsPageNo] = useState(1)
+  const [donorsTotalSize, setDonorsTotalSize] = useState(0)
 
   const getDonorsList = useCallback(
     async (page: number, size: number = PAGE_SIZE) => {

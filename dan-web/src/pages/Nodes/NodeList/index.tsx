@@ -40,7 +40,7 @@ const NodeList = (props: NodeListProps) => {
   ]
 
   useEffect(() => {
-    // 加载第一页数据
+    // Load data for page.1
     getNodesList(1, pageSize)
   }, [getNodesList, pageSize])
 

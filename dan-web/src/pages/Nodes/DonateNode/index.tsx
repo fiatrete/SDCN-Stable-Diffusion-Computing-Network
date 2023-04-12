@@ -41,9 +41,7 @@ const DonateNode = (props: DonateNodeProps) => {
 
       message.success('donate successful')
 
-      // 成功后重新加载页面数据
       refresh()
-      // 关闭弹窗
       close()
     },
     [refresh, close],
