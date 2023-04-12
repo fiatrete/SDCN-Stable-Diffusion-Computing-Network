@@ -1,27 +1,76 @@
 version: '3.8'
-
 services:
+  dan-server:
+    container_name: dan-server
+    hostname: dan-server
+    image: fiatrete/dan-server
+    # build:
+    #   context: ./dan-server
+    #   dockerfile: ./Dockerfile
+    depends_on:
+      - dan-web
+      - dan-web-server
+    ports:
+      - 6006:6006
+
   dan-web-server:
-    build: .
+    image: fiatrete/dan-web-server
+    # build:
+    #  context: ./dan-web-server
+    #  dockerfile: ./Dockerfile
     container_name: dan-web-server
+    hostname: dan-web-server
     environment:
         DATABASE_HOSTNAME: 'postgres'
+        DATABASE_PASSWORD: YOUR_POSTGRES_PASSWORD
         REDIS_URL: 'redis'
         PORT: 8080
+        GITHUB_CLIENT_ID: YOUR_GITHUB_CLIENT_ID
+        GITHUB_CLIENT_SECRET: YOUR_GITHUB_CLIENT_SECRET
+        GITHUB_CALLBACK_URL: http://localhost:6006/api/user/connect/github
+        REDIRECT_URI: http://localhost:6006/oauth/success
+        FALURE_REDIRECT_URI: http://localhost:6006/oauth/failure
+        DOMAIN: localhost
     depends_on:
       - postgres
       - redis
-    ports:
-      - 8080:8080
+
+  dan-web:
+    image: fiatrete/dan-web
+    # build:
+    # context: ./dan-web
+    # dockerfile: ./Dockerfile
+    container_name: dan-web
+    hostname: dan-web
+    environment:
+      - REACT_APP_GITHUB_URL=https://github.com/fiatrete/DAN-Stable-Diffusion-Computing-Network
+      - REACT_APP_BASE_API_URL=http://localhost:6006
+      - REACT_APP_COOKIE_DOMAIN=localhost
+      - REACT_APP_GOOGLE_ANALYTICS_ID=YOUR_GOOGLE_ANALYTICS_ID
 
   postgres:
     image: postgres:15.2-bullseye
     container_name: 'postgres'
-    command: postgres -c 'max_connections=200'
+    hostname: postgres
     environment:
-        POSTGRES_PASSWORD: 'mysecretpassword'
+        POSTGRES_PASSWORD: YOUR_POSTGRES_PASSWORD
         POSTGRES_USER: 'postgres'
+        POSTGRES_MAX_CONNECTIONS: 200
+        POSTGRES_DB: dan
+    # volumes:
+    #   - YOUR_PATH_TO_SAVE_POSTGRES_DATA:/var/lib/postgresql/data
+
+  initdb:
+    image: postgres:15.2-bullseye
+    depends_on:
+      - postgres
+    volumes:
+      - ./dan-web-server/db-migrate:/initdb
+    command: /bin/bash -c "sleep 5; cat /initdb/20230324-init.sql | PGPASSWORD=YOUR_POSTGRES_PASSWORD psql -h postgres -U postgres dan"
 
   redis:
     image: 'redis:alpine'
     container_name: redis
+    hostname: redis
+    # volumes:
+    #   - YOUR_PATH_TO_SAVE_REDIS_DATA:/data

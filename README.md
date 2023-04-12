@@ -145,31 +145,32 @@ bash webui.sh --listen --api --share
 ```bash
 bash webui.sh --listen --api
 ```
+4. Register a new github OAuth Application set callback url: http://localhost:6006/api/user/connect/github. Get the github client ID and SECRET:, then set in the docker-compose.yml.
 
-4. Start dan-server locally in docker with [Docker Compose](https://github.com/docker/compose):
+5. Start dan-server locally in docker with [Docker Compose](https://github.com/docker/compose):
 ```
 docker-compose up -d 
 ```
 
->*Now your dan-server is available on "[http://127.0.0.1:8080](http://127.0.0.1:8080/)"*
+>*Now your dan-server is available on "[http://127.0.0.1:6006](http://127.0.0.1:6006/)"*
 
-5. Register your Stable Diffusion WebUI instance as a DAN node:
+6. Register your Stable Diffusion WebUI instance as a DAN node:
 
-- Login your account using DAN's web page;
+- Login your account using DAN's web page: http://127.0.0.1:6006;
 - Navigate to `Nodes` -> `Donate Node`
 - Enter your worker node's address
 - Click `Donate`
 
-> ⚠️ *Please note that you must use non-loopback IP address! You cannot use 127.0.0.1 or 'localhost' since our docker container's `hostnet` is not enabled.* 
+> ⚠️ *Please note that you must use non-loopback IP address in your node's address! You cannot use 127.0.0.1 or 'localhost' since our docker container's `hostnet` is not enabled.* 
 
 
-6. Config SERVICE_PREFIX in `example/dan_run.py` to "[http://127.0.0.1:8080](http://127.0.0.1:8080/)". 
+7. Config SERVICE_PREFIX in `example/dan_run.py` to "[http://127.0.0.1:6006](http://127.0.0.1:6006/)". 
 
 ```python
-SERVICE_PREFIX = 'http://127.0.0.1:8080'
+SERVICE_PREFIX = 'http://127.0.0.1:6006'
 ```
 
-7. Execute the example with your local dan-server:
+8. Execute the example with your local dan-server:
 
 ```bash
 python3 dan_run.py txt2img params-txt2img.json OUTPUT_IMAGE.png
