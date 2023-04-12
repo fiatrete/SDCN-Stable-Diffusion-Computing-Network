@@ -1,3 +1,5 @@
+[TOC]
+
 # API Reference Introduction
 The reference is your key to a comprehensive understanding of the DAN API.
 
@@ -68,6 +70,9 @@ Under rapid expansion, please stay tuned.
 - LMS
 - DDIM
 
+## API
+
+All API calls are implemented in the form of `HTTP POST` with header `Content-Type: application/json`.
 
 ### txt2img
 
@@ -170,6 +175,32 @@ On success, the response should something like:
 }
 ```
 
+### txt2img-async
+
+For `txt2img` tasks, there is an asynchronous version. The url path is:
+
+```
+/api/sd/txt2img/async
+```
+
+The parameters are exactly the same as `txt2img`. See [txt2img](#txt2img).
+
+On success, the response should something like:
+
+```JSON
+{
+    "code": 200,
+    "data": {
+        "status": 0,
+        "taskId": "803f1804-c79b-4c33-afd2-0d054076dea9",
+        "queuePosition": 1
+    },
+    "message": "success"
+}
+```
+
+After this call, you can use [task status](#task-status) API to query the progress or the final result.
+
 ### img2img
 
 For `img2img` tasks, the url path is:
@@ -194,7 +225,7 @@ And all the parameters are listed below:
 | width | integer | The desired width of the resulting image |
 | height | integer | The desired height of the resulting image |
 | model | string | The model (weights) used to generate the image |
-| control_net | array | See `txt2img`. |
+| control_net | array | See [txt2img](#txt2img). |
 
 Here is an example JSON object with these parameters:
 
@@ -247,6 +278,32 @@ On success, the response should something like:
 }
 ```
 
+### img2img-async
+
+For `img2img` tasks, there is an asynchronous version. The url path is:
+
+```
+/api/sd/img2img/async
+```
+
+The parameters are exactly the same as `img2img`. See [img2img](#img2img).
+
+On success, the response should something like:
+
+```JSON
+{
+    "code": 200,
+    "data": {
+        "status": 0,
+        "taskId": "803f1804-c79b-4c33-afd2-0d054076dea9",
+        "queuePosition": 1
+    },
+    "message": "success"
+}
+```
+
+After this call, you can use [task status](#task-status) API to query the progress or the final result.
+
 ### interrogate
 For `interrogate` tasks, the url path is:
 
@@ -270,8 +327,42 @@ Here is an example JSON object with these parameters:
 }
 ```
 
-On success, the response has the following format:
+On success, the response should something like:
 
+```JSON
+{
+    "code": 200,
+    "data": {
+        "caption": "The scription"
+    },
+    "message": "success"
+}
+```
+
+### task status
+
+For those asynchronous tasks (e.g. txt2img-async and img2img-async), the API call returns a `taskId` instead of the final result.
+
+To get the `status` or the final result, you can use `task-status` API.
+
+The http url path is:
+
+```
+/api/sd/task/status
+```
+
+The parameters a listed below:
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| taskId | string | The task id returned by asynchronous API, which is the task you care about. |
+
+Here is an example JSON object with these parameters:
+
+```
+{
+    "taskId": "803f1804-c79b-4c33-afd2-0d054076dea9"
+}
 ```
 
 On success, the response should something like:
@@ -280,7 +371,12 @@ On success, the response should something like:
 {
     "code": 200,
     "data": {
-        "caption": "The scription"
+        "taskId": "803f1804-c79b-4c33-afd2-0d054076dea9",
+        "status": 2,
+        "queuePosition": 0,
+        "images": [
+            "string of base 64 encoded png file"
+        ]
     },
     "message": "success"
 }
