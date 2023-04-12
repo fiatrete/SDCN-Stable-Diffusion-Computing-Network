@@ -1,0 +1,113 @@
+#### Login url http://127.0.0.1:8080/api/user/login/github
+
+### My Nodes
+GET {{hostname}}/api/node/mine?pageNo=1&pageSize=10
+Content-Type: application/json
+Cookie: {{cookie}}
+
+
+### revoke node
+POST {{hostname}}/api/node/revoke
+Content-Type: application/json
+Cookie: {{cookie}}
+
+{
+  "nodeId": 3
+}
+
+
+### user info
+GET {{hostname}}/api/user/info
+Content-Type: application/json
+Cookie: {{cookie}}
+
+
+### list by task
+GET {{hostname}}/api/user/list-by-task?pageNo=1&pageSize=10
+Content-Type: application/json
+Cookie: {{cookie}}
+
+
+### node list
+GET {{hostname}}/api/node?type=0&pageNo=1&pageSize=10
+Content-Type: application/json
+Cookie: {{cookie}}
+
+
+### donate node
+POST {{hostname}}/api/node/donate
+Content-Type: application/json
+Cookie: {{cookie}}
+
+{
+  "worker": "{{workerUrl}}"
+}
+
+
+### task statistics
+POST {{hostname}}/api/sd/statistics
+Content-Type: application/json
+Cookie: {{cookie}}
+
+
+### txt2img
+POST {{hostname}}/api/sd/txt2img
+Content-Type: application/json
+Cookie: {{cookie}}
+
+{
+    "prompt":"girl",
+    "loras":[
+
+    ],
+    "seed":-1,
+    "sampler_name":"DPM++ SDE Karras",
+    "steps":20,
+    "cfg_scale":7,
+    "width":512,
+    "height":512,
+    "model":"3a17d0deffa4592fd91c711a798031a258ab44041809ade8b4591c0225ea9401"
+}
+
+
+### img2img
+POST {{hostname}}/api/sd/img2img
+Content-Type: application/json
+Cookie: {{cookie}}
+
+
+
+### txt2img async 
+POST {{hostname}}/api/sd/txt2img/async
+Content-Type: application/json
+Cookie: {{cookie}}
+
+{
+    "prompt":"girl",
+    "loras":[
+
+    ],
+    "seed":-1,
+    "sampler_name":"DPM++ SDE Karras",
+    "steps":20,
+    "cfg_scale":7,
+    "width":512,
+    "height":512,
+    "model":"3a17d0deffa4592fd91c711a798031a258ab44041809ade8b4591c0225ea9401"
+}
+
+
+### img2img async 
+POST {{hostname}}/api/sd/img2img/async
+Content-Type: application/json
+Cookie: {{cookie}}
+
+
+### xxx2img task tatus
+POST {{hostname}}/api/sd/task/status
+Content-Type: application/json
+Cookie: {{cookie}}
+
+{
+  "taskId": "7246a413-daf6-470f-a09e-798e1021749c"
+}
