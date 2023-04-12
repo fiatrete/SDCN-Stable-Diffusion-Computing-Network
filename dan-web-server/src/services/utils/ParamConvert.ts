@@ -127,7 +127,7 @@ function convertPluginParams(gatewayParams: DictionaryLike) {
     }
   }
 
-  if (Object.keys(alwayson_scripts).length == 0) {
+  if (Object.keys(alwayson_scripts).length === 0) {
     return undefined;
   }
 
