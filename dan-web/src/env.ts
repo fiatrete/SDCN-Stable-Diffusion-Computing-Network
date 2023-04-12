@@ -1,10 +1,9 @@
 declare global {
   interface Window {
-    env: any
+    env: EnvType
   }
 }
 
-// change with your own variables
 type EnvType = {
   REACT_APP_BASE_API_URL: string
   REACT_APP_COOKIE_DOMAIN: string
