@@ -193,7 +193,7 @@ python3 dan_run.py txt2img params-txt2img.json OUTPUT_IMAGE.png
 - [ ] Basic DAN functional interfaces
     - [ ] Scale interface
     - [ ] Inpaint interface
-    - [ ] Support for controlnet
+    - [x] Support for controlnet
 - [ ] Enrich examples in the playground
     - [ ] 2D to 3D style conversion
     - [ ] 3D to 2D style conversion
