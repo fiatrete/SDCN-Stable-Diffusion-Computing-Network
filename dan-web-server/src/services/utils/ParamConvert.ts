@@ -1,4 +1,5 @@
 import sdConfig from '../../config/sdConfig';
+import logger from '../../utils/logger';
 import { ErrorCode, SdcnError, StatusCode } from '../../utils/responseHandler';
 
 function requireString(v: unknown, defaultValue: string | undefined): string | undefined {
@@ -15,6 +16,13 @@ function requireStringIn(v: unknown, list: string[]): string | undefined {
     }
   }
   return undefined;
+}
+
+function requireBool(v: unknown, defaultValue: boolean | undefined): boolean | undefined {
+  if (typeof v === 'boolean') {
+    return v as boolean;
+  }
+  return defaultValue;
 }
 
 function requireNumberRangeOr(v: unknown, min: number, max: number, defaultValue: number): number {
@@ -41,9 +49,89 @@ function requireNumberOr(v: unknown, otherwise: number): number {
   return otherwise;
 }
 
+enum ResizeMode {
+  kJustResize = 0,
+  kResizeAndCrop = 1,
+  kResizeAndFill = 2,
+}
+enum ControlNetResizeMode {
+  ['Just Resize'] = 0,
+  ['Scale to Fit (Inner Fit)'] = 1,
+  ['Envelope (Outer Fit)'] = 2,
+}
+// NOTE: Don't enum the following constant in ResizeMode and ControlNetResizeMode,
+//   this will result in the corresponding enum name be replaced.
+const kMaxResizeMode = 2;
+const kMaxControlNetResizeMode = 2;
+
 interface DictionaryLike {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
+}
+
+function convertPluginParams(gatewayParams: DictionaryLike) {
+  const alwayson_scripts: DictionaryLike = {};
+
+  if (gatewayParams.control_net && gatewayParams.control_net[0]) {
+    const cnet = gatewayParams.control_net[0] as DictionaryLike;
+    let cnetPreprocess = undefined;
+    let preprocessParam1 = undefined;
+    let preprocessParam2 = undefined;
+    if (cnet.preprocess) {
+      cnetPreprocess = requireStringIn(cnet.preprocess, sdConfig.kValidControlNetPreprocess);
+      if (!cnet.preprocess) {
+        logger.error(`Invalid control net preprocess: ${cnet.preprocess}`);
+        throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid control net preprocess');
+      }
+
+      switch (cnet.preprocess) {
+        case 'canny':
+          preprocessParam1 = requireNumberRangeOr(cnet.preprocess_param1, 0, 255, 100);
+          preprocessParam2 = requireNumberRangeOr(cnet.preprocess_param2, 0, 255, 200);
+          break;
+        case 'openpose':
+          break;
+      }
+    }
+
+    const cnetModel = (sdConfig.kValidControlNetModels as DictionaryLike)[cnet.model];
+    if (!cnetModel) {
+      logger.error(`Invalid control net model: ${cnet.model}`);
+      throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid control net model');
+    }
+
+    const resizeModeNumber = requireNumberRangeOr(cnet.resize_mode, 0, kMaxControlNetResizeMode, 0);
+    const resizeMode = ControlNetResizeMode[resizeModeNumber];
+    alwayson_scripts.ControlNet = {
+      args: [
+        {
+          input_image: requireString(cnet.image, undefined),
+          module: cnetPreprocess,
+          model: cnetModel,
+          weight: requireNumberRangeOr(cnet.weight, 0, 2, 1),
+          resize_mode: resizeMode,
+          lowvram: true,
+          processor_res: 512, // The input_image will be resize to this size when processing
+          threshold_a: preprocessParam1, // Additional parameters, ignored by some certain model
+          threshold_b: preprocessParam2, // Additional parameters, ignored by some certain model
+          // "guidance": undefined, // Don't need to set it, sd-webui will use this value as guidance_end if < 1
+          guidance_start: requireNumberRangeOr(cnet.guidance_start, 0, 1, 0),
+          guidance_end: requireNumberRangeOr(cnet.guidance_end, 0, 1, 1),
+          guessmode: requireBool(cnet.guess_mode, false),
+        },
+      ],
+    };
+    const args = alwayson_scripts.ControlNet.args[0];
+    if (!args.input_image) {
+      throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Control net requires an input image');
+    }
+  }
+
+  if (Object.keys(alwayson_scripts).length === 0) {
+    return undefined;
+  }
+
+  return alwayson_scripts;
 }
 
 // reqType:
@@ -74,16 +162,6 @@ function gatewayParamsToWebUI_xxx2img(gatewayParams: DictionaryLike, reqType: nu
   if (!webuiParams.override_settings.sd_model_checkpoint) {
     throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid model');
   }
-  if (reqType === 0 && typeof gatewayParams.upscale === 'object') {
-    const upscale = gatewayParams.upscale;
-    webuiParams.enable_hr = true;
-    webuiParams.denoising_strength = requireNumberRangeOr(upscale.denoising_strength, 0.01, 0.99, 0.5);
-    webuiParams.hr_scale = requireNumberRangeOr(upscale.scale, 1.0, 2.0, 1.0);
-    webuiParams.upscaler = requireStringIn(upscale.upscaler, sdConfig.kValidUpscalers);
-    if (webuiParams.upscaler === undefined) {
-      throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid upscaler');
-    }
-  }
 
   // width and height must be multiple of 8
   webuiParams.width &= ~0x7;
@@ -108,13 +186,27 @@ function gatewayParamsToWebUI_xxx2img(gatewayParams: DictionaryLike, reqType: nu
     }
   }
 
-  if (reqType === 1) {
+  webuiParams.alwayson_scripts = convertPluginParams(gatewayParams);
+
+  if (reqType === 0) {
+    if (typeof gatewayParams.upscale === 'object') {
+      const upscale = gatewayParams.upscale;
+      webuiParams.enable_hr = true;
+      webuiParams.denoising_strength = requireNumberRangeOr(upscale.denoising_strength, 0.01, 0.99, 0.5);
+      webuiParams.hr_scale = requireNumberRangeOr(upscale.scale, 1.0, 2.0, 1.0);
+      webuiParams.upscaler = requireStringIn(upscale.upscaler, sdConfig.kValidUpscalers);
+      if (webuiParams.upscaler === undefined) {
+        throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid upscaler');
+      }
+    }
+  } else if (reqType === 1) {
     const initImg = requireString(gatewayParams.init_image, undefined);
     webuiParams.denoising_strength = requireNumberRangeOr(gatewayParams.denoising_strength, 0, 1, 0.5);
     if (initImg === undefined) {
       throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid init_image');
     }
     webuiParams.init_images = [initImg];
+    webuiParams.resize_mode = requireNumberRangeOr(gatewayParams.resize_mode, 0, kMaxResizeMode, 0);
   }
   return webuiParams;
 }
@@ -122,7 +214,7 @@ function gatewayParamsToWebUI_xxx2img(gatewayParams: DictionaryLike, reqType: nu
 function gatewayParamsToWebUI_interrogate(gatewayParams: DictionaryLike): DictionaryLike {
   const webuiParams = {
     image: requireString(gatewayParams.image, undefined),
-    model: requireStringIn(gatewayParams.model, sdConfig.kValidInterrogateModel),
+    model: requireStringIn(gatewayParams.model, sdConfig.kValidInterrogateModels),
   };
   if (webuiParams.image === undefined) {
     throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid image');
