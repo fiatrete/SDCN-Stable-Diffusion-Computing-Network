@@ -87,7 +87,7 @@ cd example
 cat params-txt2img.json \
 | curl --location --request POST 'https://api.opendan.ai/api/sd/txt2img' \
 --header 'Content-Type: application/json' -d @- \
-| jq '.images[0]' |tr -d '\"' | tr -d '\\' | base64 -d > out.png
+| jq '.data.images[0]' |tr -d '\"' | tr -d '\\' | base64 -d > out.png
 ```
 
 👉 **DAN API** refer to [API Docs](doc/api.md)
