@@ -17,6 +17,8 @@ interface NodeSummaryWithAccountPaged {
   items: NodeSummaryWithAccount[];
   totalSize: number;
   totalPages: number;
+  pageNo: number;
+  pageSize: number;
 }
 
 export default class UserRepository {
@@ -42,8 +44,12 @@ export default class UserRepository {
   }
 
   async getNodeSummaryWithAccountPaged(pageNo: number, pageSize: number): Promise<NodeSummaryWithAccountPaged> {
-    const countResult = await this.knex('account').select(this.knex.raw('count(*) as total_size')).first();
-    const { totalSize } = countResult;
+    const countResult = await this.knex('node')
+      .join('account', 'node.account_id', '=', 'account.id')
+      .countDistinct('account_id as total_size')
+      .where('node.task_count', '>', 0)
+      .first();
+    const totalSize = Number(countResult?.totalSize);
     const offset = (pageNo - 1) * pageSize;
     const result = await this.knex('node')
       .join('account', 'node.account_id', '=', 'account.id')
@@ -70,8 +76,10 @@ export default class UserRepository {
 
     return {
       items,
-      totalSize: parseInt(totalSize),
+      totalSize: totalSize,
       totalPages,
+      pageNo,
+      pageSize,
     };
   }
 

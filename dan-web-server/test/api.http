@@ -49,6 +49,16 @@ POST {{hostname}}/api/sd/statistics
 Content-Type: application/json
 Cookie: {{cookie}}
 
+### list user by task
+GET {{hostname}}/api/user/list-by-task?pageNo=1&pageSize=10
+Content-Type: application/json
+Cookie: {{cookie}}
+
+### node list
+GET {{hostname}}/api/node?pageNo=1&pageSize=10&type=1
+Content-Type: application/json
+Cookie: {{cookie}}
+
 
 ### txt2img
 POST {{hostname}}/api/sd/txt2img
@@ -109,5 +119,5 @@ Content-Type: application/json
 Cookie: {{cookie}}
 
 {
-  "taskId": "7246a413-daf6-470f-a09e-798e1021749c"
+  "taskId": "179dd9a5-a7dc-43b0-a11d-1e3b65211e6e"
 }

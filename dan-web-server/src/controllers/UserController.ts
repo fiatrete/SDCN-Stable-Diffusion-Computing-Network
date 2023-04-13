@@ -109,46 +109,7 @@ export default class UserControler {
     const { pageNo, pageSize } = value;
     const accountInfoList = await this.userService.getNodeSummaryWithAccountPaged(pageNo, pageSize);
     logger.debug('accountInfoList', accountInfoList);
-    const promises = accountInfoList.items.map(async (accountInfo) => {
-      const nodeList = await this.nodeService.getNodeListbyAccountId(accountInfo.account.accountId);
-      let totalTaskCount = 0;
-
-      const taskCountList: number[] = [];
-
-      await Promise.all(
-        nodeList.map(async (node) => {
-          const taskCount = await this.nodeService.getNodeTaskCount(node.nodeSeq);
-          taskCountList.push(taskCount);
-        }),
-      );
-      taskCountList.forEach((taskCount) => {
-        totalTaskCount += taskCount;
-      });
-
-      const account = {
-        nickname: accountInfo.account.nickname,
-        avatarImgUrl: accountInfo.account.avatarImgUrl,
-        email: accountInfo.account.email,
-      };
-      const item = {
-        nodeCount: accountInfo.nodeCount,
-        account: account,
-        taskHandlerCount: totalTaskCount,
-      };
-      return item;
-    });
-
-    const items = await Promise.all(promises);
-
-    logger.debug('items', items);
-    const responese = {
-      items: items,
-      pageNo: pageNo,
-      pageSize: pageSize,
-      totalSize: accountInfoList.totalSize,
-      totalPages: accountInfoList.totalPages,
-    };
-    responseHandler.success(context, responese);
+    responseHandler.success(context, accountInfoList);
   }
 
   router() {
