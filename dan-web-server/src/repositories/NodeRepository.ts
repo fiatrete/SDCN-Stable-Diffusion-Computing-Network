@@ -76,59 +76,41 @@ export default class NodeRepository {
     }
   }
 
-  async getNodeCountbyStatus(type: number) {
-    if (type === 0) {
-      const result = (await this.Nodes().count('*').where({ deleted: 0 })) as any[];
-      const count = parseInt(result[0].count);
-      return count;
-    } else if (type === 1) {
-      const result = (await this.Nodes().count('*').where({ deleted: 0, status: 1 })) as any[];
-      const count = parseInt(result[0].count);
-      return count;
-    } else {
-      return 0;
-    }
-  }
-
   async getNodeListbyStatus(type: number, pageNo: number, pageSize: number): Promise<Node[]> {
     if (type === 0) {
       const nodes = await this.Nodes()
         .where({ deleted: 0 })
         .offset((pageNo - 1) * pageSize)
         .limit(pageSize)
-        .orderBy(nodeFields.taskCount, SortDirection.Desc);
+        .orderBy([
+          { column: 'task_count', order: SortDirection.Desc },
+          { column: 'node_seq', order: SortDirection.Asc },
+        ]);
       return nodes;
     } else if (type === 1) {
       const nodes = await this.Nodes()
         .where({ status: 1, deleted: 0 })
         .offset((pageNo - 1) * pageSize)
         .limit(pageSize)
-        .orderBy(nodeFields.taskCount, SortDirection.Desc);
+        .orderBy([
+          { column: 'task_count', order: SortDirection.Desc },
+          { column: 'node_seq', order: SortDirection.Asc },
+        ]);
       return nodes;
     }
     return [];
   }
 
-  async getAllUndeletedNodes() {
-    return await this.Nodes().where({ deleted: 0 }).orderBy(nodeFields.taskCount, SortDirection.Desc);
-  }
-
-  async getNodeCountByAcccountId(account_id: bigint) {
-    const result = (await this.Nodes().count('*').where({ accountId: account_id, deleted: 0 })) as any[];
-    const count = parseInt(result[0].count);
-    return count;
-  }
-
-  async getNodeListByAccountIdPaged(account_id: bigint, pageNo: number, pageSize: number) : Promise<Node[]>{
+  async getNodeListByAccountIdPaged(account_id: bigint, pageNo: number, pageSize: number): Promise<Node[]> {
     return await this.Nodes()
+      .select('node_seq as nodeId', 'worker', 'status', 'task_count as taskHandlerCount')
       .where({ accountId: account_id, deleted: 0 })
       .offset((pageNo - 1) * pageSize)
       .limit(pageSize)
-      .orderBy(nodeFields.taskCount, SortDirection.Desc);
-  }
-
-  async getNodeListByAccountId(account_id: bigint) {
-    return await this.Nodes().where({ accountId: account_id }).orderBy(nodeFields.taskCount, SortDirection.Desc);
+      .orderBy([
+        { column: 'task_count', order: SortDirection.Desc },
+        { column: 'node_seq', order: SortDirection.Asc },
+      ]);
   }
 
   async hasNodeOwnership(account_id: bigint, node_seq: bigint): Promise<boolean> {
@@ -152,6 +134,10 @@ export default class NodeRepository {
 
   async offlineNode(node_seq: bigint) {
     return await this.Nodes().update({ status: 2, last_modify_time: new Date() }).where({ nodeSeq: node_seq });
+  }
+
+  async increaseTasksHandled(nodeSeq: bigint, count: number) {
+    await this.Nodes().where({ nodeSeq: nodeSeq }).increment('task_count', count);
   }
 
   async raw(sql: string) {

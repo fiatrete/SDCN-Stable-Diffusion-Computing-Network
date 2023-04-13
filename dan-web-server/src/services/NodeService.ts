@@ -89,22 +89,8 @@ export default class NodeService {
     return await this.nodeRepository.getNodeListByAccountIdPaged(account_id, pageNo, pageSize);
   }
 
-  async getNodeListbyAccountId(account_id: bigint) {
-    return await this.nodeRepository.getNodeListByAccountId(account_id);
-  }
-
   async getNodeListByType(type: number, pageNo: number, pageSize: number) {
     return await this.nodeRepository.getNodeListbyStatus(type, pageNo, pageSize);
-  }
-  async getNodeCountByType(type: number) {
-    return await this.nodeRepository.getNodeCountbyStatus(type);
-  }
-  async getNodeCountByAcccountId(account_id: bigint) {
-    return await this.nodeRepository.getNodeCountByAcccountId(account_id);
-  }
-
-  async getAllUndeletedNodeList() {
-    return await this.nodeRepository.getAllUndeletedNodes();
   }
 
   async redisOperation(op: { (redis: Redis): Promise<void> }): Promise<boolean> {
@@ -190,6 +176,7 @@ end
       redis.incr('NodeTaskHandled$' + nodeId);
       redis.decr('NodeLoad$' + nodeId);
     });
+    await this.nodeRepository.increaseTasksHandled(BigInt(nodeId), 1);
   }
 
   async getAllStatistics(): Promise<string | null> {

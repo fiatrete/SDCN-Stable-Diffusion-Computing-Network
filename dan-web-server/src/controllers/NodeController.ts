@@ -146,34 +146,14 @@ export default class NodeControler {
       throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Bad Request');
     }
 
-    const totalSize = await this.nodeService.getNodeCountByAcccountId(userInfo.id);
-    if (totalSize === 0) {
-      return responseHandler.success(context, {
-        items: [],
-        pageNo: pageNo,
-        pageSize: pageNo,
-        totolPages: 0,
-        totalSize: 0,
-      });
-    }
     const nodeList = await this.nodeService.getNodeListbyAccountIdPaged(userInfo.id, pageNo, pageSize);
-    const promises = nodeList.map(async (node) => {
-      const taskCount = await this.nodeService.getNodeTaskCount(node.nodeSeq);
-      const item = {
-        nodeId: node.nodeSeq,
-        worker: node.worker,
-        status: node.status,
-        taskHandlerCount: taskCount,
-      };
-      return item;
-    });
-    const result = await Promise.all(promises);
+
     return responseHandler.success(context, {
-      items: result,
+      items: nodeList,
       pageNo: pageNo,
       pageSize: pageSize,
-      totolPages: Math.ceil(Number(totalSize / pageSize)),
-      totalSize: totalSize,
+      totolPages: Math.ceil(nodeList.length / pageSize),
+      totalSize: nodeList.length,
     });
   }
 
@@ -189,30 +169,29 @@ export default class NodeControler {
       throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, error.message);
     }
     const { type, pageNo, pageSize } = value;
-    const totalSize = await this.nodeService.getNodeCountByType(type);
-    if (totalSize === 0) {
+
+    const nodeList = await this.nodeService.getNodeListByType(type, pageNo, pageSize);
+    if (nodeList.length === 0) {
       return responseHandler.success(context, {
         items: [],
         pageNo: pageNo,
-        pageSize: pageNo,
+        pageSize: pageSize,
         totolPages: 0,
         totalSize: 0,
       });
     }
-    const nodeList = await this.nodeService.getNodeListByType(type, pageNo, pageSize);
     const promises = nodeList.map(async (node) => {
       const user = await this.userService.getUserInfo(node.accountId);
       if (user === undefined) {
         return;
       }
-      const taskCount = await this.nodeService.getNodeTaskCount(node.nodeSeq);
       const userInfo = user as unknown as User;
       const accountInfo = { nickname: userInfo?.nickname, avatarImgUrl: userInfo?.avatarImg, email: userInfo?.email };
       const item = {
         nodeId: node.nodeSeq,
         account: accountInfo,
         status: node.status,
-        taskHandlerCount: taskCount,
+        taskHandlerCount: node.taskCount,
       };
       return item;
     });
@@ -223,8 +202,8 @@ export default class NodeControler {
       items: result,
       pageNo: pageNo,
       pageSize: pageSize,
-      totolPages: Math.ceil(Number(totalSize / pageSize)),
-      totalSize: totalSize,
+      totolPages: Math.ceil(nodeList.length / pageSize),
+      totalSize: nodeList.length,
     });
   }
 
