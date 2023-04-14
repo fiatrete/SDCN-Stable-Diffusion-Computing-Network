@@ -102,14 +102,14 @@ function convertPluginParams(gatewayParams: DictionaryLike) {
     let preprocessParam2 = undefined;
     switch (cnetPreprocess) {
       case 'canny':
-        preprocessParam1 = requireNumberRangeOr(cnet.preprocess_param1, 0, 255, 100);
-        preprocessParam2 = requireNumberRangeOr(cnet.preprocess_param2, 0, 255, 200);
+        preprocessParam1 = Math.floor(requireNumberRangeOr(cnet.preprocess_param1, 0, 255, 100));
+        preprocessParam2 = Math.floor(requireNumberRangeOr(cnet.preprocess_param2, 0, 255, 200));
         break;
       case 'openpose':
         break;
     }
 
-    const resizeModeNumber = requireNumberRangeOr(cnet.resize_mode, 0, kMaxControlNetResizeMode, 0);
+    const resizeModeNumber = Math.floor(requireNumberRangeOr(cnet.resize_mode, 0, kMaxControlNetResizeMode, 0));
     const resizeMode = ControlNetResizeMode[resizeModeNumber];
     alwayson_scripts.ControlNet = {
       args: [
@@ -139,10 +139,22 @@ function convertPluginParams(gatewayParams: DictionaryLike) {
   return alwayson_scripts;
 }
 
+function convertInpaintParams(webuiParams: DictionaryLike, inpaintParams: DictionaryLike) {
+  webuiParams.mask = requireString(inpaintParams.mask, undefined);
+  if (!webuiParams.mask) {
+    throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid mask in inpaint params');
+  }
+  webuiParams.mask_blur = Math.floor(requireNumberRangeOr(inpaintParams.mask_blur, 0, 64, 0));
+  webuiParams.inpainting_fill = 0; // 0->fill, 1->original. TODO: Not sure how this parameter effects the result, thus leave it to default value now.
+  webuiParams.inpainting_mask_invert = 1 - Math.floor(requireNumberRangeOr(inpaintParams.mask_mode, 0, 1, 0)); // webui's 0 and 1 are opposite to our 0 and 1
+  webuiParams.inpaint_full_res = Math.floor(requireNumberRangeOr(inpaintParams.inpaint_area, 0, 1, 0));
+  webuiParams.inpaint_full_res_padding = 0; // TODO: Not sure how this parameter effects the result, thus leave it to default value now.
+}
+
 // reqType:
 //  0 --> txt2img
 //  1 --> img2img
-function gatewayParamsToWebUI_xxx2img(gatewayParams: DictionaryLike, reqType: number): DictionaryLike {
+function gatewayParamsToWebUI_xxx2img(gatewayParams: DictionaryLike, reqType: Xxx2ImgType): DictionaryLike {
   const webuiParams: DictionaryLike = {
     prompt: requireString(gatewayParams.prompt, undefined),
     seed: requireNumberOr(gatewayParams.seed, -1),
@@ -211,7 +223,10 @@ function gatewayParamsToWebUI_xxx2img(gatewayParams: DictionaryLike, reqType: nu
       throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid init_image');
     }
     webuiParams.init_images = [initImg];
-    webuiParams.resize_mode = requireNumberRangeOr(gatewayParams.resize_mode, 0, kMaxResizeMode, 0);
+    webuiParams.resize_mode = Math.floor(requireNumberRangeOr(gatewayParams.resize_mode, 0, kMaxResizeMode, 0));
+    if (gatewayParams.inpaint) {
+      convertInpaintParams(webuiParams, gatewayParams.inpaint);
+    }
   }
   return webuiParams;
 }
