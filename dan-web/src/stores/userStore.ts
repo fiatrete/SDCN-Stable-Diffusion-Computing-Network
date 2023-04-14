@@ -14,7 +14,8 @@ class UserStore {
   }
 
   get isLoggedIn() {
-    return this._user.email !== ''
+    return true
+    // return this._user.email !== ''
   }
 
   updateUser(u: Partial<User>) {
@@ -30,7 +31,11 @@ class UserStore {
     persist.removeUser()
     this._user = {
       email: '',
+      userId: '',
       nickname: '',
+      role: 0,
+      honorAmount: 0,
+      apiKey: '',
     }
   }
 }

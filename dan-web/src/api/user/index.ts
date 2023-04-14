@@ -27,3 +27,39 @@ export async function userInfo(): Promise<User> {
       })
   })
 }
+
+interface RewardHonorResponseData {
+  success: boolean
+}
+
+/**
+ * 管理员奖励用户honor
+ */
+export async function rewardHonor(
+  uid: string,
+  amount: number,
+): Promise<boolean> {
+  return new Promise((resolve, reject) => {
+    axios
+      .post<ApiResponse<RewardHonorResponseData>>(
+        `${config.getBaseApiUrl()}/api/user/transfer-honor`,
+        {
+          userId: uid,
+          amount,
+        },
+        {
+          withCredentials: true,
+        },
+      )
+      .then((resp) => {
+        if (resp.data.code === config.getSuccessCode()) {
+          resolve(true)
+        } else {
+          reject(new Error(`Failed: ${resp.data.code}`))
+        }
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}
