@@ -2,6 +2,11 @@ import sdConfig from '../../config/sdConfig';
 import logger from '../../utils/logger';
 import { ErrorCode, SdcnError, StatusCode } from '../../utils/responseHandler';
 
+enum Xxx2ImgType {
+  kTxt,
+  kImg,
+}
+
 function requireString(v: unknown, defaultValue: string | undefined): string | undefined {
   if (typeof v === 'string') {
     return v as string;
@@ -188,7 +193,7 @@ function gatewayParamsToWebUI_xxx2img(gatewayParams: DictionaryLike, reqType: nu
 
   webuiParams.alwayson_scripts = convertPluginParams(gatewayParams);
 
-  if (reqType === 0) {
+  if (reqType === Xxx2ImgType.kTxt) {
     if (typeof gatewayParams.upscale === 'object') {
       const upscale = gatewayParams.upscale;
       webuiParams.enable_hr = true;
@@ -199,7 +204,7 @@ function gatewayParamsToWebUI_xxx2img(gatewayParams: DictionaryLike, reqType: nu
         throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid upscaler');
       }
     }
-  } else if (reqType === 1) {
+  } else if (reqType === Xxx2ImgType.kImg) {
     const initImg = requireString(gatewayParams.init_image, undefined);
     webuiParams.denoising_strength = requireNumberRangeOr(gatewayParams.denoising_strength, 0, 1, 0.5);
     if (initImg === undefined) {
@@ -225,4 +230,4 @@ function gatewayParamsToWebUI_interrogate(gatewayParams: DictionaryLike): Dictio
   return webuiParams;
 }
 
-export { gatewayParamsToWebUI_xxx2img, gatewayParamsToWebUI_interrogate };
+export { gatewayParamsToWebUI_xxx2img, gatewayParamsToWebUI_interrogate, Xxx2ImgType };
