@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import { Button, Input, Space, Tabs, message } from 'antd'
 import cx from 'classnames'
 import copy from 'copy-text-to-clipboard'
@@ -10,6 +10,17 @@ import userStore from 'stores/userStore'
 import UserAvatar from 'components/UserAvatar'
 
 const Account = () => {
+  const encryptApiKey = useCallback(() => {
+    const key = userStore.user.apiKey
+    const length = key.length
+    const startIndex = Math.floor(length / 3)
+    const endIndex = Math.ceil((length * 2) / 3)
+    const firstPart = key.slice(0, startIndex)
+    const middlePart = '*'.repeat(endIndex - startIndex)
+    const lastPart = key.slice(endIndex)
+    return `${firstPart}${middlePart}${lastPart}`
+  }, [])
+
   return (
     <div className={cx(styles.wrap)}>
       <div className={cx(styles.content)}>
@@ -49,7 +60,7 @@ const Account = () => {
                     </li>
                   </ul>
                   <Space.Compact className={cx('w-[538px] mt-2')}>
-                    <Input value={userStore.user.apiKey} readOnly />
+                    <Input value={encryptApiKey()} readOnly />
                     <Button
                       type='default'
                       icon={<CopyOutlined />}
