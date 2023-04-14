@@ -25,7 +25,7 @@ $body$
 $body$
 language sql volatile;
 --- update api_key
-update account set api_key = 'sk-' || random_string(40)  where api_key is null;
+update account set api_key = 'sk-' || random_string(48)  where api_key is null;
 
 -- update honor_amount
 update account set honor_amount = 10000 where id in (select account.id from account

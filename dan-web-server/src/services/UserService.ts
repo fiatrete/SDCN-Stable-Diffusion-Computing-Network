@@ -48,7 +48,7 @@ export default class UserService {
   }
 
   async createAccount(user: User) {
-    const apiKey = `sk-${randomstring.generate({ length: 40, charset: 'alphanumeric' })}`;
+    const apiKey = `sk-${randomstring.generate({ length: 48, charset: 'alphanumeric' })}`;
     _.assign(user, { role: RoleType.Default, honorAmount: 0, apiKey });
     user = await this.userRepository.save(user);
     this.honorService.mintHonor(user.id, HonorRecordType.Present);
