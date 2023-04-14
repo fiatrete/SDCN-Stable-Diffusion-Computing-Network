@@ -1,4 +1,4 @@
-import React, { useLayoutEffect } from 'react'
+import React, { useLayoutEffect, useEffect } from 'react'
 import cx from 'classnames'
 import { Outlet } from 'react-router-dom'
 import ReactGA from 'react-ga4'
@@ -12,6 +12,10 @@ import HeaderForMobile from 'components/HeaderForMobile'
 import { env } from 'env'
 import { observer } from 'mobx-react-lite'
 import uiStore from 'stores/uiStore'
+import to from 'await-to-js'
+import { AxiosError } from 'axios'
+import { updatePublicApiKey } from 'api/user'
+import config from 'api/config'
 
 function App() {
   console.log(env)
@@ -37,6 +41,25 @@ function App() {
     return () => {
       window.removeEventListener('resize', handleWindowResize)
     }
+  }, [])
+
+  useEffect(() => {
+    const _updatePublicApiKey = async () => {
+      const [_error, _publicApiKey] = await to<string, AxiosError>(
+        updatePublicApiKey(),
+      )
+
+      if (_error !== null) {
+        console.error('UpdatePublicApiKeyError', _error)
+        return
+      }
+
+      if (_publicApiKey) {
+        config.setPublicApiKey(_publicApiKey)
+      }
+    }
+
+    _updatePublicApiKey()
   }, [])
 
   return (

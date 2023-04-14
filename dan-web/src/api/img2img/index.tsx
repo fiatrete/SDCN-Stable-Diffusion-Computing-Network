@@ -51,6 +51,7 @@ export async function img2img(params: img2imgParams): Promise<string> {
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
+      Authorization: `Bearer ${config.getApiKey()}`,
     },
     redirect: 'follow',
     referrerPolicy: 'no-referrer',

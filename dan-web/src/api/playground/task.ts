@@ -1,22 +1,21 @@
 import config from 'api/config'
 import { ApiResponse } from 'typings/ApiResponse'
 import axios from 'axios'
+import { TaskResult } from './typings'
 
-export interface InterrogateResponseData {
-  caption: string
-}
-
-export async function interrogate(
-  image: string,
-  model: string,
-): Promise<InterrogateResponseData> {
+/**
+ * Get the Task Status
+ *
+ * @param taskId TASK ID
+ * @returns Task Status
+ */
+export async function getTaskStatus(taskId: number): Promise<TaskResult> {
   return new Promise((resolve, reject) => {
     axios
-      .post<ApiResponse<InterrogateResponseData>>(
-        `${config.getBaseApiUrl()}/api/sd/interrogate`,
+      .post<ApiResponse<TaskResult>>(
+        `${config.getBaseApiUrl()}/api/sd/task/status`,
         {
-          model,
-          image,
+          taskId,
         },
         {
           withCredentials: true,

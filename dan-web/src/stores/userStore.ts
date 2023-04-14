@@ -14,7 +14,7 @@ class UserStore {
   }
 
   get isLoggedIn() {
-    return this._user.email !== ''
+    return this._user.userId !== '' && this._user.apiKey !== ''
   }
 
   updateUser(u: Partial<User>) {

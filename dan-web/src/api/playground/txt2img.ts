@@ -1,6 +1,9 @@
 import config from 'api/config'
+import { ApiResponse } from 'typings/ApiResponse'
+import axios from 'axios'
+import { Task } from './typings'
 
-export interface txt2imgParams {
+export interface Txt2imgParams {
   prompt: string
   lora1: string
   weight1: number
@@ -16,7 +19,7 @@ export interface txt2imgParams {
   model: string
 }
 
-export async function txt2img(params: txt2imgParams): Promise<string> {
+export async function txt2imgAsync(params: Txt2imgParams): Promise<Task> {
   const data = {
     prompt: params.prompt,
     loras: (() => {
@@ -39,22 +42,27 @@ export async function txt2img(params: txt2imgParams): Promise<string> {
     model: params.model,
   }
 
-  const response = await fetch(`${config.getBaseApiUrl()}/api/sd/txt2img`, {
-    method: 'POST',
-    mode: 'cors',
-    cache: 'no-cache',
-    credentials: 'include',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${config.getApiKey()}`,
-    },
-    redirect: 'follow',
-    referrerPolicy: 'no-referrer',
-    body: JSON.stringify(data),
+  return new Promise((resolve, reject) => {
+    axios
+      .post<ApiResponse<Task>>(
+        `${config.getBaseApiUrl()}/api/sd/txt2img/async`,
+        data,
+        {
+          withCredentials: true,
+          headers: {
+            Authorization: `Bearer ${config.getApiKey()}`,
+          },
+        },
+      )
+      .then((resp) => {
+        if (resp.data.code === config.getSuccessCode()) {
+          resolve(resp.data.data)
+        } else {
+          reject(new Error(`Failed: ${resp.data.code}`))
+        }
+      })
+      .catch((error) => {
+        reject(error)
+      })
   })
-
-  const resp_json = await response.json()
-  const img_data_url = resp_json.data.images[0]
-  return 'data:image/png;base64,' + img_data_url
 }

@@ -63,3 +63,30 @@ export async function rewardHonor(
       })
   })
 }
+
+interface UpdatePublicApiKeyResponseData {
+  apiKey: string
+}
+
+export async function updatePublicApiKey(): Promise<string> {
+  return new Promise((resolve, reject) => {
+    axios
+      .get<ApiResponse<UpdatePublicApiKeyResponseData>>(
+        `${config.getBaseApiUrl()}/api/user/public-api-key`,
+        {
+          params: {},
+          withCredentials: true,
+        },
+      )
+      .then((resp) => {
+        if (resp.data.code === config.getSuccessCode()) {
+          resolve(resp.data.data.apiKey)
+        } else {
+          reject(new Error(`Failed: ${resp.data.code}`))
+        }
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}
