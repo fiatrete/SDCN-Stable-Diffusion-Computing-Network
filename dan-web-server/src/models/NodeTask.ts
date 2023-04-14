@@ -1,6 +1,6 @@
 export default interface NodeTask {
   id: string;
-  nodeSeq: number;
+  nodeSeq: bigint;
   taskType: number;
   model: string;
   status: number;

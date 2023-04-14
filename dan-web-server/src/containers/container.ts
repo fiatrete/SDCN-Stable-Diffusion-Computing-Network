@@ -2,11 +2,18 @@ import { asClass, asValue, createContainer } from 'awilix';
 import NodeControler from '../controllers/NodeController';
 import SdControler from '../controllers/SdController';
 import UserController from '../controllers/UserController';
-import { NodeRepository, RedisService, UserRepository, NodeTaskRepository } from '../repositories';
+import {
+  NodeRepository,
+  RedisService,
+  UserRepository,
+  NodeTaskRepository,
+  HonorRecordRepository,
+} from '../repositories';
 import NodeService from '../services/NodeService';
 import SdService from '../services/SdService';
 import UserService from '../services/UserService';
 import database from '../utils/database';
+import { HonorService } from '../services';
 
 const container = createContainer();
 
@@ -22,13 +29,25 @@ container.register({
   nodeTaskRepository: asClass(NodeTaskRepository)
     .inject(() => ({ knex: database.knex }))
     .singleton(),
+  honorRecordRepository: asClass(HonorRecordRepository)
+    .inject(() => ({ knex: database.knex }))
+    .singleton(),
   redisService: asClass(RedisService)
     .inject(() => ({ knex: database.redis }))
+    .singleton(),
+  honorService: asClass(HonorService)
+    .inject(() => ({
+      userRepository: container.resolve<UserRepository>('userRepository'),
+      nodeRepository: container.resolve<NodeRepository>('nodeRepository'),
+      honorRecordRepository: container.resolve<HonorRecordRepository>('honorRecordRepository'),
+    }))
     .singleton(),
   userService: asClass(UserService)
     .inject(() => ({
       userRepository: container.resolve<UserRepository>('userRepository'),
       redisService: container.resolve<RedisService>('redisService'),
+      honorService: container.resolve<HonorService>('honorService'),
+      knex: database.knex,
     }))
     .singleton(),
   userController: asClass(UserController)
@@ -54,6 +73,7 @@ container.register({
       nodeService: container.resolve<NodeService>('nodeService'),
       redisService: container.resolve<RedisService>('redisService'),
       nodeTaskRepository: container.resolve<NodeTaskRepository>('nodeTaskRepository'),
+      honorService: container.resolve<HonorService>('honorService'),
     }))
     .singleton(),
   sdController: asClass(SdControler)

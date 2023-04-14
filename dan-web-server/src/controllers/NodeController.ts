@@ -200,6 +200,12 @@ export default class NodeControler {
     });
   }
 
+  @RequireLoginAsync
+  async mineSummary(context: Context) {
+    const userId = (context.session?.authUserInfo as AuthUserInfo)!.id!;
+    responseHandler.success(context, await this.nodeService.summaryMyNodeInfo(userId));
+  }
+
   router() {
     const router = new Router({ prefix: '/node' });
     router.post('/donate', this.donate.bind(this));
@@ -208,6 +214,7 @@ export default class NodeControler {
     router.post('/stop', this.stop.bind(this));
     router.get('/mine', this.mine.bind(this));
     router.get('/', this.node.bind(this));
+    router.get('/mine-summary', this.mineSummary.bind(this));
     return router;
   }
 }

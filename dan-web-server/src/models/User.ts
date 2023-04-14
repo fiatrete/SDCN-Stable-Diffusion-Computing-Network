@@ -4,6 +4,9 @@ export default interface User {
   nickname: string;
   avatarImg: string;
   email: string;
+  role: number;
+  honorAmount: bigint;
+  apiKey: string;
   create_time: Date;
 }
 
@@ -15,6 +18,9 @@ export const userFields: Record<UserFields, string> = {
   nickname: 'nickname',
   avatarImg: 'avatarImg',
   email: 'email',
+  role: 'role',
+  honorAmount: 'honor_amount',
+  apiKey: 'api_key',
   create_time: 'create_time',
 };
 

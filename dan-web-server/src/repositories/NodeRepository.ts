@@ -2,6 +2,8 @@ import { Knex } from 'knex';
 import { isNil } from 'lodash';
 import logger from '../utils/logger';
 import { SortDirection } from '../utils/SortDirection';
+import { stat } from 'fs';
+import _ from 'lodash';
 
 interface Node {
   id?: bigint;
@@ -101,6 +103,16 @@ export default class NodeRepository {
     return [];
   }
 
+  async getAllUndeletedNodes() {
+    return await this.Nodes().where({ deleted: 0 }).orderBy(nodeFields.taskCount, SortDirection.Desc);
+  }
+
+  async getNodeCountByAcccountId(account_id: bigint) {
+    const result = (await this.Nodes().count('*').where({ accountId: account_id, deleted: 0 })) as any[];
+    const count = parseInt(result[0].count);
+    return count;
+  }
+
   async getNodeListByAccountIdPaged(account_id: bigint, pageNo: number, pageSize: number): Promise<Node[]> {
     return await this.Nodes()
       .select('node_seq as nodeId', 'worker', 'status', 'task_count as taskHandlerCount')
@@ -142,6 +154,25 @@ export default class NodeRepository {
 
   async raw(sql: string) {
     return await this.knex.raw(sql);
+  }
+
+  async getAllNodeByStatus(status: number, pageNo = 1, pageSize = 10) {
+    return await this.Nodes()
+      .where({ [nodeFields.deleted]: 0, [nodeFields.status]: status })
+      .orderBy(nodeFields.id, SortDirection.Asc)
+      .offset((pageNo - 1) * pageSize)
+      .limit(pageSize);
+  }
+
+  async countByAccountId(accountId: bigint) {
+    const result = await this.Nodes()
+      .count()
+      .where({ [nodeFields.accountId]: accountId, [nodeFields.deleted]: 0 });
+    return _.toNumber(result[0].count);
+  }
+
+  async getAllNode(accountId: bigint) {
+    return await this.Nodes().where({ [nodeFields.accountId]: accountId });
   }
 
   Nodes() {

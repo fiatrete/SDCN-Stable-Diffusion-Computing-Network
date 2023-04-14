@@ -1,6 +1,7 @@
 import { Knex } from 'knex';
 import { User, userFields, userTable } from '../models';
 import { SortDirection } from '../utils/SortDirection';
+import _ from 'lodash';
 
 interface NodeSummaryWithAccount {
   nodeCount: number;
@@ -29,7 +30,7 @@ export default class UserRepository {
   }
 
   async save(user: User) {
-    return await this.Users().insert(user).returning('*');
+    return (await this.Users().insert(user).returning('*'))[0];
   }
 
   async getById(id: bigint) {
@@ -41,6 +42,12 @@ export default class UserRepository {
 
   async getAll() {
     return await this.Users().orderBy(userFields.id, SortDirection.Desc);
+  }
+
+  async getByApiKey(apiKey: string) {
+    return await this.Users()
+      .where({ [userFields.apiKey]: apiKey })
+      .first();
   }
 
   async getNodeSummaryWithAccountPaged(pageNo: number, pageSize: number): Promise<NodeSummaryWithAccountPaged> {
@@ -87,7 +94,20 @@ export default class UserRepository {
     return await this.knex.raw(sql);
   }
 
-  Users() {
-    return this.knex<User>(userTable);
+  async updateHonorAmount(latestHonorAmount: bigint, user: User, trx: Knex = this.knex) {
+    return this.Users(trx)
+      .update({ honorAmount: latestHonorAmount } as User)
+      .where({ id: user.id, honorAmount: user.honorAmount });
+  }
+
+  async getByAccountIdIn(ids: bigint[]) {
+    return this.Users().whereIn(
+      userFields.id,
+      _.map(ids, (id) => `${id}`),
+    );
+  }
+
+  Users(knex: Knex = this.knex) {
+    return knex<User>(userTable);
   }
 }

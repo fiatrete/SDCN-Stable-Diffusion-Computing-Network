@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import _ from 'lodash';
 
 dotenv.config();
 
@@ -16,6 +17,11 @@ const redirect_uri = process.env.REDIRECT_URI || 'http://localhost:9080/oauth/su
 const failure_redirect_uri = process.env.FALURE_REDIRECT_URI || 'http://localhost:9080/oauth/failure';
 const domain = process.env.DOMAIN || 'opendan.ai';
 const requestJsonLimitSize = process.env.REQUEST_JSON_LIMIT_SIZE || '10mb';
+const honorAmountForRegister = BigInt(process.env.HONOR_AMOUNT_FOR_REGISTER || 10000);
+const honorAmountForRewardOnline = BigInt(process.env.HONOR_AMOUNT_FOR_REWARD_ONLINE || 10);
+const honorAmountForRewardTask = BigInt(process.env.HONOR_AMOUNT_FOR_REWARD_TASK || 100);
+const concurrencyForTask = _.toNumber(process.env.CONCURRENCY_FOR_TASK || 4);
+const publicUserId = BigInt(process.env.PUBLIC_USER_ID || 2);
 
 export default {
   port,
@@ -32,4 +38,9 @@ export default {
   failure_redirect_uri,
   domain,
   requestJsonLimitSize,
+  honorAmountForRegister,
+  honorAmountForRewardOnline,
+  honorAmountForRewardTask,
+  concurrencyForTask,
+  publicUserId,
 };

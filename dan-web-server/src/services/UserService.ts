@@ -2,14 +2,29 @@ import { User } from '../models';
 import { RedisService, UserRepository } from '../repositories';
 import logger from '../utils/logger';
 import _ from 'lodash';
+import randomstring from 'randomstring';
+import { SdcnError, StatusCode, ErrorCode } from '../utils/responseHandler';
+import { Knex } from 'knex';
+import { HonorRecordType, RoleType } from '../models/enum';
+import HonorService from './HonorService';
+import config from '../config';
 
 export default class UserService {
   userRepository: UserRepository;
   redisService: RedisService;
+  knex: Knex;
+  honorService: HonorService;
 
-  constructor(inject: { userRepository: UserRepository; redisService: RedisService }) {
+  constructor(inject: {
+    userRepository: UserRepository;
+    redisService: RedisService;
+    honorService: HonorService;
+    knex: Knex;
+  }) {
     this.redisService = inject.redisService;
     this.userRepository = inject.userRepository;
+    this.knex = inject.knex;
+    this.honorService = inject.honorService;
   }
 
   async helloWorld() {
@@ -33,7 +48,12 @@ export default class UserService {
   }
 
   async createAccount(user: User) {
-    return await this.userRepository.save(user);
+    const apiKey = `sk-${randomstring.generate({ length: 40, charset: 'alphanumeric' })}`;
+    _.assign(user, { role: RoleType.Default, honorAmount: 0, apiKey });
+    user = await this.userRepository.save(user);
+    this.honorService.mintHonor(user.id, HonorRecordType.Present);
+    this.redisService.setFirstTimeLogin(user.id);
+    return user;
   }
 
   async getUserInfo(id: bigint) {
@@ -48,5 +68,36 @@ export default class UserService {
 
   async world() {
     return await this.userRepository.getAll();
+  }
+
+  async transferHonor(payerId: bigint, payeeId: bigint, amount: bigint) {
+    if (payerId == payeeId) {
+      throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'cannot transfer honor to yourself.');
+    }
+    const payer = await this.userRepository.getById(payerId);
+    if (payer!.role != 1) {
+      throw new SdcnError(StatusCode.Forbidden, ErrorCode.PermissionDenied, 'permission denied');
+    }
+    const payee = await this.userRepository.getById(payeeId);
+    if (_.isNil(payee)) {
+      throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'payeeId not exist');
+    }
+    await this.honorService.transferHonor(payerId, payeeId, amount);
+  }
+
+  async getByApiKey(apiKey: string) {
+    return await this.userRepository.getByApiKey(apiKey);
+  }
+
+  async getById(id: bigint) {
+    return await this.userRepository.getById(id);
+  }
+
+  async isFirstTimeLogin(id: bigint): Promise<boolean> {
+    return await this.redisService.isFirstTimeLogin(id);
+  }
+
+  async getPublicApiKey() {
+    return _.pick(await this.userRepository.getById(config.serverConfig.publicUserId), ['apiKey']);
   }
 }
