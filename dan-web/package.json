@@ -58,7 +58,7 @@
   },
   "devDependencies": {
     "@types/check-types": "^7.3.4",
-    "@types/lodash": "^4.14.192",
+    "@types/lodash": "^4.14.194",
     "tailwindcss": "^3.2.7"
   },
   "proxy": "https://api.opendan.ai/"
