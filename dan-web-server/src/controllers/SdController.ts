@@ -1,7 +1,6 @@
 import { Context } from 'koa';
 import Router from 'koa-router';
 import SdService from '../services/SdService';
-import { ResponseSdcnErrorOnThrowAsync } from '../annotators/ResponseSdcnErrorOnThrow';
 import responseHandler, { ErrorCode, SdcnError, StatusCode } from '../utils/responseHandler';
 import { toUtf8Bytes } from 'alchemy-sdk/dist/src/api/utils';
 
@@ -12,17 +11,14 @@ export default class SdControler {
     this.sdService = inject.sdService;
   }
 
-  @ResponseSdcnErrorOnThrowAsync
   async txt2img(context: Context) {
     await this.sdService.txt2img(context);
   }
 
-  @ResponseSdcnErrorOnThrowAsync
   async img2img(context: Context) {
     await this.sdService.img2img(context);
   }
 
-  @ResponseSdcnErrorOnThrowAsync
   async interrogate(context: Context) {
     await this.sdService.interrogate(context);
   }

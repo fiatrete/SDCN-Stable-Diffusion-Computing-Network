@@ -11,7 +11,6 @@ import config from '../config/index';
 import querystring from 'querystring';
 import responseHandler, { ErrorCode, SdcnError, StatusCode } from '../utils/responseHandler';
 import Joi from 'joi';
-import { ResponseSdcnErrorOnThrowAsync } from '../annotators/ResponseSdcnErrorOnThrow';
 import { User } from '../models';
 
 interface HelloParam {
@@ -37,7 +36,6 @@ export default class UserControler {
     context.session!.authUserInfo = authUserInfo;
   }
 
-  @ResponseSdcnErrorOnThrowAsync
   private async userLogin(Authorizor: { (context: Context): Promise<AuthUserInfo> }, context: Context) {
     try {
       const authUserInfo = await Authorizor(context);
@@ -64,23 +62,19 @@ export default class UserControler {
     }
   }
 
-  @ResponseSdcnErrorOnThrowAsync
   async connectGithub(context: Context) {
     await this.userLogin(GithubAuth, context);
   }
 
-  @ResponseSdcnErrorOnThrowAsync
   async connectGoogle(context: Context) {
     await this.userLogin(GoogleAuth, context);
   }
 
-  @ResponseSdcnErrorOnThrowAsync
   async loginWithGithub(context: Context) {
     const loginWithGithubUrl = `https://github.com/login/oauth/authorize?scope=user:email&client_id=${config.serverConfig.githubClientId}`;
     context.redirect(loginWithGithubUrl);
   }
 
-  @ResponseSdcnErrorOnThrowAsync
   @RequireLoginAsync
   async info(context: Context) {
     const userInfo = context.session?.authUserInfo as AuthUserInfo;
@@ -96,7 +90,6 @@ export default class UserControler {
     responseHandler.success(context, result);
   }
 
-  @ResponseSdcnErrorOnThrowAsync
   async getNodeSummaryWithAccountPaged(context: Context) {
     const schema = Joi.object({
       pageNo: Joi.number().integer().min(1).required(),

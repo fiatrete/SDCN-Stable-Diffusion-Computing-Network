@@ -8,7 +8,6 @@ import responseHandler, { SdcnError, StatusCode, ErrorCode } from '../utils/resp
 import { AuthUserInfo } from './auth/AuthInterface';
 import { User } from '../models';
 import Joi, { number } from 'joi';
-import { ResponseSdcnErrorOnThrowAsync } from '../annotators/ResponseSdcnErrorOnThrow';
 
 export default class NodeControler {
   nodeService: NodeService;
@@ -19,7 +18,6 @@ export default class NodeControler {
     this.userService = inject.userService;
   }
 
-  @ResponseSdcnErrorOnThrowAsync
   @RequireLoginAsync
   async donate(context: Context) {
     const body = context.request.body;
@@ -59,7 +57,6 @@ export default class NodeControler {
     return worker;
   }
 
-  @ResponseSdcnErrorOnThrowAsync
   @RequireLoginAsync
   async revoke(context: Context) {
     const userInfo = context.session?.authUserInfo as AuthUserInfo;
@@ -76,7 +73,6 @@ export default class NodeControler {
     return responseHandler.success(context, { nodeId: nodeId });
   }
 
-  @ResponseSdcnErrorOnThrowAsync
   @RequireLoginAsync
   async launch(context: Context) {
     const userInfo = context.session?.authUserInfo as AuthUserInfo;
@@ -102,7 +98,6 @@ export default class NodeControler {
     return responseHandler.success(context, { nodeId: nodeId, status: node.status });
   }
 
-  @ResponseSdcnErrorOnThrowAsync
   @RequireLoginAsync
   async stop(context: Context) {
     const userInfo = context.session?.authUserInfo as AuthUserInfo;
@@ -128,7 +123,6 @@ export default class NodeControler {
     return responseHandler.success(context, { nodeId: nodeId, status: node.status });
   }
 
-  @ResponseSdcnErrorOnThrowAsync
   @RequireLoginAsync
   async mine(context: Context) {
     const schema = Joi.object({
@@ -157,7 +151,6 @@ export default class NodeControler {
     });
   }
 
-  @ResponseSdcnErrorOnThrowAsync
   async node(context: Context) {
     const schema = Joi.object({
       type: Joi.number().required(),
