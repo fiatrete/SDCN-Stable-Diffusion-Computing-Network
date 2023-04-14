@@ -181,7 +181,7 @@ export default class SdService {
     const { taskId } = taskInfo;
     try {
       const result = await this.executeImageGenerateTask(taskInfo);
-      logger.info(`task(${taskId}) result: ${JSON.stringify(result)}`);
+      // logger.info(`task(${taskId}) result: ${JSON.stringify(result)}`);
       this.queueSize -= 1;
     } catch (error) {
       logger.error(`task error: ${taskId}`);
@@ -210,7 +210,7 @@ export default class SdService {
       await this.redisService.updateTaskStatus(taskStatusArray);
 
       // obtain idle workers
-      logger.info(`---- queue: ${this.queueSize}, ${this.concurrency}, ${await this.redisService.lengthTaskQueue()}`);
+      // logger.info(`---- queue: ${this.queueSize}, ${this.concurrency}, ${await this.redisService.lengthTaskQueue()}`);
       const length = await this.redisService.lengthTaskQueue();
       if (this.queueSize < this.concurrency && length > 0) {
         const taskArray = await this.redisService.batchPopFromTaskQueue(this.concurrency - this.queueSize);
