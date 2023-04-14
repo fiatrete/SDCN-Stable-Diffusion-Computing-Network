@@ -59,18 +59,12 @@ const Account = () => {
                       browser or other client-side code.
                     </li>
                   </ul>
-                  <Space.Compact className={cx('w-[538px] mt-2')}>
+                  <Space.Compact className={cx('w-2/3 mt-2')}>
                     <Input value={encryptApiKey()} readOnly />
                     <Button
                       type='default'
                       icon={<CopyOutlined />}
                       onClick={() => {
-                        // if (userStore.user.apiKey) {
-                        //   copy(userStore.user.apiKey)
-                        //   message.success('Secret key copied to clipboard')
-                        // } else {
-                        //   message.error('')
-                        // }
                         try {
                           copy(userStore.user.apiKey)
                           message.success('API Key copied to clipboard')
