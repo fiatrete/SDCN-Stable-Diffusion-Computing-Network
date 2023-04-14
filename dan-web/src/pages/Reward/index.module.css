@@ -1,0 +1,12 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0px 60px;
+}
+
+.content {
+  width: 100%;
+  max-width: 680px;
+  padding: 48px 0;
+}

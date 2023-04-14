@@ -23,12 +23,20 @@ class Persist {
         ? JSON.parse(u)
         : {
             email: '',
+            userId: '',
             nickname: '',
+            role: 0,
+            honorAmount: 0,
+            apiKey: '',
           }
     } else {
       return {
         email: '',
+        userId: '',
         nickname: '',
+        role: 0,
+        honorAmount: 0,
+        apiKey: '',
       }
     }
   }
