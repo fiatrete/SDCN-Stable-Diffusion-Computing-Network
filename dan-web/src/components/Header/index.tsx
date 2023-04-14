@@ -36,8 +36,8 @@ const Header = () => {
 
   const userLogout = useCallback(() => {
     logout()
-    window.location.reload()
-  }, [logout])
+    navigate('/')
+  }, [logout, navigate])
 
   useEffect(() => {
     updateUserInfo()
