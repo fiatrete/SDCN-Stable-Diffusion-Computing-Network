@@ -36,8 +36,6 @@ const Portal = () => {
       return
     }
 
-    console.log(_statistics)
-
     setImageGenerationStatisticsResponseData(_statistics)
   }, [setImageGenerationStatisticsResponseData])
 

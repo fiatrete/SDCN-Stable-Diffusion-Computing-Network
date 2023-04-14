@@ -6,6 +6,10 @@ import to from 'await-to-js'
 import * as userApi from 'api/user'
 
 const useUser = () => {
+  const logout = useCallback(() => {
+    userStore.reset()
+  }, [])
+
   const updateUser = useCallback(async () => {
     const [_userInfoError, _userInfo] = await to<User, AxiosError>(
       userApi.userInfo(),
@@ -13,15 +17,16 @@ const useUser = () => {
 
     if (_userInfoError !== null) {
       console.error('updateUserInfoError', _userInfoError)
-      userStore.reset()
+      logout()
       return
     }
 
     userStore.updateUser(_userInfo)
-  }, [])
+  }, [logout])
 
   return {
     updateUser,
+    logout,
   }
 }
 
