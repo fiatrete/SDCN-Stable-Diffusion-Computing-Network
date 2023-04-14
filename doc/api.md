@@ -214,6 +214,7 @@ And all the parameters are listed below:
 | Parameter | Type | Description |
 | --- | --- | --- |
 | init_image | string | The base64-encoded string of your original image |
+| resize_mode | number | 0 means `just resize`, 1 means `resize and crop`, 2 means `resize and fill`, otherwise use default value: 0. |
 | denoising_strength | float | Controls the level of denoising; smaller values yield results that are closer to the original image. Valid range is [0, 1] |
 | prompt | string | A positive prompt that describes what you want in the resulting image |
 | negative_prompt | string | A negative prompt that describes what you don't want in the resulting image |
@@ -225,6 +226,11 @@ And all the parameters are listed below:
 | width | integer | The desired width of the resulting image |
 | height | integer | The desired height of the resulting image |
 | model | string | The model (weights) used to generate the image |
+| inpaint | object | If you want to regenerate part of your image, this will be what you want. |
+| inpaint.mask | string | This is a base64 encoded image of a mask which defined where you want to regenerate. |
+| inpaint.mask_blur | number | Before regenerating, the image and mask will be gaussian blured by this radius. Valid range is [0, 64], default 0. |
+| inpaint.mask_mode | number | 0 means regenerate where is masked; 1 means regenerate where is not masked.  |
+| inpaint.inpaint_area | number | 0 means regenerate whole image, then paste corresponding area back. 1 means only the masked area will be regenereate, then paste corresponding area back. |
 | control_net | array | See [txt2img](#txt2img). |
 
 Here is an example JSON object with these parameters:

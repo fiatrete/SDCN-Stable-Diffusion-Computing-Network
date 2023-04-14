@@ -15,6 +15,7 @@ params = {
         ["62efe75048d55a096a238c6e8c4e12d61b36bf59e388a90589335f750923954c", 0.5],
         ["3e5d8fe726b4c0f1e7f0905f32ea3d1c9ce89a54028209e8179d64d323048dac", 0.7]
     ],
+    "resize_mode": 1,
     "seed": -1,
     "sampler_name": "DPM++ SDE Karras",
     "steps": 20,

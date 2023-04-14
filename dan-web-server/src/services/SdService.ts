@@ -1,4 +1,4 @@
-import { gatewayParamsToWebUI_xxx2img, gatewayParamsToWebUI_interrogate } from './utils/ParamConvert';
+import { gatewayParamsToWebUI_xxx2img, gatewayParamsToWebUI_interrogate, Xxx2ImgType } from './utils/ParamConvert';
 import NodeService from './NodeService';
 import { Context } from 'koa';
 import responseHandler, { ErrorCode, SdcnError, StatusCode } from '../utils/responseHandler';
@@ -55,11 +55,11 @@ export default class SdService {
   }
 
   async txt2img(context: Context) {
-    await this.xxx2img(context, 0);
+    await this.xxx2img(context, Xxx2ImgType.kTxt);
   }
 
   async img2img(context: Context) {
-    await this.xxx2img(context, 1);
+    await this.xxx2img(context, Xxx2ImgType.kImg);
   }
 
   async interrogate(context: Context) {
