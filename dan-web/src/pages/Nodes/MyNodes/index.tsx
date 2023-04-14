@@ -156,8 +156,9 @@ const MyNodes = (props: MyNodesProps) => {
   }, [getMyNodesList])
 
   return (
-    <div className={cx('mt-4')}>
+    <div className={cx('')}>
       <Table<Node>
+        className={cx('overflow-x-auto')}
         columns={columns}
         dataSource={nodes}
         rowKey='nodeId'

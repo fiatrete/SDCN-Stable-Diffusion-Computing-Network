@@ -3,9 +3,14 @@
 }
 
 .contentWrap {
-  max-width: 720px;
-  margin: 0 auto;
+  max-width: 768px;
   padding: 130px 0;
+  margin: 0 auto;
+}
+
+.contentWrapForMobile {
+  width: 100%;
+  padding: 32px 16px;
 }
 
 .answer {

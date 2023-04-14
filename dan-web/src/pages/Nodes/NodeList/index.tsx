@@ -5,6 +5,7 @@ import styles from './index.module.css'
 import { Node } from 'typings/Node'
 import { Table } from 'antd'
 import NodeStatusTag from 'components/NodeStatusTag'
+
 export interface NodeListProps {
   getNodesList: (page: number, size: number) => void
   pageNo: number
@@ -45,16 +46,17 @@ const NodeList = (props: NodeListProps) => {
   }, [getNodesList, pageSize])
 
   return (
-    <div className={cx('mb-12', styles.wrap)}>
+    <div className={cx(styles.wrap)}>
       <div className={cx(styles.contentWrap)}>
         <div
           className={cx(
-            'text-base font-medium h-16 flex flex-col justify-center px-2',
+            'text-base font-medium flex flex-col justify-center px-2',
           )}
         >
           DAN Nodes
         </div>
         <Table<Node>
+          className={cx('mt-2 overflow-x-auto')}
           columns={columns}
           dataSource={nodes}
           rowKey='nodeId'

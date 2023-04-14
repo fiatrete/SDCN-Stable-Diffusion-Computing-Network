@@ -14,6 +14,8 @@ import * as nodesApi from 'api/nodes'
 import { Donor, Node } from 'typings/Node'
 import useSignInModal from 'hooks/useSignModal'
 import userStore from 'stores/userStore'
+import { observer } from 'mobx-react-lite'
+import uiStore from 'stores/uiStore'
 
 const Nodes = () => {
   const { showSignModel } = useSignInModal()
@@ -132,7 +134,14 @@ const Nodes = () => {
 
   return (
     <div className={cx(styles.wrap)}>
-      <div className={cx(styles.contentWrap)}>
+      <div
+        className={cx(
+          'flex flex-col gap-6',
+          uiStore.isMobile
+            ? [styles.contentWrapForMobile]
+            : [styles.contentWrap],
+        )}
+      >
         <NodeList
           pageNo={nodesPageNo}
           pageSize={PAGE_SIZE}
@@ -147,7 +156,7 @@ const Nodes = () => {
           donors={donors}
           getDonorsList={getDonorsList}
         />
-        <div className={cx('flex justify-center gap-4')}>
+        <div className={cx('flex justify-center gap-4 mt-8')}>
           <Button type='primary' onClick={handleDonateNode}>
             Donate Node
           </Button>
@@ -158,4 +167,4 @@ const Nodes = () => {
   )
 }
 
-export default Nodes
+export default observer(Nodes)

@@ -7,3 +7,8 @@
   margin: 0 auto;
   padding: 48px 60px;
 }
+
+.contentWrapForMobile {
+  width: 100%;
+  padding: 32px 16px;
+}
