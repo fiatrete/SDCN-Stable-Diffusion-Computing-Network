@@ -16,6 +16,9 @@ import to from 'await-to-js'
 import { AxiosError } from 'axios'
 import { updatePublicApiKey } from 'api/user'
 import config from 'api/config'
+import useUser from 'hooks/useUser'
+import { message } from 'antd'
+import userStore from 'stores/userStore'
 
 function App() {
   console.log(env)
@@ -25,6 +28,8 @@ function App() {
   } catch (error) {
     console.error(error)
   }
+
+  const { updateUser } = useUser()
 
   useLayoutEffect(() => {
     const handleWindowResize = () => {
@@ -46,6 +51,7 @@ function App() {
   }, [])
 
   useEffect(() => {
+    // Public Api Key
     const _updatePublicApiKey = async () => {
       const [_error, _publicApiKey] = await to<string, AxiosError>(
         updatePublicApiKey(),
@@ -61,8 +67,18 @@ function App() {
       }
     }
 
+    // User
+    const _updateUserInfo = async () => {
+      await updateUser()
+
+      if (userStore.user.firstTimeLogin) {
+        message.success(`100 honors as a gift for your registration`)
+      }
+    }
+
     _updatePublicApiKey()
-  }, [])
+    _updateUserInfo()
+  }, [updateUser])
 
   return (
     <div className={cx('App min-h-full w-full flex flex-col')}>
