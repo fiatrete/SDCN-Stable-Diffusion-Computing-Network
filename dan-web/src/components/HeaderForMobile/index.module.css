@@ -1,0 +1,38 @@
+.wrap {
+  width: 100%;
+  background: #fff;
+  z-index: 2;
+  box-shadow: 0 2px 8px -2px rgba(0, 32, 37, 0.1);
+}
+
+.contentWrap {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 8px 16px;
+}
+
+.left {
+}
+
+.right {
+}
+
+.navLink {
+  padding: 5px 10px;
+  text-decoration: none;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.88);
+  border-radius: 6px;
+}
+
+.navLinkActive {
+  background: #f0f0f0;
+}
+
+.navLink:focus {
+  background: #f0f0f0;
+}
+
+.navLink:hover {
+  background: #f0f0f0;
+}

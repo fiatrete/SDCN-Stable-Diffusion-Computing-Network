@@ -1,7 +1,7 @@
 import { User } from './User'
 
 export interface Node {
-  nodeId: number // 数据库表ID
+  nodeId: number
   account: User
   status: NodeStatus
   taskHandlerCount: number

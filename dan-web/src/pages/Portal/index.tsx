@@ -2,13 +2,16 @@ import { Button, Statistic, Typography } from 'antd'
 import cx from 'classnames'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { faqData, introduceData } from './data'
-
-import styles from './index.module.css'
-import { ImageGenerationStatisticsResponseData } from 'api/statistics'
 import { AxiosError } from 'axios'
 import to from 'await-to-js'
+
+import styles from './index.module.css'
+
+import { ImageGenerationStatisticsResponseData } from 'api/statistics'
+import { faqData, introduceData } from './data'
 import * as statisticsApi from 'api/statistics'
+import uiStore from 'stores/uiStore'
+import { observer } from 'mobx-react-lite'
 
 const { Title, Paragraph } = Typography
 
@@ -61,30 +64,36 @@ const Portal = () => {
 
   return (
     <div className={cx('mt-auto', styles.wrap)}>
-      <div className={cx(styles.contentWrap)}>
-        <Title className={cx('text-center')} level={1} ellipsis>
+      <div
+        className={cx(
+          uiStore.isMobile
+            ? [styles.contentWrapForMobile]
+            : [styles.contentWrap],
+        )}
+      >
+        <Title className={cx('text-center')} level={1}>
           Stable Diffusion Computing Network
         </Title>
         {introduceData.map((data, i) => (
           <Paragraph key={i}>{data}</Paragraph>
         ))}
 
-        <div className={cx('text-center mt-9')}>
-          <Title level={2} className={cx('text-center')}>
+        <div className={cx(uiStore.isMobile ? ['mt-9'] : ['mt-24'])}>
+          <Title className={cx('text-center')} level={2}>
             Image Generation Data
           </Title>
-          <div className={cx('mt-9 flex justify-around')}>
+          <div className={cx('flex justify-around')}>
             <Statistic
               title='Total generated (images)'
               value={imageGenerationStatisticsResponseData?.totalCount ?? '--'}
-              valueStyle={{ textAlign: 'left' }}
+              valueStyle={{ textAlign: 'center' }}
             />
             <Statistic
               title='The last week (images)'
               value={
                 imageGenerationStatisticsResponseData?.countInLastWeek ?? '--'
               }
-              valueStyle={{ textAlign: 'left' }}
+              valueStyle={{ textAlign: 'center' }}
             />
             <Statistic
               title='The last 24 hours (images)'
@@ -92,7 +101,7 @@ const Portal = () => {
                 imageGenerationStatisticsResponseData?.countInLast24Hours ??
                 '--'
               }
-              valueStyle={{ textAlign: 'left' }}
+              valueStyle={{ textAlign: 'center' }}
             />
           </div>
         </div>
@@ -108,8 +117,8 @@ const Portal = () => {
           </Button>
         </div>
 
-        <div className={cx('w-10/12 mx-auto mt-32')}>
-          <Title id='faq' level={2} className={cx('text-center')}>
+        <div className={cx(uiStore.isMobile ? ['mt-9'] : ['mt-24'])}>
+          <Title id='faq' className={cx('text-center')} level={2}>
             Frequently asked questions
           </Title>
           {faqData.map((data, i) => (
@@ -128,4 +137,4 @@ const Portal = () => {
   )
 }
 
-export default Portal
+export default observer(Portal)

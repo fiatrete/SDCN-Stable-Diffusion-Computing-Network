@@ -1,12 +1,17 @@
 .wrap {
   width: 100%;
-  padding-left: calc(100vw - 100%);
 }
 
 .contentWrap {
   max-width: 1440px;
   margin: 0 auto;
   padding: 24px 60px;
+}
+
+.contentWrapForMobile {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 8px 16px;
 }
 
 .left {

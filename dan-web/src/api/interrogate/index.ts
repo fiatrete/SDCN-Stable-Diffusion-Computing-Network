@@ -1,20 +1,27 @@
 import config from 'api/config'
 import { ApiResponse } from 'typings/ApiResponse'
 import axios from 'axios'
-import { User } from 'typings/User'
 
-/**
- * Get User Info
- *
- * @returns User Info
- */
-export async function userInfo(): Promise<User> {
+export interface InterrogateResponseData {
+  caption: string
+}
+
+export async function interrogate(
+  image: string,
+  model: string,
+): Promise<InterrogateResponseData> {
   return new Promise((resolve, reject) => {
     axios
-      .get<ApiResponse<User>>(`${config.getBaseApiUrl()}/api/user/info`, {
-        params: {},
-        withCredentials: true,
-      })
+      .post<ApiResponse<InterrogateResponseData>>(
+        `${config.getBaseApiUrl()}/api/sd/interrogate`,
+        {
+          model,
+          image,
+        },
+        {
+          withCredentials: true,
+        },
+      )
       .then((resp) => {
         if (resp.data.code === config.getSuccessCode()) {
           resolve(resp.data.data)

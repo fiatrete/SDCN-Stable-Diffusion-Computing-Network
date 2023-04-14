@@ -1,16 +1,18 @@
 import React, { useCallback, useEffect } from 'react'
 import { Avatar, Button, Image, Popover } from 'antd'
-import logo from 'assets/images/logo.svg'
 import cx from 'classnames'
 import { Link, NavLink } from 'react-router-dom'
+import { observer } from 'mobx-react-lite'
+import { LogoutOutlined, UserOutlined } from '@ant-design/icons'
+import { AxiosError } from 'axios'
+import to from 'await-to-js'
+
+import logo from 'assets/images/logo.svg'
+
+import { User } from 'typings/User'
 import styles from './index.module.css'
 import useSignInModal from 'hooks/useSignModal'
 import userStore from 'stores/userStore'
-import { observer } from 'mobx-react-lite'
-import { LogoutOutlined, UserOutlined } from '@ant-design/icons'
-import { User } from 'typings/User'
-import { AxiosError } from 'axios'
-import to from 'await-to-js'
 import * as userApi from 'api/user'
 
 const Header = () => {
@@ -125,15 +127,6 @@ const Header = () => {
           </Button>
         </nav>
         <div className={cx('flex items-center gap-x-6', styles.right)}>
-          {/* <Button
-            type='ghost'
-            shape='circle'
-            href={process.env.REACT_APP_GITHUB_URL}
-            target='_blank'
-            className={cx('flex justify-center items-center')}
-          >
-            <Image src={githubIcon} width={28} preview={false} />
-          </Button> */}
           {userStore.isLoggedIn ? (
             <Popover content={logoutButton} placement='bottomRight'>
               {avatarElement()}

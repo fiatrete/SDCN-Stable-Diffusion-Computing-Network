@@ -1,16 +1,21 @@
 import React from 'react'
 import { Button, Image } from 'antd'
 import cx from 'classnames'
+import { observer } from 'mobx-react-lite'
 
 import styles from './index.module.css'
 
 import githubIcon from 'assets/images/icon_github.svg'
+import uiStore from 'stores/uiStore'
 
 const Footer = () => {
   return (
     <div className={cx('mt-auto', styles.wrap)}>
       <div
-        className={cx('flex justify-between items-center', styles.contentWrap)}
+        className={cx(
+          'flex justify-between items-center gap-4',
+          uiStore.isMobile ? styles.contentWrapForMobile : styles.contentWrap,
+        )}
       >
         <div className={cx(styles.left)}>
           Copyright ©2023 Stable Diffusion Computing Network. All rights
@@ -33,4 +38,4 @@ const Footer = () => {
   )
 }
 
-export default Footer
+export default observer(Footer)

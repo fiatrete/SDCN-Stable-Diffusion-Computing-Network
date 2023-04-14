@@ -8,6 +8,7 @@ import {
   LoadingOutlined,
 } from '@ant-design/icons'
 import config from 'api/config'
+import uiStore from 'stores/uiStore'
 
 const useSignInModal = () => {
   const spinIcon = (
@@ -46,11 +47,17 @@ const useSignInModal = () => {
         className={cx('flex flex-col justify-center')}
         style={{ height: '254px' }}
       >
-        <div className={cx('flex')}>
-          <div className={cx('grow flex justify-center')}>
+        <div
+          className={cx(
+            uiStore.isMobile
+              ? ['flex flex-col gap-8 items-center']
+              : ['flex gap-8 items-center'],
+          )}
+        >
+          <div className={cx('')}>
             <Image src={logo} width={200} preview={false} />
           </div>
-          <div className={cx('grow flex flex-col justify-center gap-3 mx-8')}>
+          <div className={cx('')}>
             {/* <Button
               type='default'
               size='large'
@@ -89,9 +96,10 @@ const useSignInModal = () => {
       icon: null,
       footer: null,
       transitionName: '',
-      style: { top: '30%' },
-      width: 580,
+      centered: true,
+      width: 'auto',
       afterClose: () => {
+        modal?.destroy()
         modal = null
       },
       content: buildContent(false),
@@ -122,7 +130,6 @@ const useSignInModal = () => {
         clearInterval(loop)
         setLoading(false)
         hideSignModel()
-
         window.location.reload()
       }
     }, 500)

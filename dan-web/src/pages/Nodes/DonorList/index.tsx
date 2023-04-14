@@ -33,21 +33,22 @@ const DonorList = (props: DonorListProps) => {
   ]
 
   useEffect(() => {
-    // 加载第一页数据
+    // Load data for page.1
     getDonorsList(1, pageSize)
   }, [getDonorsList, pageSize])
 
   return (
-    <div className={cx('mb-9', styles.wrap)}>
+    <div className={cx(styles.wrap)}>
       <div className={cx(styles.contentWrap)}>
         <div
           className={cx(
-            'text-base font-medium h-16 flex flex-col justify-center px-2',
+            'text-base font-medium flex flex-col justify-center px-2',
           )}
         >
           Donors
         </div>
         <Table<Donor>
+          className={cx('mt-2 overflow-x-auto')}
           columns={columns}
           dataSource={donors}
           rowKey={(donor) => donor.account.email}

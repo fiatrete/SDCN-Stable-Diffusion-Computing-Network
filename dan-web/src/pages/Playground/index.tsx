@@ -6,6 +6,7 @@ import Img2img from 'components/Img2img'
 import cx from 'classnames'
 
 import styles from './index.module.css'
+import Interrogate from 'components/Interrogate'
 
 const items: TabsProps['items'] = [
   {
@@ -17,6 +18,11 @@ const items: TabsProps['items'] = [
     key: '2',
     label: `img2img`,
     children: <Img2img />,
+  },
+  {
+    key: '3',
+    label: `interrogate`,
+    children: <Interrogate />,
   },
 ]
 
