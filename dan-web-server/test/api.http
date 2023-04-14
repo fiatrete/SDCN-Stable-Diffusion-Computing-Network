@@ -21,6 +21,9 @@ GET {{hostname}}/api/user/info
 Content-Type: application/json
 Cookie: {{cookie}}
 
+### get public key
+GET {{hostname}}/api/user/public-api-key HTTP/1.1
+Content-Type: application/json
 
 ### list by task
 GET {{hostname}}/api/user/list-by-task?pageNo=1&pageSize=10
@@ -93,13 +96,13 @@ Content-Type: application/json
 Cookie: {{cookie}}
 
 {
-    "prompt":"girl",
+    "prompt":"girl,teacher,cat",
     "loras":[
 
     ],
     "seed":-1,
     "sampler_name":"DPM++ SDE Karras",
-    "steps":20,
+    "steps":100,
     "cfg_scale":7,
     "width":512,
     "height":512,
@@ -119,5 +122,21 @@ Content-Type: application/json
 Cookie: {{cookie}}
 
 {
-  "taskId": "179dd9a5-a7dc-43b0-a11d-1e3b65211e6e"
+  "taskId": "4efcf574-b02b-4c63-b631-0cb8f17caaef"
 }
+
+
+### transfer
+POST {{hostname}}/api/user/transfer-honor
+Content-Type: application/json
+Cookie: {{cookie}}
+
+{
+  "userId": "1",
+  "amount": 1
+}
+
+### mine summary
+GET {{hostname}}/api/node/mine-summary
+Content-Type: application/json
+Cookie: {{cookie}}

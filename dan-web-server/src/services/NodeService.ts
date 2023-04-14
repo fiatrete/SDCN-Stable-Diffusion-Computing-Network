@@ -1,8 +1,11 @@
 import { Redis } from 'ioredis';
-import { Primitive } from 'lodash';
 import redisConfig from '../config/redisConfig';
-import { RedisService, NodeRepository } from '../repositories';
+import { RedisService, NodeRepository, NodeTaskRepository } from '../repositories';
 import logger from '../utils/logger';
+import HonorService from './HonorService';
+import { JobsOptions, Queue, Worker } from 'bullmq';
+import _ from 'lodash';
+import { json } from 'stream/consumers';
 
 /*
 The meaning of keys in redis
@@ -22,10 +25,23 @@ const kNodeKeepAlive = `${redisConfig.nodeKeepAlive}`;
 export default class NodeService {
   redisService: RedisService;
   nodeRepository: NodeRepository;
+  honorService: HonorService;
+  nodeTaskRepository: NodeTaskRepository;
+  redis: Redis;
 
-  constructor(inject: { redisService: RedisService; nodeRepository: NodeRepository }) {
+  constructor(inject: {
+    redisService: RedisService;
+    nodeRepository: NodeRepository;
+    honorService: HonorService;
+    nodeTaskRepository: NodeTaskRepository;
+    redis: Redis;
+  }) {
     this.redisService = inject.redisService;
     this.nodeRepository = inject.nodeRepository;
+    this.honorService = inject.honorService;
+    this.redis = inject.redis;
+    this.nodeTaskRepository = inject.nodeTaskRepository;
+    this.timer();
   }
 
   async createNodeID(address: string, userId: string) {
@@ -216,5 +232,45 @@ return result
     });
 
     return taskCount;
+  }
+
+  async summaryMyNodeInfo(accountId: bigint) {
+    const nodeCount = await this.nodeRepository.countByAccountId(accountId);
+    const nodes = await this.nodeRepository.getAllNode(accountId);
+    let taskHandlerCount = 0;
+    if (!_.isEmpty(nodes)) {
+      taskHandlerCount = await this.nodeTaskRepository.countByNodeSeqIn(nodes.map((node) => node.nodeSeq));
+    }
+    return { nodeCount: nodeCount, taskHandlerCount: taskHandlerCount };
+  }
+
+  timer() {
+    const timedAwardForOnline = new Queue('timedAwardForOnline', { connection: this.redis });
+    timedAwardForOnline.add('timer', { name: 'timer' }, { repeat: { pattern: '0 0/10 * * * ?' } });
+    const worker = new Worker(
+      'timedAwardForOnline',
+      async () => {
+        let pageNo = 1;
+        const pageSize = 100;
+        let nodes = await this.nodeRepository.getAllNodeByStatus(1, pageNo++, pageSize);
+        while (nodes.length > 0) {
+          await this.honorService.timedRewardForOnline(
+            nodes.map((node) => ({
+              nodeSeq: node.nodeSeq,
+              accountId: node.accountId,
+            })),
+          );
+          nodes = await this.nodeRepository.getAllNodeByStatus(1, pageNo++, pageSize);
+        }
+      },
+      { connection: this.redis, concurrency: 1 },
+    );
+    worker.on('completed', async (job) => {
+      // clear history task
+      await (await worker.client).del(worker.toKey(job.id!));
+    });
+    worker.on('failed', (_, error) => {
+      logger.error(error);
+    });
   }
 }

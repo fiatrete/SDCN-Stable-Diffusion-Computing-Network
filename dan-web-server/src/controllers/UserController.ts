@@ -1,4 +1,4 @@
-import { Context, Next } from 'koa';
+import { Context } from 'koa';
 import Router from 'koa-router';
 import { RequireLoginAsync } from '../annotators/RequireLogin';
 import { UserService, NodeService } from '../services';
@@ -8,16 +8,9 @@ import GithubAuth from './auth/GithubAuth';
 import GoogleAuth from './auth/GoogleAuth';
 import _ from 'lodash';
 import config from '../config/index';
-import querystring from 'querystring';
 import responseHandler, { ErrorCode, SdcnError, StatusCode } from '../utils/responseHandler';
 import Joi from 'joi';
-import { User } from '../models';
-
-interface HelloParam {
-  id: number;
-  name: string;
-  tags?: string[];
-}
+import * as honor from '../utils/honor';
 
 export default class UserControler {
   userService: UserService;
@@ -48,7 +41,7 @@ export default class UserControler {
         user.avatarImg = authUserInfo.avatar_img;
         user.create_time = new Date();
         const newUser = await this.userService.createAccount(user);
-        authUserInfo.id = newUser[0].id;
+        authUserInfo.id = newUser.id;
         logger.debug('newUser:', newUser);
       } else {
         authUserInfo.id = user.id;
@@ -85,7 +78,12 @@ export default class UserControler {
     const id = userInfo.id as bigint;
     const user = await this.userService.getUserInfo(BigInt(id));
     logger.debug('info', user);
-    const result = { nickname: user?.nickname, avatarImgUrl: user?.avatarImg, email: user?.email };
+    const result = _.assign(_.omit(user, 'id', 'uuid', 'createTime', 'honorAmount', 'id', 'avatarImg'), {
+      userId: user?.id,
+      avatarImgUrl: user?.avatarImg,
+      honorAmount: honor.transferFromTenThousandth(user!.honorAmount),
+      firstTimeLogin: await this.userService.isFirstTimeLogin(user!.id),
+    });
     logger.debug('result', result);
     responseHandler.success(context, result);
   }
@@ -105,12 +103,32 @@ export default class UserControler {
     responseHandler.success(context, accountInfoList);
   }
 
+  @RequireLoginAsync
+  async transferHonor(context: Context) {
+    const userInfo = context.session?.authUserInfo as AuthUserInfo;
+    logger.debug('userInfo', userInfo);
+    if (userInfo.id === undefined) {
+      throw new SdcnError(StatusCode.Forbidden, ErrorCode.PermissionDenied, 'Permission Denied');
+    }
+    const currentUserId = userInfo.id;
+
+    const { userId, amount } = context.request.body;
+    await this.userService.transferHonor(currentUserId, userId, amount);
+    responseHandler.success(context, { success: true });
+  }
+
+  async getPublicApiKey(context: Context) {
+    responseHandler.success(context, await this.userService.getPublicApiKey());
+  }
+
   router() {
     const router = new Router({ prefix: '/user' });
     router.get('/connect/github', this.connectGithub.bind(this));
     router.get('/login/github', this.loginWithGithub.bind(this));
     router.get('/info', this.info.bind(this));
     router.get('/list-by-task', this.getNodeSummaryWithAccountPaged.bind(this));
+    router.post('/transfer-honor', this.transferHonor.bind(this));
+    router.get('/public-api-key', this.getPublicApiKey.bind(this));
     return router;
   }
 }

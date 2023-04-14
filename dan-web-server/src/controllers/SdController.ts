@@ -1,36 +1,114 @@
 import { Context } from 'koa';
 import Router from 'koa-router';
 import SdService from '../services/SdService';
-import responseHandler, { ErrorCode, SdcnError, StatusCode } from '../utils/responseHandler';
-import { toUtf8Bytes } from 'alchemy-sdk/dist/src/api/utils';
+import responseHandler from '../utils/responseHandler';
+import _ from 'lodash';
+import { UserService } from '../services';
+import logger from '../utils/logger';
+import { Job } from 'bullmq';
+import { NodeTaskStatus, NodeTaskType } from '../models/enum';
 
 export default class SdControler {
   sdService: SdService;
+  userService: UserService;
 
-  constructor(inject: { sdService: SdService }) {
+  constructor(inject: { sdService: SdService; userService: UserService }) {
     this.sdService = inject.sdService;
+    this.userService = inject.userService;
   }
 
   async txt2img(context: Context) {
-    await this.sdService.txt2img(context);
+    await this.taskSubmitAndWait(context, NodeTaskType.Txt2img);
   }
 
   async img2img(context: Context) {
-    await this.sdService.img2img(context);
+    await this.taskSubmitAndWait(context, NodeTaskType.Img2img);
   }
 
   async interrogate(context: Context) {
-    await this.sdService.interrogate(context);
+    await this.taskSubmitAndWait(context, NodeTaskType.Interrogate);
+  }
+
+  private async taskSubmitAndWait(context: Context, nodeTaskType: NodeTaskType) {
+    const user = await this.getAccountId(context);
+    const taskStatusResult = await this.sdService.taskSubmit(
+      context.request.body,
+      nodeTaskType,
+      user!.honorAmount,
+      user!.id,
+    );
+    responseHandler.success(context, await this.getTaskResult(context, taskStatusResult));
+  }
+
+  private async getTaskResult(context: Context, taskStatusResult: { job: Job; taskStatus: { taskId: string } }) {
+    let index = 0;
+    return new Promise((reslove, reject) => {
+      let resultSuccess = false;
+      const timerId = setInterval(async () => {
+        const result = await this.sdService.taskStatus(taskStatusResult.taskStatus.taskId);
+        if (result.status == NodeTaskStatus.Success || result.status == NodeTaskStatus.Failure) {
+          resultSuccess = true;
+          reslove(result);
+          clearInterval(timerId);
+        } else {
+          if (index == 60) {
+            try {
+              if (await taskStatusResult.job.isWaiting()) {
+                await taskStatusResult.job.remove();
+              }
+            } catch (error) {
+              logger.error(error);
+            }
+            reject('timeout');
+            clearInterval(timerId);
+          }
+        }
+        index++;
+      }, 2000);
+      context.request.socket.on('close', async () => {
+        if (!resultSuccess) {
+          setTimeout(async () => {
+            logger.info('---------------- client closed connection! ----------------');
+            try {
+              if (await taskStatusResult.job.isWaiting()) {
+                await taskStatusResult.job.remove();
+              }
+            } catch (error) {
+              logger.error(error);
+            }
+            reject('timeout');
+            clearInterval(timerId);
+          }, 1000);
+        }
+      });
+    });
   }
 
   async txt2imgAsync(context: Context) {
+    const user = await this.getAccountId(context);
     const requestBody = context.request.body;
-    responseHandler.success(context, await this.sdService.taskSubmit(requestBody, 0));
+    responseHandler.success(
+      context,
+      (await this.sdService.taskSubmit(requestBody, NodeTaskType.Txt2img, user!.honorAmount, user!.id)).taskStatus,
+    );
   }
 
   async img2imgAsync(context: Context) {
+    const user = await this.getAccountId(context);
     const requestBody = context.request.body;
-    responseHandler.success(context, await this.sdService.taskSubmit(requestBody, 1));
+    responseHandler.success(
+      context,
+      (await this.sdService.taskSubmit(requestBody, NodeTaskType.Img2img, user!.honorAmount, user!.id)).taskStatus,
+    );
+  }
+
+  async interrogateAsync(context: Context) {
+    const user = await this.getAccountId(context);
+    const requestBody = context.request.body;
+    responseHandler.success(
+      context,
+      (await this.sdService.taskSubmit(requestBody, NodeTaskType.Interrogate, user!.honorAmount, user!.id)).taskStatus,
+    );
   }
 
   async taskStatus(context: Context) {
@@ -44,6 +122,12 @@ export default class SdControler {
     responseHandler.success(context, taskStatistics);
   }
 
+  private async getAccountId(context: Context) {
+    const userId = context.session?.authUserInfo?.id;
+    const apiKey = context.request.headers?.authorization?.replace('Bearer ', '') as string;
+    return _.isNil(userId) ? await this.userService.getByApiKey(apiKey) : await this.userService.getById(userId);
+  }
+
   router() {
     const router = new Router({ prefix: '/sd' });
     router.post('/txt2img', this.txt2img.bind(this));
@@ -51,8 +135,10 @@ export default class SdControler {
     router.post('/interrogate', this.interrogate.bind(this));
     router.post('/txt2img/async', this.txt2imgAsync.bind(this));
     router.post('/img2img/async', this.img2imgAsync.bind(this));
+    router.post('/interrogate/async', this.interrogateAsync.bind(this));
     router.post('/task/status', this.taskStatus.bind(this));
     router.post('/statistics', this.taskStatistics.bind(this));
+    router.get('/statistics', this.taskStatistics.bind(this));
     return router;
   }
 }

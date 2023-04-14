@@ -1,12 +1,18 @@
-import { gatewayParamsToWebUI_xxx2img, gatewayParamsToWebUI_interrogate, Xxx2ImgType } from './utils/ParamConvert';
+import { gatewayParamsToWebUI_xxx2img, gatewayParamsToWebUI_interrogate } from './utils/ParamConvert';
 import NodeService from './NodeService';
-import { Context } from 'koa';
+import { Context, Next } from 'koa';
 import responseHandler, { ErrorCode, SdcnError, StatusCode } from '../utils/responseHandler';
 import { NodeTask } from '../models';
 import { RedisService, NodeTaskRepository } from '../repositories';
 import { JsonObject } from '../utils/json';
 import _ from 'lodash';
 import logger from '../utils/logger';
+import HonorService from './HonorService';
+import { NodeTaskStatus, NodeTaskType } from '../models/enum';
+import Redis from 'ioredis';
+import { Job, Queue, Worker } from 'bullmq';
+import config from '../config';
+import calculateTaskPriority from '../utils/taskPriority';
 
 const kXxx2ImgHttpPath = ['/sdapi/v1/txt2img', '/sdapi/v1/img2img'];
 const kInterrogateHttpPath = '/sdapi/v1/interrogate';
@@ -15,19 +21,28 @@ export default class SdService {
   nodeService: NodeService;
   redisService: RedisService;
   nodeTaskRepository: NodeTaskRepository;
+  honorService: HonorService;
   concurrency: number;
-  queueSize = 0;
+  taskQueue: Queue;
+  redis: Redis;
+  taskQueueName = 'task-queue';
 
   constructor(inject: {
     nodeService: NodeService;
     nodeTaskRepository: NodeTaskRepository;
     redisService: RedisService;
+    honorService: HonorService;
+    redis: Redis;
   }) {
     this.nodeService = inject.nodeService;
     this.nodeTaskRepository = inject.nodeTaskRepository;
     this.redisService = inject.redisService;
+    this.honorService = inject.honorService;
     this.concurrency = 8;
-    this.schedule();
+    this.redis = inject.redis;
+    this.taskQueue = new Queue(this.taskQueueName, { connection: inject.redis });
+    this.queueProcess();
+    this.timerReorderTask();
   }
 
   private async getNextWorkerNode(): Promise<{ workerAddress: string | null; nodeId: string | null }> {
@@ -38,59 +53,11 @@ export default class SdService {
     return { workerAddress, nodeId };
   }
 
-  // handerType:
-  //      0 --> txt2img
-  //      1 --> img2img
-  private async xxx2img(context: Context, handlerType: number): Promise<void> {
-    const requestBody = context.request.body;
-    const { model } = requestBody;
-    const nodeTask = await this.saveNodeTask(model, handlerType);
-    const webuiParams = gatewayParamsToWebUI_xxx2img(requestBody, handlerType);
-    const resultObj = await this.executeImageGenerateTask({
-      taskId: nodeTask.id,
-      taskType: handlerType,
-      taskParams: webuiParams,
-    });
-    responseHandler.success(context, resultObj);
-  }
-
-  async txt2img(context: Context) {
-    await this.xxx2img(context, Xxx2ImgType.kTxt);
-  }
-
-  async img2img(context: Context) {
-    await this.xxx2img(context, Xxx2ImgType.kImg);
-  }
-
-  async interrogate(context: Context) {
-    const { workerAddress, nodeId } = await this.getNextWorkerNode();
-
-    const params = gatewayParamsToWebUI_interrogate(context.request.body);
-    if (!params) {
-      throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid data');
-    }
-
-    const reqInit: RequestInit = {
-      body: JSON.stringify(params),
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-    };
-    const upstreamRes: globalThis.Response = await fetch(workerAddress + kInterrogateHttpPath, reqInit);
-    const status = upstreamRes.status;
-    if (status !== 200) {
-      throw new SdcnError(StatusCode.InternalServerError, ErrorCode.UpstreamError, `Upstream response ${status}`);
-    }
-
-    const upstreamResObj = await upstreamRes.json();
-    this.nodeService.increaseTasksHandled(nodeId as string);
-    responseHandler.success(context, { caption: upstreamResObj.caption });
-  }
-
   private async saveNodeTask(model: string, taskType: number): Promise<NodeTask> {
     const nodeTask = {
       model,
       taskType,
-      status: 0,
+      status: NodeTaskStatus.Pending,
       createTime: new Date(),
       lastModifyTime: new Date(),
     } as NodeTask;
@@ -99,21 +66,47 @@ export default class SdService {
     return nodeTask;
   }
 
-  async taskSubmit(requestBody: JsonObject, handlerType: number) {
-    const { model } = requestBody;
-    const taskInfo = gatewayParamsToWebUI_xxx2img(requestBody, handlerType);
+  async taskSubmit(requestBody: JsonObject, handlerType: number, honorAmount: bigint, userId: bigint) {
+    const taskCount = await this.redisService.getUserTaskCount(userId);
+    if (!_.isNil(taskCount) && Number(taskCount) >= 10) {
+      throw new SdcnError(
+        StatusCode.BadRequest,
+        ErrorCode.taskWaitingExceededLimit,
+        'the number of tasks waiting has exceeded 10',
+      );
+    }
 
+    let taskInfo: JsonObject;
+    let priority: number;
+    if (handlerType == NodeTaskType.Txt2img || handlerType == NodeTaskType.Img2img) {
+      taskInfo = gatewayParamsToWebUI_xxx2img(requestBody, handlerType);
+      const { width, height, step } = taskInfo!;
+      priority =
+        1 - calculateTaskPriority(Number(honorAmount), 1, _.toNumber(width), _.toNumber(height), _.toNumber(step));
+    } else if (handlerType == NodeTaskType.Interrogate) {
+      taskInfo = gatewayParamsToWebUI_interrogate(requestBody);
+      priority = 1 - calculateTaskPriority(Number(honorAmount), 1, 1, 1, 1);
+    }
+
+    const { model } = requestBody;
     const nodeTask = await this.saveNodeTask(model as string, handlerType);
-    await this.redisService.pushToTaskQueue(nodeTask.id, {
-      taskId: nodeTask.id,
-      taskType: handlerType,
-      taskParams: taskInfo,
-    });
-    return {
-      status: 0,
-      taskId: nodeTask.id,
-      queuePosition: await this.redisService.lengthTaskQueue(),
-    };
+    const taskStatusResult = { taskId: nodeTask.id, queuePosition: 50, status: NodeTaskStatus.Pending };
+    await this.redisService.updateTaskStatus([taskStatusResult]);
+
+    const job = await this.taskQueue.add(
+      this.taskQueueName,
+      {
+        taskId: nodeTask.id,
+        taskType: handlerType,
+        taskParams: taskInfo!,
+        userId: userId,
+        submitTime: new Date().getTime(),
+        honorAmount: honorAmount,
+      },
+      { priority: priority! },
+    );
+    await this.redisService.userTaskCounterIncr(userId);
+    return { taskStatus: taskStatusResult, job };
   }
 
   async taskStatus(taskId: string) {
@@ -135,12 +128,48 @@ export default class SdService {
     return { totalCount, countInLast24Hours, countInLastWeek };
   }
 
+  private async executeTaskWrapper(taskInfo: JsonObject) {
+    const { taskId, taskType } = taskInfo;
+    try {
+      let taskStatusResult: { taskId: string; queuePosition: number; status: number };
+      if (taskType == NodeTaskType.Txt2img || taskType == NodeTaskType.Img2img) {
+        taskStatusResult = await this.executeImageGenerateTask(taskInfo);
+      } else if (taskType == NodeTaskType.Interrogate) {
+        taskStatusResult = await this.executeInterrogateTask(taskInfo);
+      }
+      await this.redisService.updateTaskStatus([taskStatusResult!]);
+      await this.nodeTaskRepository.updateStatus({
+        id: taskStatusResult!.taskId,
+        status: taskStatusResult!.status,
+        finishTime: new Date(),
+      } as NodeTask);
+      await this.redisService.userTaskCounterDecr(BigInt(taskInfo.userId as string));
+      await this.rewardHonorForTask(taskId as string);
+    } catch (error) {
+      logger.error(`task error: ${taskId}`);
+      logger.error(error);
+      await this.redisService.updateTaskStatus([
+        {
+          taskId: taskId as string,
+          queuePosition: 0,
+          status: NodeTaskStatus.Failure,
+        },
+      ]);
+      await this.nodeTaskRepository.updateStatus({ id: taskId, status: 3, finishTime: new Date() } as NodeTask);
+      await this.redisService.userTaskCounterDecr(BigInt(taskInfo.userId as string));
+      throw error;
+    }
+  }
+
   private async executeImageGenerateTask(taskInfo: JsonObject) {
     const { workerAddress, nodeId } = await this.getNextWorkerNode();
 
     const { taskId, taskType, taskParams } = taskInfo;
-    this.nodeTaskRepository.updateNodeSeqAndStatus({ id: taskId, status: 1, nodeSeq: _.toNumber(nodeId) } as NodeTask);
-    this.redisService.pushToTaskQueueProcessing(taskId as string);
+    await this.nodeTaskRepository.updateNodeSeqAndStatus({
+      id: taskId as string,
+      status: NodeTaskStatus.Processing,
+      nodeSeq: BigInt(nodeId!),
+    } as NodeTask);
 
     const reqInit: RequestInit = {
       body: JSON.stringify(taskParams),
@@ -161,61 +190,131 @@ export default class SdService {
     const images = resultObj.images;
     let taskStatus: number;
     if (_.isNaN(images) || _.isNull(images) || _.isEmpty(images)) {
-      taskStatus = 3;
+      taskStatus = NodeTaskStatus.Failure;
     } else {
-      taskStatus = 2;
+      taskStatus = NodeTaskStatus.Success;
     }
-    this.nodeTaskRepository.updateStatus({ id: taskId, status: taskStatus, finishTime: new Date() } as NodeTask);
-    this.redisService.popFromTaskQueueProcessing(taskId as string, {
-      taskId,
-      status: taskStatus,
+    const taskStatusResult = {
+      taskId: taskId as string,
       queuePosition: 0,
-      images: images,
-    });
-
-    return _.omit(resultObj, 'info', 'parameters');
+      status: taskStatus,
+    };
+    return _.assign(taskStatusResult, _.omit(resultObj, 'info', 'parameters'));
   }
 
-  private async asyncTask(taskInfo: JsonObject) {
-    this.queueSize += 1;
-    const { taskId } = taskInfo;
-    try {
-      const result = await this.executeImageGenerateTask(taskInfo);
-      // logger.info(`task(${taskId}) result: ${JSON.stringify(result)}`);
-      this.queueSize -= 1;
-    } catch (error) {
-      logger.error(`task error: ${taskId}`);
-      logger.error(error);
-      this.nodeTaskRepository.updateStatus({ id: taskId, status: 3, finishTime: new Date() } as NodeTask);
-      this.redisService.popFromTaskQueueProcessing(taskId as string, {
-        taskId,
-        status: 3,
-        queuePosition: 0,
-        images: [],
-      });
-      this.queueSize -= 1;
+  private async executeInterrogateTask(taskInfo: JsonObject) {
+    const { workerAddress, nodeId } = await this.getNextWorkerNode();
+
+    const { taskId, taskParams } = taskInfo;
+    await this.nodeTaskRepository.updateNodeSeqAndStatus({
+      id: taskId as string,
+      status: NodeTaskStatus.Processing,
+      nodeSeq: BigInt(nodeId!),
+    } as NodeTask);
+
+    const reqInit: RequestInit = {
+      body: JSON.stringify(taskParams),
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    };
+    const upstreamRes: globalThis.Response = await fetch(workerAddress + kInterrogateHttpPath, reqInit);
+    const status = upstreamRes.status;
+    if (status !== 200) {
+      throw new SdcnError(StatusCode.InternalServerError, ErrorCode.UpstreamError, `Upstream response ${status}`);
     }
+
+    const resultObj = await upstreamRes.json();
+    this.nodeService.increaseTasksHandled(nodeId as string);
+
+    const caption = resultObj.caption;
+    let taskStatus: number;
+    if (_.isNil(caption)) {
+      taskStatus = NodeTaskStatus.Failure;
+    } else {
+      taskStatus = NodeTaskStatus.Success;
+    }
+    return {
+      taskId: taskId as string,
+      queuePosition: 0,
+      status: taskStatus,
+      caption: caption,
+    };
   }
 
-  schedule() {
-    setInterval(async () => {
-      // update task status
-      const taskIdList = await this.redisService.getAllTaskFromQueue();
-      if (taskIdList.length == 0) {
-        return;
-      }
-      const taskStatusArray = taskIdList.map((taskId, index) => {
-        return { taskId, queuePosition: index + 1, status: 0 };
-      });
-      await this.redisService.updateTaskStatus(taskStatusArray);
+  private async rewardHonorForTask(taskId: string) {
+    const nodeTask = await this.nodeTaskRepository.getById(taskId);
+    await this.honorService.rewardForTask({ taskId: taskId, nodeSeq: nodeTask!.nodeSeq });
+  }
 
-      // obtain idle workers
-      // logger.info(`---- queue: ${this.queueSize}, ${this.concurrency}, ${await this.redisService.lengthTaskQueue()}`);
-      const length = await this.redisService.lengthTaskQueue();
-      if (this.queueSize < this.concurrency && length > 0) {
-        const taskArray = await this.redisService.batchPopFromTaskQueue(this.concurrency - this.queueSize);
-        taskArray.forEach((task) => this.asyncTask(task));
+  queueProcess() {
+    const taskQueueWorker = new Worker(
+      this.taskQueueName,
+      async (job) => {
+        await this.executeTaskWrapper(job.data);
+      },
+      { connection: this.redis, concurrency: config.serverConfig.concurrencyForTask },
+    );
+    taskQueueWorker.on('completed', async (job) => {
+      // clear history task
+      await (await taskQueueWorker.client).del(taskQueueWorker.toKey(job.id!));
+    });
+    taskQueueWorker.on('failed', (_, error) => {
+      logger.error(error);
+    });
+  }
+
+  timerReorderTask() {
+    setInterval(async () => {
+      const jobs = await this.taskQueue.getJobs(['delayed', 'waiting'], 0, -1, false);
+      const waittingJobs = _.forEach(jobs, async (job) => {
+        if ((await job.isWaiting) || (await job.isDelayed())) {
+          try {
+            job.remove();
+            return true;
+          } catch (error) {
+            return false;
+          }
+        } else {
+          return false;
+        }
+      });
+      const jobDataWrappers = _.map(waittingJobs, (waittingJob) => {
+        const { taskType, taskParams, submitTime, honorAmount } = waittingJob.data;
+        const waitTime = (new Date().getTime() - _.toNumber(submitTime)) / 1000;
+        let priority: number;
+        if (taskType == NodeTaskType.Txt2img || taskType == NodeTaskType.Img2img) {
+          const { width, height, step } = taskParams!;
+          priority =
+            1 -
+            calculateTaskPriority(
+              Number(honorAmount),
+              waitTime,
+              _.toNumber(width),
+              _.toNumber(height),
+              _.toNumber(step),
+            );
+        } else if (taskType == NodeTaskType.Interrogate) {
+          priority = 1 - calculateTaskPriority(Number(honorAmount), waitTime, 1, 1, 1);
+        }
+
+        return {
+          jobData: waittingJob.data,
+          priority: priority!,
+        };
+      });
+
+      const taskStatusArray = _.map(_.sortBy(jobDataWrappers, ['priority'], ['desc']), (jobDataWrapper, index) => ({
+        taskId: jobDataWrapper.jobData.taskId,
+        queuePosition: index + 1,
+        status: NodeTaskStatus.Pending,
+      }));
+      if (!_.isEmpty(taskStatusArray)) {
+        this.redisService.updateTaskStatus(taskStatusArray);
       }
-    }, 1000 * 4);
+
+      _.forEach(jobDataWrappers, async (jobDataWrapper) => {
+        this.taskQueue.add(this.taskQueueName, jobDataWrapper.jobData, { priority: jobDataWrapper.priority! });
+      });
+    }, 2000);
   }
 }

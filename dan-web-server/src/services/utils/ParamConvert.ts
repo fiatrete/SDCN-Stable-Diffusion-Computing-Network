@@ -1,11 +1,7 @@
 import sdConfig from '../../config/sdConfig';
+import { NodeTaskType } from '../../models/enum';
 import logger from '../../utils/logger';
 import { ErrorCode, SdcnError, StatusCode } from '../../utils/responseHandler';
-
-enum Xxx2ImgType {
-  kTxt,
-  kImg,
-}
 
 function requireString(v: unknown, defaultValue: string | undefined): string | undefined {
   if (typeof v === 'string') {
@@ -154,7 +150,7 @@ function convertInpaintParams(webuiParams: DictionaryLike, inpaintParams: Dictio
 // reqType:
 //  0 --> txt2img
 //  1 --> img2img
-function gatewayParamsToWebUI_xxx2img(gatewayParams: DictionaryLike, reqType: Xxx2ImgType): DictionaryLike {
+function gatewayParamsToWebUI_xxx2img(gatewayParams: DictionaryLike, nodeTaskType: NodeTaskType): DictionaryLike {
   const webuiParams: DictionaryLike = {
     prompt: requireString(gatewayParams.prompt, undefined),
     seed: requireNumberOr(gatewayParams.seed, -1),
@@ -205,7 +201,7 @@ function gatewayParamsToWebUI_xxx2img(gatewayParams: DictionaryLike, reqType: Xx
 
   webuiParams.alwayson_scripts = convertPluginParams(gatewayParams);
 
-  if (reqType === Xxx2ImgType.kTxt) {
+  if (nodeTaskType === NodeTaskType.Txt2img) {
     if (typeof gatewayParams.upscale === 'object') {
       const upscale = gatewayParams.upscale;
       webuiParams.enable_hr = true;
@@ -216,7 +212,7 @@ function gatewayParamsToWebUI_xxx2img(gatewayParams: DictionaryLike, reqType: Xx
         throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid upscaler');
       }
     }
-  } else if (reqType === Xxx2ImgType.kImg) {
+  } else if (nodeTaskType === NodeTaskType.Img2img) {
     const initImg = requireString(gatewayParams.init_image, undefined);
     webuiParams.denoising_strength = requireNumberRangeOr(gatewayParams.denoising_strength, 0, 1, 0.5);
     if (initImg === undefined) {
@@ -245,4 +241,4 @@ function gatewayParamsToWebUI_interrogate(gatewayParams: DictionaryLike): Dictio
   return webuiParams;
 }
 
-export { gatewayParamsToWebUI_xxx2img, gatewayParamsToWebUI_interrogate, Xxx2ImgType };
+export { gatewayParamsToWebUI_xxx2img, gatewayParamsToWebUI_interrogate };

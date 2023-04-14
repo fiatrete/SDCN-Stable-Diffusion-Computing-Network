@@ -26,12 +26,12 @@
   "devDependencies": {
     "@types/jest": "^29.5.0",
     "@types/koa-bodyparser": "^4.3.10",
-    "@types/koa-cors": "^0.0.2",
     "@types/koa-csrf": "^5.0.1",
     "@types/koa-router": "^7.4.4",
     "@types/koa-session": "^6.4.0",
     "@types/lodash": "^4.14.191",
     "@types/node": "^18.15.5",
+    "@types/randomstring": "^1.1.8",
     "@typescript-eslint/eslint-plugin": "^5.56.0",
     "@typescript-eslint/parser": "^5.56.0",
     "eslint": "^8.36.0",
@@ -51,6 +51,7 @@
     "alchemy-sdk": "^2.6.2",
     "awilix": "^8.0.0",
     "awilix-koa": "^9.0.0",
+    "bullmq": "^3.10.4",
     "db-migrate": "^0.11.13",
     "dotenv": "^16.0.3",
     "ioredis": "^5.3.1",
@@ -62,7 +63,6 @@
     "koa-body": "^6.0.1",
     "koa-bodyparser": "^4.4.0",
     "koa-compose": "^4.1.0",
-    "koa-cors": "^0.0.16",
     "koa-csrf": "^5.0.1",
     "koa-favicon": "^2.1.0",
     "koa-jwt": "^4.0.4",
@@ -75,6 +75,7 @@
     "path": "^0.12.7",
     "pg": "^8.10.0",
     "querystring": "^0.2.1",
+    "randomstring": "^1.2.3",
     "raw-body": "^2.5.2"
   }
 }
