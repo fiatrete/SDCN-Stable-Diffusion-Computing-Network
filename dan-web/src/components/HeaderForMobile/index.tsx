@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useState } from 'react'
-import { Button, Collapse, Image, Modal, message } from 'antd'
+import React, { useCallback, useState } from 'react'
+import { Button, Collapse, Image, Modal } from 'antd'
 import cx from 'classnames'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { observer } from 'mobx-react-lite'
@@ -31,24 +31,12 @@ const Header = () => {
     showSignModel()
   }, [showSignModel])
 
-  const { updateUser, logout } = useUser()
-
-  const updateUserInfo = useCallback(async () => {
-    await updateUser()
-
-    if (userStore.user.firstTimeLogin) {
-      message.success(`100 honors as a gift for your registration`)
-    }
-  }, [updateUser])
+  const { logout } = useUser()
 
   const userLogout = useCallback(() => {
     logout()
     navigate('/')
   }, [logout, navigate])
-
-  useEffect(() => {
-    updateUserInfo()
-  }, [updateUserInfo])
 
   const avatarElement = useCallback(
     () => (
