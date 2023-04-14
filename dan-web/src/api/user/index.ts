@@ -53,7 +53,7 @@ export async function rewardHonor(
       )
       .then((resp) => {
         if (resp.data.code === config.getSuccessCode()) {
-          resolve(true)
+          resolve(resp.data.data.success)
         } else {
           reject(new Error(`Failed: ${resp.data.code}`))
         }

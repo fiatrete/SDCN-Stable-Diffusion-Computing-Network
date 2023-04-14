@@ -37,11 +37,7 @@ root.render(
           path='reward'
           element={
             <CheckAuth>
-              {/* 
-              // FIXME:
-              <CheckRole userRole={1}> 
-              */}
-              <CheckRole userRole={0}>
+              <CheckRole userRole={1}>
                 <Reward />
               </CheckRole>
             </CheckAuth>

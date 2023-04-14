@@ -1,5 +1,5 @@
 import React from 'react'
-import { Button, Image, Input, Space, Tabs, message } from 'antd'
+import { Button, Input, Space, Tabs, message } from 'antd'
 import cx from 'classnames'
 import copy from 'copy-text-to-clipboard'
 import { observer } from 'mobx-react-lite'
