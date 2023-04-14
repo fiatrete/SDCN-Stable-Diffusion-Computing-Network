@@ -5,6 +5,7 @@ import { Button, Form, Input, InputNumber, message } from 'antd'
 import styles from './index.module.css'
 
 import * as userApi from 'api/user'
+import useUser from 'hooks/useUser'
 
 interface FormValues {
   uid: string
@@ -13,25 +14,32 @@ interface FormValues {
 
 const Reward = () => {
   const [form] = Form.useForm<FormValues>()
+  const { updateUser } = useUser()
 
-  const handleFormFinish = useCallback((values: FormValues) => {
-    console.log('handleFormFinish', values)
-    userApi
-      .rewardHonor(values.uid, values.count)
-      .then((result) => {
-        if (result === true) {
-          message.success('Success')
-        } else {
+  const handleFormFinish = useCallback(
+    (values: FormValues) => {
+      console.log('handleFormFinish', values)
+      userApi
+        .rewardHonor(values.uid, values.count)
+        .then((result) => {
+          if (result === true) {
+            message.success('Success')
+
+            updateUser()
+          } else {
+            message.error('Failed')
+          }
+        })
+        .catch((e) => {
+          console.error(e)
           message.error('Failed')
-        }
-      })
-      .catch((e) => {
-        message.error('Failed')
-      })
-      .finally(() => {
-        //
-      })
-  }, [])
+        })
+        .finally(() => {
+          //
+        })
+    },
+    [updateUser],
+  )
 
   return (
     <div className={cx(styles.wrap)}>
