@@ -28,6 +28,7 @@ class Persist {
             role: 0,
             honorAmount: 0,
             apiKey: '',
+            firstTimeLogin: false,
           }
     } else {
       return {
@@ -37,6 +38,7 @@ class Persist {
         role: 0,
         honorAmount: 0,
         apiKey: '',
+        firstTimeLogin: false,
       }
     }
   }

@@ -14,8 +14,7 @@ class UserStore {
   }
 
   get isLoggedIn() {
-    return true
-    // return this._user.email !== ''
+    return this._user.email !== ''
   }
 
   updateUser(u: Partial<User>) {
@@ -36,6 +35,7 @@ class UserStore {
       role: 0,
       honorAmount: 0,
       apiKey: '',
+      firstTimeLogin: false,
     }
   }
 }
