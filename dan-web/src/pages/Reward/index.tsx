@@ -6,6 +6,7 @@ import styles from './index.module.css'
 
 import * as userApi from 'api/user'
 import useUser from 'hooks/useUser'
+import uiStore from 'stores/uiStore'
 
 interface FormValues {
   uid: string
@@ -48,7 +49,7 @@ const Reward = () => {
           Reward Honor
         </h3>
         <Form
-          className={cx('mt-8 w-[520px]')}
+          className={cx('mt-8 w-2/3')}
           form={form}
           size='large'
           labelCol={{ span: 4 }}

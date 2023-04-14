@@ -33,6 +33,8 @@ function App() {
       } else {
         uiStore.isMobile = false
       }
+
+      console.log('isMobile', uiStore.isMobile)
     }
 
     handleWindowResize()
