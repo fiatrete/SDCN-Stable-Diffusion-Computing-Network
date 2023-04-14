@@ -1,76 +1,49 @@
 import React, { useCallback, useEffect } from 'react'
-import { Avatar, Button, Image, Popover } from 'antd'
+import { Button, Image, Popover, message } from 'antd'
 import cx from 'classnames'
-import { Link, NavLink } from 'react-router-dom'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { observer } from 'mobx-react-lite'
-import { LogoutOutlined, UserOutlined } from '@ant-design/icons'
-import { AxiosError } from 'axios'
-import to from 'await-to-js'
+import {
+  CrownOutlined,
+  GiftOutlined,
+  LogoutOutlined,
+  UserOutlined,
+} from '@ant-design/icons'
 
 import logo from 'assets/images/logo.svg'
 
-import { User } from 'typings/User'
 import styles from './index.module.css'
 import useSignInModal from 'hooks/useSignModal'
 import userStore from 'stores/userStore'
-import * as userApi from 'api/user'
+import useUser from 'hooks/useUser'
+import UserAvatar from 'components/UserAvatar'
 
 const Header = () => {
   const { showSignModel } = useSignInModal()
+  const navigate = useNavigate()
 
   const signInHandler = useCallback(() => {
     showSignModel()
   }, [showSignModel])
 
+  const { updateUser, logout } = useUser()
+
   const updateUserInfo = useCallback(async () => {
-    const [_userInfoError, _userInfo] = await to<User, AxiosError>(
-      userApi.userInfo(),
-    )
+    await updateUser()
 
-    if (_userInfoError !== null) {
-      console.error('updateUserInfoError', _userInfoError)
-      userStore.reset()
-      return
+    if (userStore.user.firstTimeLogin) {
+      message.success(`100 honors as a gift for your registration`)
     }
+  }, [updateUser])
 
-    userStore.updateUser(_userInfo)
-  }, [])
+  const userLogout = useCallback(() => {
+    logout()
+    navigate('/')
+  }, [logout, navigate])
 
   useEffect(() => {
     updateUserInfo()
   }, [updateUserInfo])
-
-  const avatarElement = useCallback(() => {
-    const user = userStore.user
-    if (user.avatarImgUrl) {
-      return <Avatar src={user.avatarImgUrl} />
-    } else if (user.nickname.length > 0) {
-      return (
-        <Avatar style={{ backgroundColor: '#40A9FF' }}>
-          {user.nickname[0]}
-        </Avatar>
-      )
-    } else {
-      return (
-        <Avatar
-          style={{ backgroundColor: '#40A9FF' }}
-          icon={<UserOutlined />}
-        />
-      )
-    }
-  }, [])
-
-  const logoutButton = (
-    <Button
-      type='text'
-      icon={<LogoutOutlined />}
-      onClick={() => {
-        userStore.reset()
-      }}
-    >
-      Logout
-    </Button>
-  )
 
   return (
     <div className={cx('sticky top-0', styles.wrap)}>
@@ -128,8 +101,58 @@ const Header = () => {
         </nav>
         <div className={cx('flex items-center gap-x-6', styles.right)}>
           {userStore.isLoggedIn ? (
-            <Popover content={logoutButton} placement='bottomRight'>
-              {avatarElement()}
+            <Popover
+              content={
+                <div className={cx('flex flex-col items-start')}>
+                  <div className={cx('w-full text-lef px-4 py-1')}>
+                    <CrownOutlined />
+                    <span className={cx('ml-2')}>
+                      Honor: {userStore.user.honorAmount}
+                    </span>
+                  </div>
+                  <Button
+                    type='text'
+                    className={cx('w-full text-left')}
+                    block
+                    icon={<UserOutlined />}
+                    onClick={() => {
+                      navigate('/account')
+                    }}
+                  >
+                    Account
+                  </Button>
+                  {userStore.user.role === 1 && (
+                    <Button
+                      type='text'
+                      className={cx('w-full text-left')}
+                      icon={<GiftOutlined />}
+                      onClick={() => {
+                        navigate('/reward')
+                      }}
+                    >
+                      Reward
+                    </Button>
+                  )}
+                  <Button
+                    type='text'
+                    className={cx('w-full text-left')}
+                    icon={<LogoutOutlined />}
+                    onClick={() => {
+                      userLogout()
+                    }}
+                  >
+                    Logout
+                  </Button>
+                </div>
+              }
+              placement='bottomRight'
+            >
+              <div className={cx('flex items-center gap-3')}>
+                <UserAvatar user={userStore.user} />
+                <div className={cx('h-min font-bold')}>
+                  {userStore.user.nickname}
+                </div>
+              </div>
             </Popover>
           ) : (
             <Button type='primary' onClick={signInHandler}>
