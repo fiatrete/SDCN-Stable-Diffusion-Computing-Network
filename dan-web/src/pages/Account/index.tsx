@@ -7,6 +7,7 @@ import { CopyOutlined } from '@ant-design/icons'
 
 import styles from './index.module.css'
 import userStore from 'stores/userStore'
+import UserAvatar from 'components/UserAvatar'
 
 const Account = () => {
   return (
@@ -14,12 +15,7 @@ const Account = () => {
       <div className={cx(styles.content)}>
         <div className={cx('flex gap-7 items-center')}>
           <div className={cx('rounded-full overflow-hidden w-[128px]')}>
-            <Image
-              width={128}
-              height={128}
-              preview={false}
-              src={userStore.user.avatarImgUrl}
-            />
+            <UserAvatar user={userStore.user} size={128} />
           </div>
           <div>
             <h3 className={cx('font-medium text-2xl text-black mb-0')}>
@@ -58,8 +54,19 @@ const Account = () => {
                       type='default'
                       icon={<CopyOutlined />}
                       onClick={() => {
-                        copy(userStore.user.apiKey)
-                        message.success('Secret key copied to clipboard')
+                        // if (userStore.user.apiKey) {
+                        //   copy(userStore.user.apiKey)
+                        //   message.success('Secret key copied to clipboard')
+                        // } else {
+                        //   message.error('')
+                        // }
+                        try {
+                          copy(userStore.user.apiKey)
+                          message.success('API Key copied to clipboard')
+                        } catch (error) {
+                          console.error(error)
+                          message.error('An error has occurred')
+                        }
                       }}
                     />
                   </Space.Compact>

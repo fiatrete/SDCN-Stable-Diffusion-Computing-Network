@@ -49,10 +49,15 @@ const Reward = () => {
           onFinish={handleFormFinish}
         >
           <Form.Item name='uid' label='Uid' rules={[{ required: true }]}>
-            <Input />
+            <Input placeholder='uid' />
           </Form.Item>
           <Form.Item name='count' label='Count' rules={[{ required: true }]}>
-            <InputNumber className={cx('w-full')} controls={false} min={0} />
+            <InputNumber
+              className={cx('w-full')}
+              controls={false}
+              min={0}
+              placeholder='Amount of honor'
+            />
           </Form.Item>
           <Form.Item wrapperCol={{ offset: 4 }}>
             <Button type='primary' htmlType='submit'>
