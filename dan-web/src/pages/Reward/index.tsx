@@ -6,7 +6,6 @@ import styles from './index.module.css'
 
 import * as userApi from 'api/user'
 import useUser from 'hooks/useUser'
-import uiStore from 'stores/uiStore'
 
 interface FormValues {
   uid: string
