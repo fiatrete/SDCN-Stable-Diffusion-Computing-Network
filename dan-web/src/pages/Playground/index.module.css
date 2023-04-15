@@ -5,16 +5,25 @@
   padding: 0px 60px;
 }
 
+.wrapForMobile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0px 16px;
+}
+
 .tabs {
   width: 100%;
   max-width: 1320px;
   padding: 48px 0;
 }
 
-.tabs :global(.ant-tabs-nav-wrap) {
-  padding-left: 46px;
+.tabsForMobile {
+  width: 100%;
+  max-width: 1320px;
+  padding: 16px 0;
 }
 
-.tabs :global(.ant-tabs-content-holder) {
+.tabs :global(.ant-tabs-nav-wrap) {
   padding-left: 46px;
 }

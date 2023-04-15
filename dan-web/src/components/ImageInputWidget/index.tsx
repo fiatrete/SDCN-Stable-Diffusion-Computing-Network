@@ -106,7 +106,7 @@ const ImageInputWidget = forwardRef<ImageInputWidgetRefHandle, propTypes>(
           ) : (
             <div
               className={cx(
-                'w-full h-0 pt-[50%] pb-[50%]',
+                'w-full h-[200px]',
                 styles.border_type,
                 'bg-[#FAFAFA]',
                 'flex flex-col items-center justify-center gap-4',
