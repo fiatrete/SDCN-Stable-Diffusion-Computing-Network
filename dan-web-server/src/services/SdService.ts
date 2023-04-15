@@ -72,7 +72,7 @@ export default class SdService {
       throw new SdcnError(
         StatusCode.BadRequest,
         ErrorCode.taskWaitingExceededLimit,
-        'the number of pending tasks has exceeded the limit.',
+        'the number of pending tasks has exceeded the limit',
       );
     }
 
@@ -103,7 +103,7 @@ export default class SdService {
         submitTime: new Date().getTime(),
         honorAmount: honorAmount,
       },
-      { priority: priority! },
+      { priority: priority!, removeOnComplete: true, removeOnFail: true },
     );
     await this.redisService.userTaskCounterIncr(userId);
     return { taskStatus: taskStatusResult, job };
@@ -256,7 +256,7 @@ export default class SdService {
     );
     taskQueueWorker.on('completed', async (job) => {
       // clear history task
-      await (await taskQueueWorker.client).del(taskQueueWorker.toKey(job.id!));
+      // await (await taskQueueWorker.client).del(taskQueueWorker.toKey(job.id!));
     });
     taskQueueWorker.on('failed', (_, error) => {
       logger.error(error);
