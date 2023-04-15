@@ -13,6 +13,7 @@ export enum HonorRecordType {
   Transfer = 1,
   RewardOnline = 2,
   RewardTask = 3,
+  PresentBySystem = 4,
 }
 export function getHonorRecordType(num: number) {
   return _.findKey(HonorRecordType, (value) => value === num);

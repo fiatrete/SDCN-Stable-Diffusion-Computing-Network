@@ -45,6 +45,7 @@ app.use(errorHandler);
   container.resolve<UserController>('userController').router(),
   container.resolve<NodeControler>('nodeController').router(),
   container.resolve<SdControler>('sdController').router(),
+  container.resolve<SdControler>('walletController').router(),
 ].forEach((subRouter) => {
   router.use('/api', subRouter.routes()).use('/api', subRouter.allowedMethods());
 });

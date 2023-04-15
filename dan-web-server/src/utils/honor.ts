@@ -1,4 +1,4 @@
-function transferToTenThousandth(amount: bigint): bigint {
+function transferToTenThousandth(amount: number): bigint {
   return BigInt(Number(amount) * Number(100));
 }
 

@@ -14,6 +14,7 @@ import SdService from '../services/SdService';
 import UserService from '../services/UserService';
 import database from '../utils/database';
 import { HonorService } from '../services';
+import WalletController from '../controllers/WalletController';
 
 const container = createContainer();
 
@@ -78,6 +79,9 @@ container.register({
     .singleton(),
   sdController: asClass(SdControler)
     .inject(() => ({ sdService: container.resolve<SdService>('sdService') }))
+    .singleton(),
+  walletController: asClass(WalletController)
+    .inject(() => ({ honorService: container.resolve<HonorService>('honorService') }))
     .singleton(),
 });
 

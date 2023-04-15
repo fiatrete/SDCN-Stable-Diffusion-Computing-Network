@@ -127,13 +127,23 @@ Cookie: {{cookie}}
 
 
 ### transfer
-POST {{hostname}}/api/user/transfer-honor
+POST {{hostname}}/api/wallet/transfer-honor
+Content-Type: application/json
+Cookie: {{cookie}}
+
+{
+  "userId": "2",
+  "amount": 100
+}
+
+### present by system
+POST {{hostname}}/api/wallet/present-honor
 Content-Type: application/json
 Cookie: {{cookie}}
 
 {
   "userId": "1",
-  "amount": 1
+  "amount": 10000
 }
 
 ### mine summary

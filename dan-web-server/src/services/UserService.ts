@@ -3,7 +3,6 @@ import { RedisService, UserRepository } from '../repositories';
 import logger from '../utils/logger';
 import _ from 'lodash';
 import randomstring from 'randomstring';
-import { SdcnError, StatusCode, ErrorCode } from '../utils/responseHandler';
 import { Knex } from 'knex';
 import { HonorRecordType, RoleType } from '../models/enum';
 import HonorService from './HonorService';
@@ -68,21 +67,6 @@ export default class UserService {
 
   async world() {
     return await this.userRepository.getAll();
-  }
-
-  async transferHonor(payerId: bigint, payeeId: bigint, amount: bigint) {
-    if (payerId == payeeId) {
-      throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'cannot transfer honor to yourself.');
-    }
-    const payer = await this.userRepository.getById(payerId);
-    if (payer!.role != 1) {
-      throw new SdcnError(StatusCode.Forbidden, ErrorCode.PermissionDenied, 'permission denied');
-    }
-    const payee = await this.userRepository.getById(payeeId);
-    if (_.isNil(payee)) {
-      throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'payeeId not exist');
-    }
-    await this.honorService.transferHonor(payerId, payeeId, amount);
   }
 
   async getByApiKey(apiKey: string) {

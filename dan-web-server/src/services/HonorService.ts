@@ -74,13 +74,42 @@ export default class HonorService {
     await this.mintHonor(node!.accountId, HonorRecordType.RewardTask, task.nodeSeq, task.taskId);
   }
 
-  async transferHonor(payerId: bigint, payeeId: bigint, amount: bigint) {
-    const transferHonorAmount = honor.transferToTenThousandth(amount);
+  async mintHonorBySys(payeeId: bigint, amount: number) {
+    const payee = await this.userRepository.getById(payeeId);
+    if (_.isNil(payee)) {
+      throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'payee not exist');
+    }
+
+    const mintHonorAmount = honor.transferToTenThousandth(amount);
+    const honorRecord = {
+      accountId: payeeId,
+      type: HonorRecordType.PresentBySystem,
+      amount: mintHonorAmount,
+      createTime: new Date(),
+    } as HonorRecord;
+    await this.honorRecordRepository.save(honorRecord);
+
+    const user = await this.userRepository.getById(payeeId);
+    await this.userRepository.updateHonorAmount(BigInt(mintHonorAmount) + BigInt(user!.honorAmount), user!);
+  }
+
+  async transferHonor(payerId: bigint, payeeId: bigint, amount: number) {
+    if (payerId == payeeId) {
+      throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'cannot transfer honor to yourself.');
+    }
     const payer = await this.userRepository.getById(payerId);
+    if (payer!.role != 1) {
+      throw new SdcnError(StatusCode.Forbidden, ErrorCode.PermissionDenied, 'permission denied');
+    }
+    const payee = await this.userRepository.getById(payeeId);
+    if (_.isNil(payee)) {
+      throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'payee not exist');
+    }
+
+    const transferHonorAmount = honor.transferToTenThousandth(amount);
     if (payer!.honorAmount < transferHonorAmount) {
       throw new SdcnError(StatusCode.BadRequest, ErrorCode.NotSufficientHonor, 'not sufficient honor');
     }
-    const payee = await this.userRepository.getById(payeeId);
 
     const payerUpdateRows = await this.userRepository.updateHonorAmount(
       BigInt(payer!.honorAmount) - BigInt(transferHonorAmount),

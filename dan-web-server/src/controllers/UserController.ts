@@ -103,20 +103,6 @@ export default class UserControler {
     responseHandler.success(context, accountInfoList);
   }
 
-  @RequireLoginAsync
-  async transferHonor(context: Context) {
-    const userInfo = context.session?.authUserInfo as AuthUserInfo;
-    logger.debug('userInfo', userInfo);
-    if (userInfo.id === undefined) {
-      throw new SdcnError(StatusCode.Forbidden, ErrorCode.PermissionDenied, 'Permission Denied');
-    }
-    const currentUserId = userInfo.id;
-
-    const { userId, amount } = context.request.body;
-    await this.userService.transferHonor(currentUserId, userId, amount);
-    responseHandler.success(context, { success: true });
-  }
-
   async getPublicApiKey(context: Context) {
     responseHandler.success(context, await this.userService.getPublicApiKey());
   }
@@ -127,7 +113,6 @@ export default class UserControler {
     router.get('/login/github', this.loginWithGithub.bind(this));
     router.get('/info', this.info.bind(this));
     router.get('/list-by-task', this.getNodeSummaryWithAccountPaged.bind(this));
-    router.post('/transfer-honor', this.transferHonor.bind(this));
     router.get('/public-api-key', this.getPublicApiKey.bind(this));
     return router;
   }
