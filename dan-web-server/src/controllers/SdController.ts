@@ -1,7 +1,7 @@
 import { Context } from 'koa';
 import Router from 'koa-router';
 import SdService from '../services/SdService';
-import responseHandler from '../utils/responseHandler';
+import responseHandler, { SdcnError, StatusCode, ErrorCode } from '../utils/responseHandler';
 import _ from 'lodash';
 import { UserService } from '../services';
 import logger from '../utils/logger';
@@ -30,7 +30,7 @@ export default class SdControler {
   }
 
   private async taskSubmitAndWait(context: Context, nodeTaskType: NodeTaskType) {
-    const user = await this.getAccountId(context);
+    const user = await this.getAccount(context);
     const taskStatusResult = await this.sdService.taskSubmit(
       context.request.body,
       nodeTaskType,
@@ -85,29 +85,23 @@ export default class SdControler {
   }
 
   async txt2imgAsync(context: Context) {
-    const user = await this.getAccountId(context);
-    const requestBody = context.request.body;
-    responseHandler.success(
-      context,
-      (await this.sdService.taskSubmit(requestBody, NodeTaskType.Txt2img, user!.honorAmount, user!.id)).taskStatus,
-    );
+    await this.taskSubmit(context, NodeTaskType.Txt2img);
   }
 
   async img2imgAsync(context: Context) {
-    const user = await this.getAccountId(context);
-    const requestBody = context.request.body;
-    responseHandler.success(
-      context,
-      (await this.sdService.taskSubmit(requestBody, NodeTaskType.Img2img, user!.honorAmount, user!.id)).taskStatus,
-    );
+    await this.taskSubmit(context, NodeTaskType.Img2img);
   }
 
   async interrogateAsync(context: Context) {
-    const user = await this.getAccountId(context);
+    await this.taskSubmit(context, NodeTaskType.Interrogate);
+  }
+
+  async taskSubmit(context: Context, nodeTaskType: NodeTaskType) {
+    const user = await this.getAccount(context);
     const requestBody = context.request.body;
     responseHandler.success(
       context,
-      (await this.sdService.taskSubmit(requestBody, NodeTaskType.Interrogate, user!.honorAmount, user!.id)).taskStatus,
+      (await this.sdService.taskSubmit(requestBody, nodeTaskType, user!.honorAmount, user!.id)).taskStatus,
     );
   }
 
@@ -122,10 +116,20 @@ export default class SdControler {
     responseHandler.success(context, taskStatistics);
   }
 
-  private async getAccountId(context: Context) {
+  private async getAccount(context: Context) {
     const userId = context.session?.authUserInfo?.id;
     const apiKey = context.request.headers?.authorization?.replace('Bearer ', '') as string;
-    return _.isNil(userId) ? await this.userService.getByApiKey(apiKey) : await this.userService.getById(userId);
+    if (!_.isEmpty(userId)) {
+      return await this.userService.getById(userId);
+    } else if (!_.isEmpty(apiKey)) {
+      const user = await this.userService.getByApiKey(apiKey);
+      if (_.isEmpty(user)) {
+        throw new SdcnError(StatusCode.Forbidden, ErrorCode.PermissionDenied, 'forbidden');
+      }
+      return user;
+    } else {
+      throw new SdcnError(StatusCode.Forbidden, ErrorCode.PermissionDenied, 'forbidden');
+    }
   }
 
   router() {

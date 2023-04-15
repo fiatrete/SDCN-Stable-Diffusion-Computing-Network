@@ -72,7 +72,7 @@ export default class SdService {
       throw new SdcnError(
         StatusCode.BadRequest,
         ErrorCode.taskWaitingExceededLimit,
-        'the number of tasks waiting has exceeded 10',
+        'the number of pending tasks has exceeded the limit.',
       );
     }
 

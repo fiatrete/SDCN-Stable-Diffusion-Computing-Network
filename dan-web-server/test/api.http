@@ -115,6 +115,11 @@ POST {{hostname}}/api/sd/img2img/async
 Content-Type: application/json
 Cookie: {{cookie}}
 
+### interrogate async 
+POST {{hostname}}/api/sd/interrogate/async
+Content-Type: application/json
+Cookie: {{cookie}}
+
 
 ### xxx2img task tatus
 POST {{hostname}}/api/sd/task/status
@@ -122,7 +127,7 @@ Content-Type: application/json
 Cookie: {{cookie}}
 
 {
-  "taskId": "4efcf574-b02b-4c63-b631-0cb8f17caaef"
+  "taskId": "2d2c7107-fe33-4c50-a2bc-81d4f1b28c6c"
 }
 
 
