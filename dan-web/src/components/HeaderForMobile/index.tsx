@@ -1,84 +1,51 @@
-import React, { useCallback, useEffect, useState } from 'react'
-import { Avatar, Button, Collapse, Image, Modal, Popover } from 'antd'
+import React, { useCallback, useState } from 'react'
+import { Button, Collapse, Image, Modal } from 'antd'
 import cx from 'classnames'
-import { Link, NavLink } from 'react-router-dom'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { observer } from 'mobx-react-lite'
 import {
   CloseOutlined,
+  CrownOutlined,
   DownOutlined,
+  GiftOutlined,
   LogoutOutlined,
   MenuOutlined,
   RightOutlined,
   UserOutlined,
 } from '@ant-design/icons'
-import { AxiosError } from 'axios'
-import to from 'await-to-js'
 
 import logo from 'assets/images/logo.svg'
 
-import { User } from 'typings/User'
 import styles from './index.module.css'
 import useSignInModal from 'hooks/useSignModal'
 import userStore from 'stores/userStore'
-import * as userApi from 'api/user'
-import uiStore from 'stores/uiStore'
+import useUser from 'hooks/useUser'
+import UserAvatar from 'components/UserAvatar'
 
 const Header = () => {
   const { showSignModel } = useSignInModal()
   const [isMenuOpened, setIsMenuOpened] = useState(false)
+  const navigate = useNavigate()
 
   const signInHandler = useCallback(() => {
     showSignModel()
   }, [showSignModel])
 
-  const updateUserInfo = useCallback(async () => {
-    const [_userInfoError, _userInfo] = await to<User, AxiosError>(
-      userApi.userInfo(),
-    )
+  const { logout } = useUser()
 
-    if (_userInfoError !== null) {
-      console.error('updateUserInfoError', _userInfoError)
-      userStore.reset()
-      return
-    }
+  const userLogout = useCallback(() => {
+    logout()
+    navigate('/')
+  }, [logout, navigate])
 
-    userStore.updateUser(_userInfo)
-  }, [])
-
-  useEffect(() => {
-    updateUserInfo()
-  }, [updateUserInfo])
-
-  const avatarElement = useCallback(() => {
-    const user = userStore.user
-    if (user.avatarImgUrl) {
-      return <Avatar src={user.avatarImgUrl} />
-    } else if (user.nickname.length > 0) {
-      return (
-        <Avatar style={{ backgroundColor: '#40A9FF' }}>
-          {user.nickname[0]}
-        </Avatar>
-      )
-    } else {
-      return (
-        <Avatar
-          style={{ backgroundColor: '#40A9FF' }}
-          icon={<UserOutlined />}
-        />
-      )
-    }
-  }, [])
-
-  const logoutButton = (
-    <Button
-      type='text'
-      icon={<LogoutOutlined />}
-      onClick={() => {
-        userStore.reset()
-      }}
-    >
-      Logout
-    </Button>
+  const avatarElement = useCallback(
+    () => (
+      <div className={cx('flex items-center gap-3')}>
+        <UserAvatar user={userStore.user} />
+        <div className={cx('h-min font-bold')}>{userStore.user.nickname}</div>
+      </div>
+    ),
+    [],
   )
 
   return (
@@ -206,30 +173,65 @@ const Header = () => {
               </a>
               <div className={cx('flex items-center gap-x-6 mt-4 w-full')}>
                 {userStore.isLoggedIn ? (
-                  <>
-                    {uiStore.isMobile ? (
-                      <Collapse
-                        ghost
-                        expandIconPosition='end'
-                        className={cx('w-full')}
-                        expandIcon={({ isActive }) => {
-                          return isActive ? (
-                            <DownOutlined className='relative top-[7px]' />
-                          ) : (
-                            <RightOutlined className='relative top-[7px]' />
-                          )
-                        }}
-                      >
-                        <Collapse.Panel header={avatarElement()} key='1'>
-                          {logoutButton}
-                        </Collapse.Panel>
-                      </Collapse>
-                    ) : (
-                      <Popover content={logoutButton} placement='bottomRight'>
-                        {avatarElement()}
-                      </Popover>
-                    )}
-                  </>
+                  <Collapse
+                    ghost
+                    expandIconPosition='end'
+                    className={cx('w-full')}
+                    expandIcon={({ isActive }) => {
+                      return isActive ? (
+                        <DownOutlined className='relative top-[7px]' />
+                      ) : (
+                        <RightOutlined className='relative top-[7px]' />
+                      )
+                    }}
+                  >
+                    <Collapse.Panel header={avatarElement()} key='1'>
+                      <div className={cx('flex flex-col items-start')}>
+                        <div className={cx('w-full text-lef px-4 py-1')}>
+                          <CrownOutlined />
+                          <span className={cx('ml-2')}>
+                            Honor: {userStore.user.honorAmount}
+                          </span>
+                        </div>
+                        <Button
+                          type='text'
+                          className={cx('w-full text-left')}
+                          block
+                          icon={<UserOutlined />}
+                          onClick={() => {
+                            navigate('/account')
+                            setIsMenuOpened(false)
+                          }}
+                        >
+                          Account
+                        </Button>
+                        {userStore.user.role === 1 && (
+                          <Button
+                            type='text'
+                            className={cx('w-full text-left')}
+                            icon={<GiftOutlined />}
+                            onClick={() => {
+                              navigate('/reward')
+                              setIsMenuOpened(false)
+                            }}
+                          >
+                            Reward
+                          </Button>
+                        )}
+                        <Button
+                          type='text'
+                          className={cx('w-full text-left')}
+                          icon={<LogoutOutlined />}
+                          onClick={() => {
+                            userLogout()
+                            setIsMenuOpened(false)
+                          }}
+                        >
+                          Logout
+                        </Button>
+                      </div>
+                    </Collapse.Panel>
+                  </Collapse>
                 ) : (
                   <Button
                     type='primary'
