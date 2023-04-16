@@ -21,8 +21,11 @@ import ImageInputWidget from 'components/ImageInputWidget'
 import { FormFinishInfo } from 'rc-field-form/es/FormContext'
 import GeneratingMask from 'components/GeneratingMask'
 import SliderSettingItem from 'components/SliderSettingItem'
+import { observer } from 'mobx-react-lite'
 
 import styles from './index.module.css'
+
+import uiStore from 'stores/uiStore'
 
 const { Title } = Typography
 const { TextArea } = Input
@@ -48,31 +51,6 @@ function calclImgSize(
   return [Math.round(width), Math.round(height)]
 }
 
-function InputAndGenerateArea() {
-  return (
-    <div className={cx('flex flex-col items-start gap-6')}>
-      <Title level={5}>Input keyword and generate</Title>
-      <div className={cx('flex flex-col w-full items-start gap-6')}>
-        <Form.Item
-          name='prompt'
-          className={cx('self-stretch')}
-          style={{ marginBottom: '0px' }}
-        >
-          <TextArea
-            size='large'
-            rows={6}
-            placeholder='Enter prompts here'
-            className={cx('text-base leading-6 px-4 py-2')}
-          />
-        </Form.Item>
-        <Button type='primary' htmlType='submit' size='large'>
-          Generate
-        </Button>
-      </div>
-    </div>
-  )
-}
-
 const sizes = [
   { value: '-1x-1', label: 'same as input' },
   { value: '512x512', label: '512x512' },
@@ -81,47 +59,6 @@ const sizes = [
   { value: '768x1024', label: '768x1024' },
   { value: '1024x768', label: '1024x768' },
 ]
-
-function SettingsArea() {
-  return (
-    <div className={cx('flex flex-col w-80 gap-6 bg-green-000')}>
-      <Title level={5}>Settings</Title>
-      <div className={cx('gap-0')}>
-        <ModelFormGroup label='Model' name='model' />
-
-        <Form.Item label='Size' name='size' initialValue={sizes[0].value}>
-          <Select size='large' options={sizes} />
-        </Form.Item>
-
-        <LoraFormGroup label='LoRA1' loraName='lora1' weightName='weight1' />
-        <LoraFormGroup label='LoRA2' loraName='lora2' weightName='weight2' />
-
-        <Form.Item label='Negative Prompts' name='negative_prompt'>
-          <TextArea
-            size='large'
-            rows={4}
-            placeholder='Negative Prompts'
-            className={cx('self-stretch text-base leading-6 px-4 py-2')}
-          />
-        </Form.Item>
-
-        <Form.Item
-          label='Denoising strength'
-          name='denoising_strength'
-          initialValue={0.5}
-        >
-          <SliderSettingItem />
-        </Form.Item>
-
-        <SamplingFormGroup
-          methodName='sampler_name'
-          stepsName='steps'
-          seedName='seed'
-        />
-      </div>
-    </div>
-  )
-}
 
 const Img2img = () => {
   const [form] = Form.useForm()
@@ -190,22 +127,97 @@ const Img2img = () => {
         </Fragment>
         <div
           className={cx(
-            styles.wrap,
-            'flex flex-col md:flex-row w-full bg-yellow-000 gap-24 mt-8',
+            uiStore.isMobile
+              ? [styles.wrap, 'w-full flex flex-col gap-12']
+              : [styles.wrap, 'w-full flex flex-row gap-24 mt-8'],
           )}
         >
-          <div className={cx('flex flex-col flex-1 bg-red-000')}>
-            <InputAndGenerateArea />
-            <div className={cx('flex h-[788px] gap-2.5')}>
+          <div
+            className={cx(
+              uiStore.isMobile
+                ? ['flex flex-col gap-6']
+                : ['flex flex-col flex-1'],
+            )}
+          >
+            <div className={cx('flex flex-col items-start gap-6')}>
+              <Title level={5}>Input keyword and generate</Title>
+              <div className={cx('flex flex-col w-full items-start gap-6')}>
+                <Form.Item
+                  name='prompt'
+                  className={cx('self-stretch')}
+                  style={{ marginBottom: '0px' }}
+                >
+                  <TextArea
+                    size='large'
+                    rows={6}
+                    placeholder='Enter prompts here'
+                    className={cx('text-base leading-6 px-4 py-2')}
+                  />
+                </Form.Item>
+                <Button type='primary' htmlType='submit' size='large'>
+                  Generate
+                </Button>
+              </div>
+            </div>
+            <div
+              className={cx(
+                uiStore.isMobile
+                  ? ['flex flex-col gap-2.5']
+                  : ['flex h-[788px] gap-2.5'],
+              )}
+            >
               <ImageInputWidget onChanged={setInputImg} onSize={onInputSize} />
               <ImageOutputWidget src={outputImgUri} />
             </div>
           </div>
-          <SettingsArea />
+          <div className={cx('flex flex-col w-80 gap-6')}>
+            <Title level={5}>Settings</Title>
+            <div className={cx('gap-0')}>
+              <ModelFormGroup label='Model' name='model' />
+
+              <Form.Item label='Size' name='size' initialValue={sizes[0].value}>
+                <Select size='large' options={sizes} />
+              </Form.Item>
+
+              <LoraFormGroup
+                label='LoRA1'
+                loraName='lora1'
+                weightName='weight1'
+              />
+              <LoraFormGroup
+                label='LoRA2'
+                loraName='lora2'
+                weightName='weight2'
+              />
+
+              <Form.Item label='Negative Prompts' name='negative_prompt'>
+                <TextArea
+                  size='large'
+                  rows={4}
+                  placeholder='Negative Prompts'
+                  className={cx('self-stretch text-base leading-6 px-4 py-2')}
+                />
+              </Form.Item>
+
+              <Form.Item
+                label='Denoising strength'
+                name='denoising_strength'
+                initialValue={0.5}
+              >
+                <SliderSettingItem />
+              </Form.Item>
+
+              <SamplingFormGroup
+                methodName='sampler_name'
+                stepsName='steps'
+                seedName='seed'
+              />
+            </div>
+          </div>
         </div>
       </Form>
     </Form.Provider>
   )
 }
 
-export default Img2img
+export default observer(Img2img)

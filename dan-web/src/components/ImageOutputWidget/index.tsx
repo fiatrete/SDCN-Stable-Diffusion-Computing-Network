@@ -21,17 +21,13 @@ const ImageWidget = ({ src }: { src?: string }) => {
       ) : (
         <div
           className={cx(
-            'w-full h-0 pt-[50%] pb-[50%]',
             styles.dashedArea,
+            'w-full min-h-[300px]',
             'bg-[#FAFAFA]',
-            'flex flex-col justify-center text-center',
+            'flex flex-col justify-center text-center p-4',
           )}
         >
-          <Title
-            className={cx()}
-            style={{ color: 'rgba(0,0,0,0.25)' }}
-            level={2}
-          >
+          <Title className={cx('!text-black/25 !mb-0')} level={2}>
             Images you generated will be shown here
           </Title>
         </div>

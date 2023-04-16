@@ -12,6 +12,8 @@ import to from 'await-to-js'
 import * as interrogateApi from 'api/interrogate'
 import _ from 'lodash'
 import { LoadingOutlined } from '@ant-design/icons'
+import uiStore from 'stores/uiStore'
+import { observer } from 'mobx-react-lite'
 
 const { Title, Paragraph } = Typography
 
@@ -122,7 +124,13 @@ const Interrogate = () => {
   }, [resetLoading])
 
   return (
-    <div className={cx('flex flex-col items-start gap-3 mt-8', styles.wrap)}>
+    <div
+      className={cx(
+        uiStore.isMobile
+          ? [styles.wrap, 'w-full flex flex-col gap-4']
+          : [styles.wrap, 'w-full flex flex-col gap-4 mt-8'],
+      )}
+    >
       <div>
         <Title level={5}>Interrogate</Title>
         <Paragraph>
@@ -136,7 +144,7 @@ const Interrogate = () => {
           onChange={onCheckboxChange}
         />
       </div>
-      <div className={cx('w-3/6')}>
+      <div className={cx(uiStore.isMobile ? ['w-full'] : ['w-3/6'])}>
         <Button
           className={cx('mb-2', {
             hidden: results.length === 0,
@@ -177,4 +185,4 @@ const Interrogate = () => {
   )
 }
 
-export default Interrogate
+export default observer(Interrogate)

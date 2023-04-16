@@ -8,6 +8,7 @@ import { CopyOutlined } from '@ant-design/icons'
 import styles from './index.module.css'
 import userStore from 'stores/userStore'
 import UserAvatar from 'components/UserAvatar'
+import uiStore from 'stores/uiStore'
 
 const Account = () => {
   const encryptApiKey = useCallback(() => {
@@ -22,8 +23,14 @@ const Account = () => {
   }, [])
 
   return (
-    <div className={cx(styles.wrap)}>
-      <div className={cx(styles.content)}>
+    <div
+      className={cx(uiStore.isMobile ? [styles.wrapForMobile] : [styles.wrap])}
+    >
+      <div
+        className={cx(
+          uiStore.isMobile ? [styles.contentForMobile] : [styles.content],
+        )}
+      >
         <div className={cx('flex gap-7 items-center')}>
           <div className={cx('rounded-full overflow-hidden w-[128px]')}>
             <UserAvatar user={userStore.user} size={128} />
@@ -41,7 +48,7 @@ const Account = () => {
           </div>
         </div>
         <Tabs
-          className={cx('mt-14')}
+          className={cx(uiStore.isMobile ? ['mt-6'] : ['mt-14'])}
           tabBarStyle={{
             paddingLeft: 46,
           }}
@@ -59,7 +66,11 @@ const Account = () => {
                       browser or other client-side code.
                     </li>
                   </ul>
-                  <Space.Compact className={cx('w-2/3 mt-2')}>
+                  <Space.Compact
+                    className={cx(
+                      uiStore.isMobile ? ['w-full mt-2'] : ['w-2/3 mt-2'],
+                    )}
+                  >
                     <Input value={encryptApiKey()} readOnly />
                     <Button
                       type='default'

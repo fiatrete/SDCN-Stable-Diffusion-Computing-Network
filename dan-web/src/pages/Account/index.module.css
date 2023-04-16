@@ -5,10 +5,22 @@
   padding: 0px 60px;
 }
 
+.wrapForMobile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0px 16px;
+}
+
 .content {
   width: 100%;
   max-width: 830px;
   padding: 48px 0;
+}
+
+.contentForMobile {
+  width: 100%;
+  padding: 24px 0;
 }
 
 .tabs {
