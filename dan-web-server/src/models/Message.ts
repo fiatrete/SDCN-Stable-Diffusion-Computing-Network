@@ -10,41 +10,41 @@ export enum MessageType {
 }
 
 interface IMessage {
-  msgtype: string;
+  msgType: string;
 }
 interface sessionMessage extends IMessage {
   sessionId: string;
 }
 export interface RegisterMessage extends IMessage {
-  msgtype: MessageType.Register;
+  msgType: MessageType.Register;
   nodeName: string;
-  apikey: string;
+  apiKey: string;
 }
 
 export interface RegisterMessageResult extends sessionMessage {
-  msgtype: MessageType.RegisterResult;
+  msgType: MessageType.RegisterResult;
   code: number;
 }
 
 export interface HeartbeatMessage extends sessionMessage {
-  msgtype: MessageType.Heartbeat;
+  msgType: MessageType.Heartbeat;
   status: number; // 0 mean webui is error，1 means webui is ok
   time: number;
 }
 
 export interface HeartbeatResultMessage extends sessionMessage {
-  msgtype: MessageType.HeartbeatResult;
+  msgType: MessageType.HeartbeatResult;
   time: number;
 }
 
 export interface OfflineMessage extends sessionMessage {
-  msgtype: MessageType.Offline;
+  msgType: MessageType.Offline;
   type: number; // 0mean this message is from client，1 means this message is from server
   reason: string;
 }
 
 export interface OfflineResultMessage extends sessionMessage {
-  msgtype: MessageType.OfflineResult;
+  msgType: MessageType.OfflineResult;
 }
 
 export interface CommandRequest {
@@ -54,7 +54,7 @@ export interface CommandRequest {
 }
 
 export interface CommandMessage {
-  msgtype: MessageType.Command;
+  msgType: MessageType.Command;
   sessionId: string;
   request: CommandRequest;
 }
@@ -65,7 +65,7 @@ export interface CommandResultData {
 }
 
 export interface CommandResultMessage {
-  msgtype: MessageType.CommandResult;
+  msgType: MessageType.CommandResult;
   sessionId: string;
   result: CommandResultData;
 }

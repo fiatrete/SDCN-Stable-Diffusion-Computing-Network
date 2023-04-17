@@ -42,23 +42,25 @@ export default class WebsocketService {
   clientBySessionId: Map<string, Client> = new Map();
 
   async addNewClient(ws: WebSocket, message: RegisterMessage) {
-    const accountId = await this.userRepository.getAccountIdByApiKey(message.apikey);
+    const accountId = await this.userRepository.getAccountIdByApiKey(message.apiKey);
     if (accountId === undefined || accountId === null) {
-      logger.error('Invalid apiKey');
+      logger.warn('Invalid apiKey');
       const result: RegisterMessageResult = {
-        msgtype: MessageType.RegisterResult,
+        msgType: MessageType.RegisterResult,
         sessionId: '',
         code: 500,
       };
       ws.send(JSON.stringify(result));
+      ws.close();
       return;
     }
     logger.info('accountId:', accountId);
 
     const node = await this.nodeService.getOrCreateNodeByNodeName(message.nodeName, String(accountId), true);
     if (node === undefined) {
+      logger.warn('Cannot get node By:', message.nodeName);
       const result: RegisterMessageResult = {
-        msgtype: MessageType.RegisterResult,
+        msgType: MessageType.RegisterResult,
         sessionId: '',
         code: 500,
       };
@@ -67,7 +69,7 @@ export default class WebsocketService {
     }
     const client: Client = {
       nodeName: message.nodeName,
-      apiKey: message.apikey,
+      apiKey: message.apiKey,
       accountId: accountId,
       nodeId: node.nodeSeq,
       sessionId: uuidv4(),
@@ -79,7 +81,7 @@ export default class WebsocketService {
     this.clientBySessionId.set(client.sessionId, client);
 
     const result: RegisterMessageResult = {
-      msgtype: MessageType.RegisterResult,
+      msgType: MessageType.RegisterResult,
       sessionId: client.sessionId,
       code: 200,
     };
@@ -94,13 +96,27 @@ export default class WebsocketService {
 
   async registerClient(ws: WebSocket, message: any) {
     const registerMsg: RegisterMessage = message as RegisterMessage;
-    if (registerMsg.nodeName === '') {
+    if (registerMsg.nodeName === undefined || registerMsg.nodeName === '') {
+      logger.warn('Invaild nodeName');
       const result: RegisterMessageResult = {
-        msgtype: MessageType.RegisterResult,
+        msgType: MessageType.RegisterResult,
         sessionId: '',
         code: 500,
       };
       ws.send(JSON.stringify(result));
+      ws.close();
+      return;
+    }
+
+    if (message.apiKey === undefined || message.apiKey === '') {
+      logger.warn('Invalid apiKey');
+      const result: RegisterMessageResult = {
+        msgType: MessageType.RegisterResult,
+        sessionId: '',
+        code: 500,
+      };
+      ws.send(JSON.stringify(result));
+      ws.close();
       return;
     }
 
@@ -111,8 +127,9 @@ export default class WebsocketService {
       }
     });
     if (existingClient0 !== undefined) {
+      logger.warn('Already registered:', existingClient0.accountId, existingClient0.nodeName);
       const result: RegisterMessageResult = {
-        msgtype: MessageType.RegisterResult,
+        msgType: MessageType.RegisterResult,
         sessionId: (existingClient0 as unknown as Client).sessionId,
         code: 200,
       };
@@ -122,23 +139,24 @@ export default class WebsocketService {
 
     let existingClient: Client | undefined;
     this.clients.forEach((client) => {
-      if (client.apiKey === registerMsg.apikey && client.nodeName === registerMsg.nodeName) {
+      if (client.apiKey === registerMsg.apiKey && client.nodeName === registerMsg.nodeName) {
         existingClient = client;
       }
     });
 
     if (existingClient) {
+      logger.warn('Duplicate registration:', existingClient.apiKey, existingClient.nodeName);
       const offlineMsg: OfflineMessage = {
-        msgtype: MessageType.Offline,
+        msgType: MessageType.Offline,
         sessionId: existingClient.sessionId,
         type: 1,
-        reason: 'duplicate registration',
+        reason: 'Duplicate registration',
       };
       existingClient.socket.send(JSON.stringify(offlineMsg));
 
       existingClient.socket.once('message', function onMessage(response: string) {
         const responseMsg: OfflineResultMessage = JSON.parse(response);
-        if (responseMsg.msgtype === 'offline-result' && responseMsg.sessionId === existingClient?.sessionId) {
+        if (responseMsg.msgType === 'offline-result' && responseMsg.sessionId === existingClient?.sessionId) {
           logger.info(`received offline-result from ${registerMsg.nodeName}`);
           existingClient.socket.close();
         } else {
@@ -160,7 +178,7 @@ export default class WebsocketService {
     if (existingClient === undefined) {
       logger.warn('Unregister client: sessionId:', heartbeatMsg.sessionId);
       const offlineMsg: OfflineMessage = {
-        msgtype: MessageType.Offline,
+        msgType: MessageType.Offline,
         sessionId: message.sessionId,
         type: 1,
         reason: 'Unregister client',
@@ -173,7 +191,7 @@ export default class WebsocketService {
     const client = this.clientBySessionId.get(message.sessionId);
     if (client === undefined) {
       const offlineMsg: OfflineMessage = {
-        msgtype: MessageType.Offline,
+        msgType: MessageType.Offline,
         sessionId: message.sessionId,
         type: 1,
         reason: 'Invaild sessionId',
@@ -189,7 +207,7 @@ export default class WebsocketService {
     }
 
     const heartbeatResultMsg: HeartbeatResultMessage = {
-      msgtype: MessageType.HeartbeatResult,
+      msgType: MessageType.HeartbeatResult,
       sessionId: heartbeatMsg.sessionId,
       time: heartbeatMsg.time,
     };
@@ -199,7 +217,7 @@ export default class WebsocketService {
   async handleIncomingMessage(ws: WebSocket, message: string) {
     try {
       const parsedMessage = JSON.parse(message);
-      switch (parsedMessage.msgtype) {
+      switch (parsedMessage.msgType) {
         case MessageType.Register:
           this.registerClient(ws, parsedMessage);
           break;
@@ -207,7 +225,7 @@ export default class WebsocketService {
           this.handleHeartbeat(ws, parsedMessage);
           break;
         default:
-          logger.info(`Received unknown message type: ${parsedMessage.msgtype}`);
+          logger.info(`Received unknown message type: ${parsedMessage.msgType}`);
           break;
       }
     } catch (error) {
@@ -217,7 +235,7 @@ export default class WebsocketService {
 
   async createWebSocketServer(server: any) {
     const wss = new WebSocket.Server({ server, path: '/websocket' });
-    wss.on('connection', (ws) => {
+    wss.on('connection', (ws: WebSocket) => {
       ws.on('message', (message: string) => {
         logger.info(`Received message: ${message}`);
         this.handleIncomingMessage(ws, message);
@@ -247,7 +265,7 @@ export default class WebsocketService {
     }
     const sessionId = client.sessionId;
     const commandMsg: CommandMessage = {
-      msgtype: MessageType.Command,
+      msgType: MessageType.Command,
       sessionId: client.sessionId,
       request: request,
     };
@@ -256,7 +274,7 @@ export default class WebsocketService {
     if (ws) {
       ws.send(JSON.stringify(commandMsg));
 
-      ws.onmessage = function (event) {
+      ws.onmessage = function (event: WebSocket.MessageEvent) {
         let data: any;
         if (typeof event.data === 'string') {
           data = JSON.parse(event.data);
@@ -270,7 +288,7 @@ export default class WebsocketService {
           throw new Error('Invalid message format.');
         }
 
-        if (data.msgtype === MessageType.CommandResult && data.sessionId === sessionId) {
+        if (data.msgType === MessageType.CommandResult && data.sessionId === sessionId) {
           const resultMsg: CommandResultMessage = data as CommandResultMessage;
           callback(resultMsg.result);
         }
