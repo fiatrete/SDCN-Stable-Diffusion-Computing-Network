@@ -1,22 +1,28 @@
 import React from 'react'
 import cx from 'classnames'
-import { Typography, Modal, Spin } from 'antd'
+import { Modal, Spin } from 'antd'
 import { LoadingOutlined } from '@ant-design/icons'
 
 import styles from './index.module.css'
-
-const { Title } = Typography
+import { Task, getTaskStatusDesc } from 'typings/Task'
 
 interface GeneratingMaskProps {
   open: boolean
+  defaultTip?: string
+  task?: Task
 }
 
-const GeneratingMask = ({ open }: GeneratingMaskProps) => {
+const GeneratingMask = ({ open, defaultTip, task }: GeneratingMaskProps) => {
   const icon = <LoadingOutlined style={{ fontSize: 36 }} spin />
-  const tip = (
-    <Title level={5} style={{}}>
-      Generating...
-    </Title>
+  const tip = task ? (
+    <div className={cx('text-[#333] font-bold py-2')}>
+      <div>{`Status: ${task.status} - ${getTaskStatusDesc(task.status)}`}</div>
+      <div>{`QueuePosition: ${task.queuePosition}`}</div>
+    </div>
+  ) : (
+    <div className={cx('text-[#333] font-bold py-2')}>
+      {defaultTip ?? 'Loading...'}
+    </div>
   )
 
   return (
@@ -25,21 +31,12 @@ const GeneratingMask = ({ open }: GeneratingMaskProps) => {
       closeIcon={<div></div>}
       maskClosable={false}
       footer={null}
-      width={148}
-      style={{ height: '140px' }}
+      width={248}
       centered={true}
     >
-      <Spin
-        className={cx(styles.spin)}
-        tip={tip}
-        indicator={icon}
-        style={{
-          width: '100px',
-          height: '100px',
-          gap: '24px',
-          padding: '16px 0 0 0',
-        }}
-      />
+      <div className={cx('flex flex-col justify-center items-center py-2')}>
+        <Spin className={cx(styles.spin)} indicator={icon} tip={tip} />
+      </div>
     </Modal>
   )
 }

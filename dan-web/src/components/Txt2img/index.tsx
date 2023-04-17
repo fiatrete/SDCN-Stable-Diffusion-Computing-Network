@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react'
 import cx from 'classnames'
-import { Form, Select, Button, Input, Typography, message, Spin } from 'antd'
+import { Form, Select, Button, Input, Typography, message } from 'antd'
 import {
   ModelFormGroup,
   LoraFormGroup,
@@ -22,7 +22,7 @@ import {
   txt2imgAsync,
 } from 'api/playground'
 import { Task } from 'typings/Task'
-import { LoadingOutlined } from '@ant-design/icons'
+import GeneratingMask from 'components/GeneratingMask'
 
 const { Title } = Typography
 const { TextArea } = Input
@@ -39,20 +39,20 @@ const Txt2img = () => {
   const [form] = Form.useForm()
 
   const [imgUri, setImgUri] = useState<string | undefined>()
-  const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [loadingTitle, setLoadingTitle] = useState<string | undefined>(
-    undefined,
-  )
+  const [isGenerating, setIsGenerating] = useState<boolean>(false)
+  const [task, setTask] = useState<Task | undefined>(undefined)
 
-  const setLoading = (
-    isShow: boolean,
-    title: string | undefined = undefined,
+  const setGeneratingTask = (
+    _isGenerating: boolean,
+    _task: Task | undefined = undefined,
   ) => {
-    setIsLoading(isShow)
-    setLoadingTitle(title)
+    setIsGenerating(_isGenerating)
+    setTask(_task)
   }
 
-  const getTaskResult = useCallback((task: Task) => {
+  const pollingTaskResult = useCallback((task: Task) => {
+    setGeneratingTask(true, task)
+
     const timerId = setInterval(async () => {
       const [_error, _resp] = await to<TaskResponseData, AxiosError>(
         getTaskStatus(task.taskId),
@@ -61,18 +61,15 @@ const Txt2img = () => {
       if (_error !== null) {
         message.error(_error.message)
         console.error('getTaskStatus Error', _error)
-        setLoading(false)
+        setGeneratingTask(false)
         return
       }
 
-      setLoading(
-        true,
-        `Status: ${_resp.status} QueuePosition: ${_resp.queuePosition}`,
-      )
+      setGeneratingTask(true, _resp)
 
       if (_resp.status !== 0 && _resp.status !== 1) {
         clearInterval(timerId)
-        setLoading(false)
+        setGeneratingTask(false)
 
         if (_resp.status === 2) {
           setImgUri(`data:image/png;base64,${_resp.images[0]}`)
@@ -86,7 +83,7 @@ const Txt2img = () => {
   const onFormSubmit = useCallback(
     async (name: string, { values }: FormFinishInfo) => {
       try {
-        setLoading(true)
+        setGeneratingTask(true)
 
         const [widthStr, heightStr] = values.size.split('x')
         delete values.size
@@ -102,25 +99,30 @@ const Txt2img = () => {
         if (_error !== null) {
           message.error(_error.message)
           console.error('txt2img Async Error', _error)
+          setGeneratingTask(false)
           return
         }
 
-        getTaskResult(_task)
+        pollingTaskResult(_task)
       } catch (err) {
         if (err instanceof String) message.error(err)
         if (err instanceof Error) message.error(err.message)
 
-        setLoading(false)
+        setGeneratingTask(false)
       }
     },
-    [getTaskResult],
+    [pollingTaskResult],
   )
 
   return (
     /* when Form submitted, the parent Form.Provider received the submittion via onFormFinish */
     <Form.Provider onFormFinish={onFormSubmit}>
       <Form name='txt2imgForm' form={form} layout='vertical'>
-        {/* <GeneratingMask open={isShowMask} title={maskTitle} /> */}
+        <GeneratingMask
+          open={isGenerating}
+          defaultTip='Generating...'
+          task={task}
+        />
         <div
           className={cx(
             uiStore.isMobile
@@ -138,7 +140,11 @@ const Txt2img = () => {
             <div className={cx('flex flex-col items-start gap-6')}>
               <Title level={5}>Input keyword and generate</Title>
               <div className={cx('flex flex-col w-full items-start gap-6')}>
-                <Form.Item name='prompt' className={cx('self-stretch mb-0')}>
+                <Form.Item
+                  name='prompt'
+                  className={cx('self-stretch mb-0')}
+                  rules={[{ required: true, message: 'Please input prompts' }]}
+                >
                   <TextArea
                     size='large'
                     rows={6}
@@ -202,25 +208,6 @@ const Txt2img = () => {
           </div>
         </div>
       </Form>
-
-      {isLoading ? (
-        <div className={cx('absolute top-0 left-0 w-full h-full bg-white/80')}>
-          <div
-            className={cx(
-              'flex flex-col justify-center items-center gap-4 mt-48',
-            )}
-          >
-            <Spin
-              indicator={
-                <LoadingOutlined style={{ fontSize: 36, color: '#666' }} spin />
-              }
-            />
-            <div className={cx('text-[#333]')}>
-              {loadingTitle ?? 'Generating...'}
-            </div>
-          </div>
-        </div>
-      ) : null}
     </Form.Provider>
   )
 }

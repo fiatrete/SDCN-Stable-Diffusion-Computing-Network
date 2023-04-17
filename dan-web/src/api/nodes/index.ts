@@ -41,7 +41,7 @@ export async function nodes(
         if (resp.data.code === config.getSuccessCode()) {
           resolve(resp.data.data)
         } else {
-          reject(new Error(`Failed: ${resp.data.code}`))
+          reject(new Error(`Failed: ${resp.data.code}-${resp.data.message}`))
         }
       })
       .catch((error) => {
@@ -85,7 +85,7 @@ export async function donors(
         if (resp.data.code === config.getSuccessCode()) {
           resolve(resp.data.data)
         } else {
-          reject(new Error(`Failed: ${resp.data.code}`))
+          reject(new Error(`Failed: ${resp.data.code}-${resp.data.message}`))
         }
       })
       .catch((error) => {
@@ -121,7 +121,7 @@ export async function myNodes(
         if (resp.data.code === config.getSuccessCode()) {
           resolve(resp.data.data)
         } else {
-          reject(new Error(`Failed: ${resp.data.code}`))
+          reject(new Error(`Failed: ${resp.data.code}-${resp.data.message}`))
         }
       })
       .catch((error) => {
@@ -152,7 +152,7 @@ export async function donateNode(worker: string): Promise<Node> {
         if (resp.data.code === config.getSuccessCode()) {
           resolve(resp.data.data)
         } else {
-          reject(new Error(`Failed: ${resp.data.code}`))
+          reject(new Error(`Failed: ${resp.data.code}-${resp.data.message}`))
         }
       })
       .catch((error) => {
@@ -183,7 +183,7 @@ export async function revokeNode(nodeId: number): Promise<Node> {
         if (resp.data.code === config.getSuccessCode()) {
           resolve(resp.data.data)
         } else {
-          reject(new Error(`Failed: ${resp.data.code}`))
+          reject(new Error(`Failed: ${resp.data.code}-${resp.data.message}`))
         }
       })
       .catch((error) => {
@@ -214,7 +214,7 @@ export async function launchNode(nodeId: number): Promise<Node> {
         if (resp.data.code === config.getSuccessCode()) {
           resolve(resp.data.data)
         } else {
-          reject(new Error(`Failed: ${resp.data.code}`))
+          reject(new Error(`Failed: ${resp.data.code}-${resp.data.message}`))
         }
       })
       .catch((error) => {
@@ -245,7 +245,7 @@ export async function stopNode(nodeId: number): Promise<Node> {
         if (resp.data.code === config.getSuccessCode()) {
           resolve(resp.data.data)
         } else {
-          reject(new Error(`Failed: ${resp.data.code}`))
+          reject(new Error(`Failed: ${resp.data.code}-${resp.data.message}`))
         }
       })
       .catch((error) => {
