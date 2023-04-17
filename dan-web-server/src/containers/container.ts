@@ -14,7 +14,11 @@ import SdService from '../services/SdService';
 import UserService from '../services/UserService';
 import database from '../utils/database';
 import { HonorService } from '../services';
+<<<<<<< HEAD
 import WalletController from '../controllers/WalletController';
+=======
+import WebsocketService from '../services/Websocket';
+>>>>>>> 39bf5f3... feat: add websocket for dan-node
 
 const container = createContainer();
 
@@ -49,6 +53,12 @@ container.register({
       redisService: container.resolve<RedisService>('redisService'),
       honorService: container.resolve<HonorService>('honorService'),
       knex: database.knex,
+    }))
+    .singleton(),
+  websocketService: asClass(WebsocketService)
+    .inject(() => ({
+      userRepository: container.resolve<UserRepository>('userRepository'),
+      nodeService: container.resolve<NodeService>('nodeService'),
     }))
     .singleton(),
   userController: asClass(UserController)

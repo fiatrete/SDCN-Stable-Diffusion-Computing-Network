@@ -11,17 +11,19 @@ import koaSession from 'koa-session';
 import { errorHandler } from './utils/responseHandler';
 import NodeControler from './controllers/NodeController';
 import SdControler from './controllers/SdController';
+import http from 'http';
+import WebsocketService from './services/Websocket';
 
 dotenv.config();
 
 const app = new Koa();
 const router = new Router();
+const server = http.createServer(app.callback());
 
 app.keys = [config.serverConfig.koaSecretKey];
 
 app.use(scopePerRequest(container));
-// This middleware causes our post request crash, thus disable it
-// app.use(new CSRF());
+
 app.use(
   koaSession(
     {
@@ -40,6 +42,7 @@ app.use(
   }),
 );
 app.use(errorHandler);
+container.resolve<WebsocketService>('websocketService').createWebSocketServer(server);
 
 [
   container.resolve<UserController>('userController').router(),
@@ -51,6 +54,6 @@ app.use(errorHandler);
 });
 
 app.use(router.routes()).use(router.allowedMethods());
-app.listen(config.serverConfig.port, () => {
+server.listen(config.serverConfig.port, () => {
   logger.info(`server has been launched on port ${config.serverConfig.port}.`);
 });

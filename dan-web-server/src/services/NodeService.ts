@@ -53,15 +53,20 @@ export default class NodeService {
     return nodeList[0];
   }
 
+  async createNodeIDByNodeName(nodeName: string, userId: string) {
+    const node_seq = await this.nodeRepository.getNextNodeSeq();
+    logger.debug(node_seq);
+    const nodeHash = await this.nodeRepository.saveNodeHashWithNodeName(BigInt(userId), nodeName, node_seq);
+    logger.debug(nodeHash);
+    const nodeList = await this.nodeRepository.saveNodeWithNodeName(node_seq, BigInt(userId), nodeName);
+    return nodeList[0];
+  }
+
   async getOrCreateNode(address: string, userId: string, createIfNotExists: boolean) {
-    // TODO: get or generate worker ID from database
-    // use node_hash to check exist
     const nodeHash = await this.nodeRepository.getNodeHashByAccountAndWorker(BigInt(userId), address);
 
     if (nodeHash) {
-      if (nodeHash.seq === undefined) {
-        return await this.createNodeID(address, userId);
-      } else {
+      if (nodeHash.seq !== undefined) {
         const node = await this.nodeRepository.getNodeBySeq(nodeHash.seq!);
         logger.debug('node:', node);
         return node;
@@ -71,6 +76,24 @@ export default class NodeService {
       return await this.createNodeID(address, userId);
     } else {
       return undefined;
+    }
+  }
+
+  async getOrCreateNodeByNodeName(nodeName: string, userId: string, createIfNotExists: boolean) {
+    const nodeHash = await this.nodeRepository.getNodeHashByAccountAndNodeName(BigInt(userId), nodeName);
+    if (nodeHash) {
+      if (nodeHash.seq !== undefined) {
+        const node = await this.nodeRepository.getNodeBySeq(nodeHash.seq!);
+        logger.debug('current node:', node);
+        return node;
+      }
+
+      if (createIfNotExists) {
+        logger.info('create New node by nodeName', nodeName);
+        return await this.createNodeIDByNodeName(nodeName, userId);
+      } else {
+        return undefined;
+      }
     }
   }
 

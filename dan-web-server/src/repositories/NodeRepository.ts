@@ -11,6 +11,7 @@ interface Node {
   accountId: bigint;
   taskCount: number;
   worker: string;
+  nodeName: string;
   status: number;
   deleted: number;
   create_time: Date;
@@ -23,6 +24,7 @@ const nodeFields: Record<NodeFields, string> = {
   accountId: 'accountId',
   taskCount: 'taskCount',
   worker: 'worker',
+  nodeName: 'nodeName',
   status: 'status',
   deleted: 'deleted',
   create_time: 'create_time',
@@ -33,6 +35,7 @@ const nodeTable = 'node';
 export interface NodeHash {
   account_id: bigint;
   worker: string;
+  nodeName: string;
   seq: bigint;
 }
 type NodeHashFields = keyof NodeHash;
@@ -40,6 +43,7 @@ type NodeHashFields = keyof NodeHash;
 const nodeHashFields: Record<NodeHashFields, string> = {
   account_id: 'account_id',
   worker: 'worker',
+  nodeName: 'nodeName',
   seq: 'seq',
 };
 const nodeHashTable = 'node_hash';
@@ -57,7 +61,23 @@ export default class NodeRepository {
       accountId: account_id,
       taskCount: 0,
       worker: worker,
+      nodeName: worker,
       status: 1,
+      deleted: 0,
+      create_time: new Date(),
+      last_modify_time: new Date(),
+    };
+    return await this.Nodes().insert(node).returning('*');
+  }
+
+  async saveNodeWithNodeName(node_seq: bigint, account_id: bigint, nodeName: string) {
+    const node: Node = {
+      nodeSeq: node_seq,
+      accountId: account_id,
+      taskCount: 0,
+      worker: '',
+      nodeName: nodeName,
+      status: 0,
       deleted: 0,
       create_time: new Date(),
       last_modify_time: new Date(),
@@ -67,6 +87,12 @@ export default class NodeRepository {
 
   async getNodeBySeq(node_seq: bigint) {
     return await this.Nodes().where({ nodeSeq: node_seq }).first();
+  }
+
+  async getNodeByNodeName(nodeName: string) {
+    return await this.Nodes()
+      .where({ [nodeFields.nodeName]: nodeName })
+      .first();
   }
 
   async getWorkerBySeq(node_seq: bigint) {
@@ -183,13 +209,26 @@ export default class NodeRepository {
     return await this.NodeHashs().where({ account_id: account_id, worker: worker }).first();
   }
 
+  async getNodeHashByAccountAndNodeName(account_id: bigint, nodeName: string): Promise<NodeHash | undefined> {
+    return await this.NodeHashs().where({ account_id: account_id, nodeName: nodeName }).first();
+  }
+
   async saveNodeHash(account_id: bigint, worker: string, seq: bigint) {
     const nodeHash: NodeHash = {
       account_id: account_id,
       worker: worker,
+      nodeName: worker,
       seq: seq,
     };
-    logger.info(nodeHash);
+    return await this.NodeHashs().insert(nodeHash).returning('*');
+  }
+  async saveNodeHashWithNodeName(account_id: bigint, nodeName: string, seq: bigint) {
+    const nodeHash: NodeHash = {
+      account_id: account_id,
+      worker: nodeName,
+      nodeName: nodeName,
+      seq: seq,
+    };
     return await this.NodeHashs().insert(nodeHash).returning('*');
   }
 

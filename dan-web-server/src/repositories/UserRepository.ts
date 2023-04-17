@@ -50,6 +50,14 @@ export default class UserRepository {
       .first();
   }
 
+  async getAccountIdByApiKey(apiKey: string) {
+    const result = await this.Users()
+      .select('id')
+      .where({ [userFields.apiKey]: apiKey })
+      .first();
+    return result ? result.id : null;
+  }
+
   async getNodeSummaryWithAccountPaged(pageNo: number, pageSize: number): Promise<NodeSummaryWithAccountPaged> {
     const countResult = await this.knex('node')
       .join('account', 'node.account_id', '=', 'account.id')

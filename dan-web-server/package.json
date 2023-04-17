@@ -54,6 +54,7 @@
     "bullmq": "^3.10.4",
     "db-migrate": "^0.11.13",
     "dotenv": "^16.0.3",
+    "http": "^0.0.1-security",
     "ioredis": "^5.3.1",
     "jest-cucumber": "^3.0.1",
     "joi": "^17.9.1",
@@ -76,6 +77,8 @@
     "pg": "^8.10.0",
     "querystring": "^0.2.1",
     "randomstring": "^1.2.3",
-    "raw-body": "^2.5.2"
+    "raw-body": "^2.5.2",
+    "uuid": "^9.0.0",
+    "ws": "^8.13.0"
   }
 }
