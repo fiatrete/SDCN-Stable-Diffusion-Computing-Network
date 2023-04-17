@@ -134,6 +134,13 @@ export default class SdService {
   private async executeTaskWrapper(taskInfo: JsonObject) {
     const { taskId, taskType } = taskInfo;
     try {
+      await this.redisService.updateTaskStatus([
+        {
+          taskId: taskId as string,
+          queuePosition: 0,
+          status: NodeTaskStatus.Processing,
+        },
+      ]);
       let taskStatusResult: { taskId: string; queuePosition: number; status: number };
       if (taskType == NodeTaskType.Txt2img || taskType == NodeTaskType.Img2img) {
         taskStatusResult = await this.executeImageGenerateTask(taskInfo);
