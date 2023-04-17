@@ -28,21 +28,22 @@ export async function userInfo(): Promise<User> {
   })
 }
 
-interface RewardHonorResponseData {
+interface PresentHonorResponseData {
   success: boolean
 }
 
 /**
- * 管理员奖励用户honor
+ * Present ${amount} honors to ${uid}
+ * Administrators only
  */
-export async function rewardHonor(
+export async function presentHonor(
   uid: string,
   amount: number,
 ): Promise<boolean> {
   return new Promise((resolve, reject) => {
     axios
-      .post<ApiResponse<RewardHonorResponseData>>(
-        `${config.getBaseApiUrl()}/api/user/transfer-honor`,
+      .post<ApiResponse<PresentHonorResponseData>>(
+        `${config.getBaseApiUrl()}/api/wallet/present-honor`,
         {
           userId: uid,
           amount,

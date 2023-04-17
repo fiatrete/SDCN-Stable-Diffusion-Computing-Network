@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import cx from 'classnames'
 import { Button, Form, Input, InputNumber, message } from 'antd'
 
@@ -15,15 +15,19 @@ interface FormValues {
 const Reward = () => {
   const [form] = Form.useForm<FormValues>()
   const { updateUser } = useUser()
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleFormFinish = useCallback(
     (values: FormValues) => {
       console.log('handleFormFinish', values)
+      setIsLoading(true)
       userApi
-        .rewardHonor(values.uid, values.count)
+        .presentHonor(values.uid, values.count)
         .then((result) => {
           if (result === true) {
             message.success('Success')
+
+            form.resetFields()
 
             updateUser()
           } else {
@@ -35,11 +39,15 @@ const Reward = () => {
           message.error('Failed')
         })
         .finally(() => {
-          //
+          setIsLoading(false)
         })
     },
-    [updateUser],
+    [updateUser, form],
   )
+
+  useEffect(() => {
+    setIsLoading(false)
+  }, [])
 
   return (
     <div className={cx(styles.wrap)}>
@@ -68,7 +76,7 @@ const Reward = () => {
             />
           </Form.Item>
           <Form.Item wrapperCol={{ offset: 4 }}>
-            <Button type='primary' htmlType='submit'>
+            <Button type='primary' htmlType='submit' loading={isLoading}>
               Reward
             </Button>
           </Form.Item>

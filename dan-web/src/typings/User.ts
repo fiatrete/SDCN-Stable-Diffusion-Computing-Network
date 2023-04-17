@@ -1,5 +1,4 @@
-export type UserRole = 0 | 1 // 0普通用户, 1管理员
-
+export type UserRole = 0 | 1 // 0:Normal 1:Administrator
 export interface User {
   email: string
   userId: string
@@ -8,5 +7,5 @@ export interface User {
   role: UserRole
   honorAmount: number
   apiKey: string
-  firstTimeLogin: boolean // 是否首次登录
+  firstTimeLogin: boolean
 }
