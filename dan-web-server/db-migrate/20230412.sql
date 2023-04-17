@@ -1,8 +1,8 @@
 ALTER TABLE account ADD COLUMN role smallint default 0;
 ALTER TABLE account ADD COLUMN honor_amount bigint default 0;
 ALTER TABLE account ADD COLUMN api_key text;
-comment on column account.role is comment "0:default 1:admin";
-comment on column account.honor_amount is comment "unit: ten to the power of negative four";
+comment on column account.role is '0:default 1:admin';
+comment on column account.honor_amount is 'unit: ten to the power of negative four';
 
 create table honor_record (
   id BIGSERIAL PRIMARY KEY NOT NULL,
@@ -14,7 +14,7 @@ create table honor_record (
   amount bigint NOT NULL,
   create_time timestamptz
 );
-comment on column honor_record.type is comment "0:present 1:transfer 2:reward-online 3:reward-task";
+comment on column honor_record.type is '0:present 1:transfer 2:reward-online 3:reward-task';
 
 
 --- add random_string func

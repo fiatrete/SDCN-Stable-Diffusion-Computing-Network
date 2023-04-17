@@ -1,7 +1,6 @@
 import { gatewayParamsToWebUI_xxx2img, gatewayParamsToWebUI_interrogate } from './utils/ParamConvert';
 import NodeService from './NodeService';
-import { Context, Next } from 'koa';
-import responseHandler, { ErrorCode, SdcnError, StatusCode } from '../utils/responseHandler';
+import { ErrorCode, SdcnError, StatusCode } from '../utils/responseHandler';
 import { NodeTask } from '../models';
 import { RedisService, NodeTaskRepository } from '../repositories';
 import { JsonObject } from '../utils/json';
@@ -10,7 +9,7 @@ import logger from '../utils/logger';
 import HonorService from './HonorService';
 import { NodeTaskStatus, NodeTaskType } from '../models/enum';
 import Redis from 'ioredis';
-import { Job, Queue, Worker } from 'bullmq';
+import { JobType, Queue, Worker } from 'bullmq';
 import config from '../config';
 import calculateTaskPriority from '../utils/taskPriority';
 
@@ -90,7 +89,11 @@ export default class SdService {
 
     const { model } = requestBody;
     const nodeTask = await this.saveNodeTask(model as string, handlerType);
-    const taskStatusResult = { taskId: nodeTask.id, queuePosition: 50, status: NodeTaskStatus.Pending };
+    const taskStatusResult = {
+      taskId: nodeTask.id,
+      queuePosition: (await this.taskQueue.getJobCountByTypes('delayed', 'waiting')) + 1,
+      status: NodeTaskStatus.Pending,
+    };
     await this.redisService.updateTaskStatus([taskStatusResult]);
 
     const job = await this.taskQueue.add(
