@@ -69,4 +69,34 @@ export const faqData: FaqData[] = [
       'Currently, using DAN is free. DAN is an open-source community where you can donate computing power machines to the community and also buy coffee for developers.',
     ],
   },
+  {
+    q: 'What is the Honor System in DAN?',
+    a: [
+      "The Honor System is DAN's credit system that rewards users for correct behavior and helps prevent abuse of the system.",
+    ],
+  },
+  {
+    q: 'How can I obtain Honor in DAN?',
+    a: [
+      'Users can obtain Honor in DAN by registering as a website user, donating computing power nodes, or contributing to the community.',
+    ],
+  },
+  {
+    q: 'How does the Honor value of users affect the task execution queue?',
+    a: [
+      "The Honor value of different users only affects the sorting of their tasks in the execution queue. Whether the Honor value is high or low, everyone has the opportunity to use DAN's computing power for calculations.",
+    ],
+  },
+  {
+    q: 'How are tasks sorted in the task queue?',
+    a: [
+      'Tasks are sorted in the task queue based on the Honor of the user who sends the task request, the wait time in the queue, and the computing power consumption required for the task.',
+    ],
+  },
+  {
+    q: 'Is there an anonymous API-key in DAN?',
+    a: [
+      'Yes, there is a public anonymous API-key in DAN, and its Honor value remains at 0.',
+    ],
+  },
 ]
