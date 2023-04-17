@@ -2,111 +2,68 @@ import requests
 import json
 import base64
 import sys
-import os
+import common.parameters
+import common.utils
 
-from PIL import Image
-from math import ceil
-
-def get_image_size(filename):
-    with Image.open(filename) as img:
-        width, height = img.size
-        print("img size：%d x %d px" % (width, height))
-    return width, height
-
-def resize(width, height):
-    ratio = min(1024 / width, 1024 / height)
-    w, h = (ceil(width * ratio), ceil(height * ratio))
-    print("resize to：%d x %d px" % (w, h))
-    return w, h
-
-def generate_output_filename(input_filename):
-    dir_name, base_name = os.path.split(os.path.splitext(input_filename)[0])
-    ext = os.path.splitext(input_filename)[1]
-
-    id_int = 1
-    new_base_name = f"{base_name}-3d_to_2d-{id_int}"
-    new_file_path = os.path.join(dir_name, new_base_name + ext)
-    
-    while os.path.exists(new_file_path):
-        id_int += 1
-        new_base_name = f"{base_name}-3d_to_2d-{id_int}"
-        new_file_path = os.path.join(dir_name, new_base_name + ext)
-    
-    return new_file_path
 
 def interrogate(filename):
-	with open(filename, "rb") as f:
-		init_img = base64.b64encode(f.read()).decode()
+    init_img = common.parameters.load_image_file_as_base64(filename)
+    params = {
+        "image": init_img,
+        "model": "clip"
+    }
+    url = common.parameters.get_http_url("/api/sd/interrogate")
+    headers = common.parameters.get_http_headers()
 
-	params = {
-	    "image": init_img,
-	    "model": "clip"
-	}
+    try:
+        response = requests.request(
+            "POST", url, headers=headers, data=json.dumps(params))
+        response.raise_for_status()
+        resp_obj = json.loads(response.content)
+    except requests.exceptions.RequestException as e:
+        print(response.content)
+        return ""
+    result = resp_obj["data"]["caption"]
+    print("interrogate:" + result)
 
-	url = 'https://api.opendan.ai/api/sd/interrogate'
-	headers = {
-	    'accept': 'application/json',
-	    'Content-Type': 'application/json',
-	}
-
-	try:
-	    response = requests.request("POST", url, headers=headers, data=json.dumps(params))
-	    response.raise_for_status()
-	    resp_obj = json.loads(response.content)
-	except requests.exceptions.RequestException as e:
-	    print(response.content)
-	    return ""
-	result = resp_obj["caption"]
-	print("interrogate:" + result)
-
-	return result
+    return result
 
 
 init_img_filename = sys.argv[1]
-target_filename = generate_output_filename(init_img_filename)
+target_filename = common.utils.generate_output_filename(init_img_filename, "3d_to_2d")
 
-width, height = get_image_size(init_img_filename)
-width, height = resize(width, height)
+width, height = common.utils.get_image_size(init_img_filename)
+width, height = common.utils.resize(width, height)
 
 with open(init_img_filename, "rb") as f:
     init_img = base64.b64encode(f.read()).decode()
 
-prompt=interrogate(init_img_filename)
-# prompt=''' 1girl '''
-
-params = {
-	"model": "6e430eb51421ce5bf18f04e2dbe90b2cad437311948be4ef8c33658a73c86b2a",
-    "prompt": prompt,
+prompt = interrogate(init_img_filename)
+body = common.parameters.get_img2img_parameters({
     "init_image": init_img,
+    "prompt": prompt,
     "loras": [
         ["759d6fdf539f44f6991efd27ef1767c7779ac8884defc71dd909e5808b5ea74b", 1]
     ],
     "denoising_strength": 0.45,
-    "seed": -1,
     "sampler_name": "Euler a",
-    "steps": 20,
-    "cfg_scale": 7,
+    "model": "6e430eb51421ce5bf18f04e2dbe90b2cad437311948be4ef8c33658a73c86b2a",
     "width": width,
     "height": height,
     "negative_prompt": '''EasyNegative, lowres, bad anatomy, hands, text, error ,missing fingers , extra digit, fewer digit, cropped ,worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username , blurry '''
-
-}
-
-url = 'https://api.opendan.ai/api/sd/txt2img'
-headers = {
-    'accept': 'application/json',
-    'Content-Type': 'application/json',
-}
+})
+url = common.parameters.get_http_url("/api/sd/img2img")
+headers = common.parameters.get_http_headers()
 
 try:
-    response = requests.request("POST", url, headers=headers, data=json.dumps(params))
+    response = requests.request("POST", url, headers=headers, data=body)
     response.raise_for_status()
-    resp_obj = json.loads(response.content)
 except requests.exceptions.RequestException as e:
     print(response.content)
     sys.exit(1)
 
-if "data" in resp_obj.keys():
+resp_obj = json.loads(response.content)
+if resp_obj.get("code") == 200 and "data" in resp_obj.keys():
     images = resp_obj.get('data').get('images')
     for index, img in zip(range(len(images)), images):
         data = base64.b64decode(img)
@@ -114,3 +71,5 @@ if "data" in resp_obj.keys():
             f.write(data)
 else:
     print(response.content)
+    print(
+        "The response is not as expected, I have print out the original response string")

@@ -1,28 +1,21 @@
 import requests
 import json
-import base64
 import sys
-
+import common.parameters
 
 init_img_filename = sys.argv[1]
-
-with open(init_img_filename, "rb") as f:
-    init_img = base64.b64encode(f.read()).decode()
-
 params = {
-    "image": init_img,
+    "image": common.parameters.load_image_file_as_base64(init_img_filename),
     # "model": "clip"
     "model": "deepdanbooru"
 }
 
-url = 'https://api.opendan.ai/api/sd/interrogate'
-headers = {
-    'accept': 'application/json',
-    'Content-Type': 'application/json',
-}
+url = common.parameters.get_http_url("/api/sd/interrogate")
+headers = common.parameters.get_http_headers()
 
 try:
-    response = requests.request("POST", url, headers=headers, data=json.dumps(params))
+    response = requests.request(
+        "POST", url, headers=headers, data=json.dumps(params))
     response.raise_for_status()
     resp_obj = json.loads(response.content)
     # print(resp_obj)
@@ -34,4 +27,3 @@ if "data" in resp_obj.keys():
     print(resp_obj["data"]["caption"])
 else:
     print(response.content)
-

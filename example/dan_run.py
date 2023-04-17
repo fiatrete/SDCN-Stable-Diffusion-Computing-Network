@@ -2,6 +2,7 @@ import requests
 import json
 import base64
 import sys
+import common.parameters
 
 def print_usage(error_msg = None):
     print("Usage:")
@@ -26,15 +27,9 @@ def load_params(params_file, init_image_file = None):
     
     return params
 
-SERVICE_PREFIX = 'https://api.opendan.ai/api/sd'
-
 def do_request_and_save_image(func_type, params, save_to):
-    url = SERVICE_PREFIX + '/' + func_type
-    headers = {
-        'accept': 'application/json',
-        'Content-Type': 'application/json',
-    }
-
+    url = common.parameters.get_http_url(f"/api/sd/{func_type}")
+    headers = common.parameters.get_http_headers()
     response = requests.request("POST", url, headers=headers, data=json.dumps(params))
     resp_obj = json.loads(response.content)
     if "data" in resp_obj.keys():
