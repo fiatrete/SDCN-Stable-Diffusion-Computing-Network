@@ -210,6 +210,65 @@ end
     return { workerAddress, nodeId };
   }
 
+  async addNodeByNodeName(nodeInfo: { nodeName: string; nodeId: string; accountId: string }) {
+    await this.redisOperation(async (redis: Redis) => {
+      await redis.eval(
+        `
+local nodeId = KEYS[3]
+redis.call("SET", "NodeName$" .. KEYS[1], nodeId, "EX", KEYS[2])
+redis.call("SADD", "AllNodes", nodeId)
+if 1 == redis.call("SADD", "WorkQSetByNodeName", KEYS[1]) then
+    redis.call("RPUSH", "WorkQByNodeName", KEYS[1])
+end
+redis.call("SET", "NodeOwner$" .. nodeId, KEYS[4])
+            `,
+        4,
+        [nodeInfo.nodeName, String(9), nodeInfo.nodeId, nodeInfo.accountId],
+      );
+    });
+  }
+
+  async removeNodeByNodeName(nodeName: string) {
+    await this.redisOperation(async (redis: Redis) => {
+      await redis.eval(
+        `
+local nodeName= KEYS[1]
+redis.call("DEL", "NodeName$" .. nodeName)
+            `,
+        1,
+        nodeName,
+      );
+    });
+  }
+
+  async getNextWorkerNodeByNodeName(): Promise<{ nodeName: string | null; nodeId: string | null }> {
+    let nodeName: string | null = null;
+    let nodeId: string | null = null;
+    await this.redisOperation(async (redis: Redis) => {
+      const evalResult = await redis.eval(
+        `
+while true do
+    local nodeName = redis.call("LPOP", "WorkQByNodeName")
+    if not nodeName then
+        return nil
+    end
+    local nodeId = redis.call("GET", "NodeName$" .. nodeName)
+    if not nodeId then
+        redis.call("SREM", "WorkQSetByNodeName", nodeName)
+    else
+        redis.call("RPUSH", "WorkQByNodeName", nodeName);
+        return { nodeName, nodeId }
+    end
+end
+            `,
+        0,
+      );
+      nodeName = (evalResult as string[])[0];
+      nodeId = (evalResult as string[])[1];
+    });
+    return { nodeName, nodeId };
+  }
+
   async increaseTasksHandled(nodeId: string) {
     await this.redisOperation(async (redis: Redis) => {
       redis.incr('NodeTaskHandled$' + nodeId);

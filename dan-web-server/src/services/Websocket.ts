@@ -41,7 +41,7 @@ export default class WebsocketService {
   clients: Map<string, Client> = new Map();
   clientBySessionId: Map<string, Client> = new Map();
 
-  async addNewClient(ws: WebSocket, message: RegisterMessage) {
+  private async addNewClient(ws: WebSocket, message: RegisterMessage) {
     const accountId = await this.userRepository.getAccountIdByApiKey(message.apiKey);
     if (accountId === undefined || accountId === null) {
       logger.warn('Invalid apiKey');
@@ -88,13 +88,13 @@ export default class WebsocketService {
     ws.send(JSON.stringify(result));
   }
 
-  async removeClient(client: Client) {
+  private async removeClient(client: Client) {
     this.clients.delete(`${client.accountId}:${client.nodeName}`);
     this.clientBySessionId.delete(client.sessionId);
     this.nodeService.offlineNode(client.nodeId);
   }
 
-  async registerClient(ws: WebSocket, message: any) {
+  private async registerClient(ws: WebSocket, message: any) {
     const registerMsg: RegisterMessage = message as RegisterMessage;
     if (registerMsg.nodeName === undefined || registerMsg.nodeName === '') {
       logger.warn('Invaild nodeName');
@@ -167,7 +167,7 @@ export default class WebsocketService {
     this.addNewClient(ws, registerMsg);
   }
 
-  async handleHeartbeat(ws: WebSocket, message: any) {
+  private async handleHeartbeat(ws: WebSocket, message: any) {
     const heartbeatMsg: HeartbeatMessage = message as HeartbeatMessage;
     let existingClient: Client | undefined;
     this.clients.forEach((client) => {
@@ -202,8 +202,14 @@ export default class WebsocketService {
     client.status = heartbeatMsg.status;
     if (client.status === Status.OK) {
       this.nodeService.onlineNode(client.nodeId);
+      this.nodeService.addNodeByNodeName({
+        nodeName: client.nodeName,
+        nodeId: String(client.nodeId),
+        accountId: String(client.accountId),
+      });
     } else {
       this.nodeService.offlineNode(client.nodeId);
+      this.nodeService.removeNodeByNodeName(String(client.nodeId));
     }
 
     const heartbeatResultMsg: HeartbeatResultMessage = {
@@ -214,7 +220,7 @@ export default class WebsocketService {
     ws.send(JSON.stringify(heartbeatResultMsg));
   }
 
-  async handleIncomingMessage(ws: WebSocket, message: string) {
+  private async handleIncomingMessage(ws: WebSocket, message: string) {
     try {
       const parsedMessage = JSON.parse(message);
       switch (parsedMessage.msgType) {
