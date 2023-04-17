@@ -1,7 +1,7 @@
 import config from 'api/config'
 import { ApiResponse } from 'typings/ApiResponse'
 import axios from 'axios'
-import { Task } from './typings'
+import { Task } from 'typings/Task'
 
 export interface Txt2imgParams {
   prompt: string
