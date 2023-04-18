@@ -3,7 +3,9 @@ import { ApiResponse } from 'typings/ApiResponse'
 import axios from 'axios'
 import { Task } from 'typings/Task'
 
-export interface Txt2imgParams {
+export interface Img2imgParams {
+  init_image: string
+  denoising_strength: number
   prompt: string
   lora1: string
   weight1: number
@@ -19,8 +21,10 @@ export interface Txt2imgParams {
   model: string
 }
 
-export async function txt2imgAsync(params: Txt2imgParams): Promise<Task> {
+export async function img2imgAsync(params: Img2imgParams): Promise<Task> {
   const data = {
+    init_image: params.init_image,
+    denoising_strength: params.denoising_strength,
     prompt: params.prompt,
     loras: (() => {
       const loras = []
@@ -45,7 +49,7 @@ export async function txt2imgAsync(params: Txt2imgParams): Promise<Task> {
   return new Promise((resolve, reject) => {
     axios
       .post<ApiResponse<Task>>(
-        `${config.getBaseApiUrl()}/api/sd/txt2img/async`,
+        `${config.getBaseApiUrl()}/api/sd/img2img/async`,
         data,
         {
           withCredentials: true,

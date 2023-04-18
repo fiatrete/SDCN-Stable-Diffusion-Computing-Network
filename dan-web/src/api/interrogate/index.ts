@@ -29,7 +29,7 @@ export async function interrogate(
         if (resp.data.code === config.getSuccessCode()) {
           resolve(resp.data.data)
         } else {
-          reject(new Error(`Failed: ${resp.data.code}`))
+          reject(new Error(`Failed: ${resp.data.code}-${resp.data.message}`))
         }
       })
       .catch((error) => {

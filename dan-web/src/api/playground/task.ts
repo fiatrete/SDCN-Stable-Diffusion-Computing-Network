@@ -1,7 +1,11 @@
 import config from 'api/config'
 import { ApiResponse } from 'typings/ApiResponse'
 import axios from 'axios'
-import { TaskResult } from './typings'
+import { Task } from 'typings/Task'
+
+export interface TaskResponseData extends Task {
+  images: string[]
+}
 
 /**
  * Get the Task Status
@@ -9,10 +13,10 @@ import { TaskResult } from './typings'
  * @param taskId TASK ID
  * @returns Task Status
  */
-export async function getTaskStatus(taskId: number): Promise<TaskResult> {
+export async function getTaskStatus(taskId: string): Promise<TaskResponseData> {
   return new Promise((resolve, reject) => {
     axios
-      .post<ApiResponse<TaskResult>>(
+      .post<ApiResponse<TaskResponseData>>(
         `${config.getBaseApiUrl()}/api/sd/task/status`,
         {
           taskId,
@@ -28,7 +32,7 @@ export async function getTaskStatus(taskId: number): Promise<TaskResult> {
         if (resp.data.code === config.getSuccessCode()) {
           resolve(resp.data.data)
         } else {
-          reject(new Error(`Failed: ${resp.data.code}`))
+          reject(new Error(`Failed: ${resp.data.code}-${resp.data.message}`))
         }
       })
       .catch((error) => {

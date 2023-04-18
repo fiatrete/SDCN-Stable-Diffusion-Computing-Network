@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import cx from 'classnames'
-import { Button, Checkbox, Spin, Typography, message } from 'antd'
+import { Button, Checkbox, Typography, message } from 'antd'
 import styles from './index.module.css'
 import { CheckboxValueType } from 'antd/es/checkbox/Group'
 import ImageInputWidget, {
@@ -11,9 +11,9 @@ import { InterrogateResponseData } from 'api/interrogate'
 import to from 'await-to-js'
 import * as interrogateApi from 'api/interrogate'
 import _ from 'lodash'
-import { LoadingOutlined } from '@ant-design/icons'
 import uiStore from 'stores/uiStore'
 import { observer } from 'mobx-react-lite'
+import GeneratingMask from 'components/GeneratingMask'
 
 const { Title, Paragraph } = Typography
 
@@ -24,10 +24,6 @@ interface InterrogateModel {
 }
 
 const Interrogate = () => {
-  const spinIcon = (
-    <LoadingOutlined style={{ fontSize: 36, color: '#999' }} spin />
-  )
-
   const imageUploaderRef = useRef<ImageInputWidgetRefHandle>(null)
   const [checkedModels, setCheckedModels] = useState(['clip'])
   const [results, setResults] = useState<InterrogateModel[]>([])
@@ -131,6 +127,7 @@ const Interrogate = () => {
           : [styles.wrap, 'w-full flex flex-col gap-4 mt-8'],
       )}
     >
+      <GeneratingMask open={isLoading} defaultTip='Interrogating...' />
       <div>
         <Title level={5}>Interrogate</Title>
         <Paragraph>
@@ -172,15 +169,6 @@ const Interrogate = () => {
           <Paragraph>{m.description}</Paragraph>
         </div>
       ))}
-
-      {isLoading ? (
-        <Spin
-          indicator={spinIcon}
-          className={cx(
-            'absolute top-0 left-0 w-full h-full rounded-lg bg-white/60 flex justify-center items-center',
-          )}
-        />
-      ) : null}
     </div>
   )
 }

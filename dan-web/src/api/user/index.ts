@@ -19,7 +19,7 @@ export async function userInfo(): Promise<User> {
         if (resp.data.code === config.getSuccessCode()) {
           resolve(resp.data.data)
         } else {
-          reject(new Error(`Failed: ${resp.data.code}`))
+          reject(new Error(`Failed: ${resp.data.code}-${resp.data.message}`))
         }
       })
       .catch((error) => {
@@ -56,7 +56,7 @@ export async function presentHonor(
         if (resp.data.code === config.getSuccessCode()) {
           resolve(resp.data.data.success)
         } else {
-          reject(new Error(`Failed: ${resp.data.code}`))
+          reject(new Error(`Failed: ${resp.data.code}-${resp.data.message}`))
         }
       })
       .catch((error) => {
@@ -83,7 +83,7 @@ export async function updatePublicApiKey(): Promise<string> {
         if (resp.data.code === config.getSuccessCode()) {
           resolve(resp.data.data.apiKey)
         } else {
-          reject(new Error(`Failed: ${resp.data.code}`))
+          reject(new Error(`Failed: ${resp.data.code}-${resp.data.message}`))
         }
       })
       .catch((error) => {
