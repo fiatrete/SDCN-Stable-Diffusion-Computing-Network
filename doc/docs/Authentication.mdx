@@ -1,0 +1,46 @@
+---
+sidebar_position: 2
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+
+The DAN API uses API keys for authentication. Visit your [API Keys page](https://opendan.ai/account) to retrieve the API key you'll use in your requests.
+
+:::caution
+
+**Remember that your API key is a secret!**
+Do not share it with others or expose it in any client-side code (browsers, apps). Production requests must be routed through your own backend server where your API key can be securely loaded from an environment variable or key management service.
+
+:::
+
+
+
+All API requests should include your API key in an Authorization HTTP header as follows:
+``` bash
+Authorization: Bearer DAN_API_KEY
+```
+
+**Note:** if you do not want to register, you can use `sk-000000000000000000000000000000000000000000000000` as api_key to connect anonymously. However anonymous accounts have the lowest priority!
+
+Example curl command:
+```bash {4}
+curl -L -X POST 'https://api.opendan.ai/api/sd/txt2img' \
+-H 'Content-Type: application/json' \
+-H 'Accept: application/json' \
+-H 'Authorization: Bearer sk-000000000000000000000000000000000000000000000000' \
+--data-raw '{
+  "prompt": "masterpiece, best quality, prefect face, shiny skin, cyberpunk",
+  "sampler_name": "DPM++ SDE Karras",
+  "width": 600,
+  "height": 800,
+  "model": "3a17d0deffa4592fd91c711a798031a258ab44041809ade8b4591c0225ea9401",
+  "cfg_scale": 7
+}'
+
+```
+
+
+
+
