@@ -20,7 +20,7 @@ def interrogate(filename):
             "POST", url, headers=headers, data=json.dumps(params))
         response.raise_for_status()
         resp_obj = json.loads(response.content)
-    except requests.exceptions.RequestException as e:
+    except requests.exceptions.RequestException:
         print(response.content)
         return ""
     result = resp_obj["data"]["caption"]
@@ -50,7 +50,11 @@ body = common.parameters.get_img2img_parameters({
     "model": "6e430eb51421ce5bf18f04e2dbe90b2cad437311948be4ef8c33658a73c86b2a",
     "width": width,
     "height": height,
-    "negative_prompt": '''EasyNegative, lowres, bad anatomy, hands, text, error ,missing fingers , extra digit, fewer digit, cropped ,worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username , blurry '''
+    "negative_prompt":
+        '''EasyNegative, lowres, bad anatomy, hands, text, error,
+        missing fingers , extra digit, fewer digit, cropped,
+        worst quality, low quality, normal quality, jpeg artifacts,
+        signature, watermark, username , blurry '''
 })
 url = common.parameters.get_http_url("/api/sd/img2img")
 headers = common.parameters.get_http_headers()
@@ -58,7 +62,7 @@ headers = common.parameters.get_http_headers()
 try:
     response = requests.request("POST", url, headers=headers, data=body)
     response.raise_for_status()
-except requests.exceptions.RequestException as e:
+except requests.exceptions.RequestException:
     print(response.content)
     sys.exit(1)
 
@@ -72,4 +76,5 @@ if resp_obj.get("code") == 200 and "data" in resp_obj.keys():
 else:
     print(response.content)
     print(
-        "The response is not as expected, I have print out the original response string")
+        "The response is not as expected,\
+        I have print out the original response string")

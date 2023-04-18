@@ -40,7 +40,7 @@ while True:
         time.sleep(1)
 
     if status == 1:
-        print(f"The task is being processed, please wait")
+        print("The task is being processed, please wait")
         time.sleep(1)
         continue
 

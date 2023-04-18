@@ -19,7 +19,7 @@ try:
     response.raise_for_status()
     resp_obj = json.loads(response.content)
     # print(resp_obj)
-except requests.exceptions.RequestException as e:
+except requests.exceptions.RequestException:
     print(response.content)
     sys.exit(1)
 
