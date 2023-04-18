@@ -7,7 +7,8 @@ import common.parameters
 def print_usage(error_msg = None):
     print("Usage:")
     print(f"\t{sys.argv[0]} txt2img PARAMS_JSON.json OUTPUT_IMAGE.png")
-    print(f"\t{sys.argv[0]} img2img PARAMS_JSON.json ORIGINAL_IMAGE.png OUTPUT_IMAGE.png")
+    print(f"\t{sys.argv[0]} img2img PARAMS_JSON.json\
+          ORIGINAL_IMAGE.png OUTPUT_IMAGE.png")
     if error_msg is not None:
         print(error_msg)
 
@@ -16,7 +17,7 @@ def load_params(params_file, init_image_file = None):
     with open(params_file, "rb") as f:
         params = json.load(f)
 
-    if params == None:
+    if params is None:
         raise RuntimeError("Failed to load parameters")
 
     if init_image_file is not None:
