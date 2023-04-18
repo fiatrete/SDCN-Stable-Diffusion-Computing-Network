@@ -85,6 +85,7 @@ container.register({
       redisService: container.resolve<RedisService>('redisService'),
       nodeTaskRepository: container.resolve<NodeTaskRepository>('nodeTaskRepository'),
       honorService: container.resolve<HonorService>('honorService'),
+      websocketService: container.resolve<WebsocketService>('websocketService'),
     }))
     .singleton(),
   sdController: asClass(SdControler)

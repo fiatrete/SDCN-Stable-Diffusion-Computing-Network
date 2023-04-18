@@ -50,7 +50,7 @@ export interface OfflineResultMessage extends sessionMessage {
 export interface CommandRequest {
   type: string;
   uri: string;
-  data: Record<string, unknown>;
+  data: any;
 }
 
 export interface CommandMessage {
@@ -61,7 +61,12 @@ export interface CommandMessage {
 
 export interface CommandResultData {
   type: string;
-  data: Record<string, unknown>;
+  status: number;
+  data: any;
+}
+
+export interface CommandResultImageData {
+  images: string;
 }
 
 export interface CommandResultMessage {

@@ -262,42 +262,51 @@ export default class WebsocketService {
     });
   }
 
-  async sendCommand(key: string, request: CommandRequest, callback: (result: CommandResultData) => void) {
-    const client = this.clients.get(key);
-    if (client === undefined) {
-      // const
-      // callback();
-      return;
+  async sendCommand(nodeId: string, request: CommandRequest): Promise<CommandResultData> {
+    let existingClient: Client | undefined;
+    this.clients.forEach((client) => {
+      if (nodeId === String(client.nodeId)) {
+        existingClient = client;
+      }
+    });
+    if (existingClient === undefined) {
+      return {
+        type: 'sd',
+        status: 500,
+        data: {
+          result: false,
+        },
+      };
     }
-    const sessionId = client.sessionId;
+
+    const sessionId = existingClient.sessionId;
     const commandMsg: CommandMessage = {
       msgType: MessageType.Command,
-      sessionId: client.sessionId,
+      sessionId: sessionId,
       request: request,
     };
-
-    const ws = client.socket;
+    const ws = existingClient.socket;
     if (ws) {
-      ws.send(JSON.stringify(commandMsg));
+      return new Promise((resolve, reject) => {
+        ws.send(JSON.stringify(commandMsg));
 
-      ws.onmessage = function (event: WebSocket.MessageEvent) {
-        let data: any;
-        if (typeof event.data === 'string') {
-          data = JSON.parse(event.data);
-        } else if (event.data instanceof ArrayBuffer) {
-          const buffer = new Uint8Array(event.data);
-          data = JSON.parse(Buffer.from(buffer).toString());
-        } else if (event.data instanceof Array) {
-          const buffer = Buffer.concat(event.data);
-          data = JSON.parse(buffer.toString());
-        } else {
-          throw new Error('Invalid message format.');
-        }
+        ws.once('message', (data) => {
+          const commandResult: CommandResultMessage = JSON.parse(data.toString()) as CommandResultMessage;
+          resolve(commandResult.result);
+        });
 
-        if (data.msgType === MessageType.CommandResult && data.sessionId === sessionId) {
-          const resultMsg: CommandResultMessage = data as CommandResultMessage;
-          callback(resultMsg.result);
-        }
+        ws.once('error', (err) => {
+          logger.info(err);
+          reject(err);
+        });
+      });
+    } else {
+      return {
+        type: 'sd',
+        status: 500,
+        data: {
+          result: false,
+        },
       };
     }
   }

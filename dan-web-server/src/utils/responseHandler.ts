@@ -19,6 +19,7 @@ export enum ErrorCode {
   NotSufficientHonor = 3001,
   taskWaitingExceededLimit = 3002,
   UpstreamError = 4000,
+  NodeError = 4001,
   DbError = 5000,
 }
 

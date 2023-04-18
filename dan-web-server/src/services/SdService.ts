@@ -1,7 +1,7 @@
 import { gatewayParamsToWebUI_xxx2img, gatewayParamsToWebUI_interrogate } from './utils/ParamConvert';
 import NodeService from './NodeService';
 import { ErrorCode, SdcnError, StatusCode } from '../utils/responseHandler';
-import { NodeTask } from '../models';
+import { CommandRequest, CommandResultData, NodeTask } from '../models';
 import { RedisService, NodeTaskRepository } from '../repositories';
 import { JsonObject } from '../utils/json';
 import _ from 'lodash';
@@ -12,6 +12,8 @@ import Redis from 'ioredis';
 import { JobType, Queue, Worker } from 'bullmq';
 import config from '../config';
 import calculateTaskPriority from '../utils/taskPriority';
+import WebsocketService from './Websocket';
+import { CommandResultImageData } from '../models/Message';
 
 const kXxx2ImgHttpPath = ['/sdapi/v1/txt2img', '/sdapi/v1/img2img'];
 const kInterrogateHttpPath = '/sdapi/v1/interrogate';
@@ -21,6 +23,7 @@ export default class SdService {
   redisService: RedisService;
   nodeTaskRepository: NodeTaskRepository;
   honorService: HonorService;
+  websocketService: WebsocketService;
   concurrency: number;
   taskQueue: Queue;
   redis: Redis;
@@ -31,12 +34,14 @@ export default class SdService {
     nodeTaskRepository: NodeTaskRepository;
     redisService: RedisService;
     honorService: HonorService;
+    websocketService: WebsocketService;
     redis: Redis;
   }) {
     this.nodeService = inject.nodeService;
     this.nodeTaskRepository = inject.nodeTaskRepository;
     this.redisService = inject.redisService;
     this.honorService = inject.honorService;
+    this.websocketService = inject.websocketService;
     this.concurrency = 8;
     this.redis = inject.redis;
     this.taskQueue = new Queue(this.taskQueueName, { connection: inject.redis });
@@ -50,6 +55,13 @@ export default class SdService {
       throw new SdcnError(StatusCode.InternalServerError, ErrorCode.ResourceUnavailable, 'No available worker found');
     }
     return { workerAddress, nodeId };
+  }
+  private async getNextNodeName(): Promise<{ nodeName: string | null; nodeId: string | null }> {
+    const { nodeName, nodeId } = await this.nodeService.getNextWorkerNodeByNodeName();
+    if (!nodeName) {
+      throw new SdcnError(StatusCode.InternalServerError, ErrorCode.ResourceUnavailable, 'No available worker found');
+    }
+    return { nodeName, nodeId };
   }
 
   private async saveNodeTask(model: string, taskType: number): Promise<NodeTask> {
@@ -150,7 +162,8 @@ export default class SdService {
       ]);
       let taskStatusResult: { taskId: string; queuePosition: number; status: number };
       if (taskType == NodeTaskType.Txt2img || taskType == NodeTaskType.Img2img) {
-        taskStatusResult = await this.executeImageGenerateTask(taskInfo);
+        // taskStatusResult = await this.executeImageGenerateTask(taskInfo);
+        await this.executeImageGenerateTask(taskInfo);
       } else if (taskType == NodeTaskType.Interrogate) {
         taskStatusResult = await this.executeInterrogateTask(taskInfo);
       }
@@ -179,34 +192,44 @@ export default class SdService {
   }
 
   private async executeImageGenerateTask(taskInfo: JsonObject) {
-    const { workerAddress, nodeId } = await this.getNextWorkerNode();
-
+    const { nodeId } = await this.getNextNodeName();
+    if (nodeId === null) {
+      logger.info('Cannot find a node for task.');
+      return;
+    }
     const { taskId, taskType, taskParams } = taskInfo;
+
+    const commandReq: CommandRequest = {
+      type: 'sd',
+      uri: kXxx2ImgHttpPath[taskType as number],
+      data: taskParams,
+    };
+
     await this.nodeTaskRepository.updateNodeSeqAndStatus({
       id: taskId as string,
       status: NodeTaskStatus.Processing,
       nodeSeq: BigInt(nodeId!),
     } as NodeTask);
 
-    const reqInit: RequestInit = {
-      body: JSON.stringify(taskParams),
-      method: 'POST',
-      headers: [['Content-Type', 'application/json']],
-    };
-
-    const upstreamRes: globalThis.Response = await fetch(workerAddress + kXxx2ImgHttpPath[taskType as number], reqInit);
-    const status = upstreamRes.status;
+    const commandResult = await this.websocketService.sendCommand(nodeId, commandReq);
+    const status = commandResult.status;
     if (status !== 200) {
-      throw new SdcnError(StatusCode.InternalServerError, ErrorCode.UpstreamError, `Upstream response ${status}`);
+      throw new SdcnError(StatusCode.InternalServerError, ErrorCode.NodeError, `Node response ${status}`);
     }
 
-    const resultObj = await upstreamRes.json();
     this.nodeService.increaseTasksHandled(nodeId as string);
+    logger.info('commandResult', commandResult);
 
     // update task status
+<<<<<<< HEAD
     const images = resultObj.images;
     const seeds = JSON.parse(resultObj.info).all_seeds;
+=======
+>>>>>>> 8356b8b... feat: implement sendCommand in Websocket.ts
     let taskStatus: number;
+    const images = (commandResult.data as CommandResultImageData).images;
+    logger.info('images', images);
+
     if (_.isNaN(images) || _.isNull(images) || _.isEmpty(images)) {
       taskStatus = NodeTaskStatus.Failure;
     } else {
@@ -218,7 +241,8 @@ export default class SdService {
       status: taskStatus,
       seeds: seeds,
     };
-    return _.assign(taskStatusResult, _.omit(resultObj, 'info', 'parameters'));
+    logger.info('taskStatusResult', taskStatusResult);
+    return _.assign(taskStatusResult, _.omit(commandResult.data, 'info', 'parameters'));
   }
 
   private async executeInterrogateTask(taskInfo: JsonObject) {

@@ -223,7 +223,7 @@ end
 redis.call("SET", "NodeOwner$" .. nodeId, KEYS[4])
             `,
         4,
-        [nodeInfo.nodeName, String(9), nodeInfo.nodeId, nodeInfo.accountId],
+        [nodeInfo.nodeName, kNodeKeepAlive, nodeInfo.nodeId, nodeInfo.accountId],
       );
     });
   }
