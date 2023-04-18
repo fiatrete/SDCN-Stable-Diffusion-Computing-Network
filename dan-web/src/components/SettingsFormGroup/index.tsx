@@ -91,6 +91,7 @@ interface SamplingFormGroupProps {
   stepsName: string
   seedName: string
 }
+
 const SamplingFormGroup = (props: SamplingFormGroupProps) => {
   return (
     <Fragment>
@@ -115,4 +116,22 @@ const SamplingFormGroup = (props: SamplingFormGroupProps) => {
   )
 }
 
-export { ModelFormGroup, LoraFormGroup, SamplingFormGroup }
+interface CFGFormGroupProps {
+  scaleName: string
+}
+
+const CFGFormGroup = (props: CFGFormGroupProps) => {
+  return (
+    <Fragment>
+      <Form.Item
+        label='CFG Scale'
+        name={props.scaleName}
+        initialValue={7}
+      >
+        <SliderSettingItem min={1} max={30} step={0.5} />
+      </Form.Item>
+    </Fragment>
+  )
+}
+
+export { ModelFormGroup, LoraFormGroup, SamplingFormGroup, CFGFormGroup }

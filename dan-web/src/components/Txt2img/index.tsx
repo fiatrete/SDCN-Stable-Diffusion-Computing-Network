@@ -5,6 +5,7 @@ import {
   ModelFormGroup,
   LoraFormGroup,
   SamplingFormGroup,
+  CFGFormGroup,
 } from 'components/SettingsFormGroup'
 import { txt2img, txt2imgParams } from 'api/txt2img'
 import ImageWidget from 'components/ImageOutputWidget'
@@ -40,7 +41,7 @@ const Txt2img = () => {
         const apiParams: txt2imgParams = Object.assign(values)
         apiParams.width = parseInt(widthStr)
         apiParams.height = parseInt(heightStr)
-        apiParams.cfg_scale = 7
+        apiParams.cfg_scale = parseFloat(values.cfg_scale)
         //console.log('submit txt2img', apiParams)
 
         setImgLoading(true)
@@ -135,6 +136,9 @@ const Txt2img = () => {
                 methodName='sampler_name'
                 stepsName='steps'
                 seedName='seed'
+              />
+              <CFGFormGroup
+                scaleName='cfg_scale'
               />
             </div>
           </div>
