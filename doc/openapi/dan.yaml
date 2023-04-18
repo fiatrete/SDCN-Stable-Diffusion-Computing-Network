@@ -1,0 +1,704 @@
+openapi: 3.1.0
+info:
+  title: DAN API
+  description: >-
+    ## Conventions
+
+
+    The base URL to send all API requests is
+
+    ```
+
+    https://api.opendan.ai
+
+    ```
+
+
+    HTTPS is required for all API requests.
+
+
+    The DAN API follows RESTful conventions when possible, with most operations
+    performed via GET, POST, PATCH, and DELETE requests on page and database
+    resources. Request and response bodies are encoded as JSON.
+
+
+    At present, only HTTP requests are supported to complete image generation
+    tasks.
+
+
+    The APIs has similar respones.
+
+
+    On success, dan server will response http `status code` 200 and an object in
+    JSON as below:
+
+
+    ```JSON
+
+    {
+        "code": 200,
+        "data": `The returned object`,
+        "message": "success"
+    }
+
+    ```
+
+
+    On failure, dan server will response a non-ok http `status code` (i.e. not
+    200, may be 401 for an example) and an object JSON as below:
+
+
+    ```JSON
+
+    {
+        "code": `Error code`,
+        "message": `A string describe the error`
+    }
+
+    ```
+
+
+    ## Supported list values
+
+    Under rapid expansion, please stay tuned.
+
+
+    ### Models
+
+    | Name                 |
+    Value                                                            |
+    Ref                                                                |
+    Download                                                                                                        
+    |
+
+    | -------------------- |
+    ---------------------------------------------------------------- |
+    ------------------------------------------------------------------ |
+    ----------------------------------------------------------------------------------------------------------------
+    |
+
+    | chillout_mix         |
+    3a17d0deffa4592fd91c711a798031a258ab44041809ade8b4591c0225ea9401 | [link to
+    civitai](https://civitai.com/models/6424/chilloutmix)     |
+    [download](https://huggingface.co/fiatrete/dan-used-models/resolve/main/chilloutmix_NiPrunedFp32Fix.safetensors)
+    |
+
+    | clarity              |
+    627a6f5c8bf7669d4a224ac041d527debc65d2d435b16e54ead8ee2c901d1634 | [link to
+    civitai](https://civitai.com/models/5062/clarity)         |
+    [download](https://huggingface.co/fiatrete/dan-used-models/resolve/main/clarity.safetensors)                    
+    |
+
+    | anything-v4.5-pruned |
+    6e430eb51421ce5bf18f04e2dbe90b2cad437311948be4ef8c33658a73c86b2a | [link to
+    huggingface](https://huggingface.co/andite/anything-v4.0) |
+    [download](https://huggingface.co/fiatrete/dan-used-models/resolve/main/anything-v4.5-pruned.safetensors)       
+    |
+
+
+
+
+    ### LoRas
+
+
+    | Name                               |
+    Value                                                            |
+    Ref                                                                                   
+    |
+    Download                                                                                                               
+    |
+
+    | ---------------------------------- |
+    ---------------------------------------------------------------- |
+    --------------------------------------------------------------------------------------
+    |
+    -----------------------------------------------------------------------------------------------------------------------
+    |
+
+    | koreanDollLikeness_v10             |
+    62efe75048d55a096a238c6e8c4e12d61b36bf59e388a90589335f750923954c | [link to
+    civitai](https://civitai.com/models/19356/koreandolllikenessv10)             
+    |
+    [download](https://huggingface.co/fiatrete/dan-used-models/resolve/main/koreandolllikeness_V10.safetensors)            
+    |
+
+    | stLouisLuxuriousWheels_v1          |
+    f1efd7b748634120b70343bc3c3b425c06c51548431a1264a2fcb5368352349f | [link to
+    civitai](https://civitai.com/models/6669/st-louis-luxurious-wheels-azur-lane)
+    |
+    [download](https://huggingface.co/fiatrete/dan-used-models/resolve/main/stLouisLuxuriousWheels_v1.safetensors)         
+    |
+
+    | taiwanDollLikeness_v10             |
+    5bbaabc04553d5821a3a45e4de5a02b2e66ecb00da677dd8ae862efd8ba59050 | [link to
+    civitai](https://civitai.com/models/17497/taiwan-doll-likeness)              
+    |
+    [download](https://huggingface.co/fiatrete/dan-used-models/resolve/main/taiwanDollLikeness_v10.safetensors)            
+    |
+
+    | kobeni_v10                         |
+    3e5d8fe726b4c0f1e7f0905f32ea3d1c9ce89a54028209e8179d64d323048dac | [link to
+    civitai](https://civitai.com/models/6679/kobeni)                             
+    |
+    [download](https://huggingface.co/fiatrete/dan-used-models/resolve/main/kobeni_v10.safetensors)                        
+    |
+
+    | thickerLinesAnimeStyle_loraVersion |
+    759d6fdf539f44f6991efd27ef1767c7779ac8884defc71dd909e5808b5ea74b | [link to
+    civitai](https://civitai.com/models/13910/thicker-lines-anime-style-lora-mix)
+    |
+    [download](https://huggingface.co/fiatrete/dan-used-models/resolve/main/thickerLinesAnimeStyle_loraVersion.safetensors)
+    |
+
+
+
+
+    ### Samplers
+
+    - DPM++ SDE Karras
+
+    - Euler a
+
+    - Euler
+
+    - DPM++ SDE
+
+    - LMS
+
+    - DDIM
+  version: 1.0.0
+tags:
+  - name: Stable Diffusion API
+paths:
+  /api/sd/img2img:
+    post:
+      summary: img2img
+      deprecated: false
+      description: This interface provides a service for generating images from images.
+      tags:
+        - Stable Diffusion API
+      parameters:
+        - name: Content-Type
+          in: header
+          description: application/json is required
+          required: true
+          example: application/json
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          description: >-
+            Bearer DAN_API_KEY .Please refer to the Documentation/Authentication
+            section on how to obtain a private DAN_API_KEY.
+          required: true
+          example: Bearer sk-000000000000000000000000000000000000000000000000
+          schema:
+            type: string
+        - name: Accept
+          in: header
+          description: ''
+          required: false
+          example: application/json
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                init_image:
+                  type: string
+                  description: The base64-encoded string of your original image
+                denoising_strength:
+                  type: number
+                  description: "Controls the level of denoising; smaller values yield results that are closer to the original image. Valid range is [0, 1]"
+                prompt:
+                  type: string
+                  description: >-
+                    A positive prompt that describes what you want in the
+                    resulting image
+                sampler_name:
+                  type: string
+                  description: >-
+                    The name of the sampling algorithm used. refer to the
+                    Introduction section for supported list values
+                model:
+                  type: string
+                  description: >-
+                    The model used to generate the image. refer to the
+                    Introduction section for supported list values
+                width:
+                  type: integer
+                  description: >-
+                    The desired width of the resulting image. Valid range is [8,
+                    1024].
+                height:
+                  type: integer
+                  description: >-
+                    The desired height of the resulting image. Valid range is
+                    [8, 1024].
+                negative_prompt:
+                  type: string
+                  description: >-
+                    A negative prompt that describes what you don't want in the
+                    resulting image
+                loras:
+                  type: array
+                  items:
+                    type: string
+                    description: >-
+                      LoRAs value and weight . For example, fill in
+                      ["62efe75048d55a096a238c6e8c4e12d61b36bf59e388a90589335f750923954c",
+                      0.7]
+                  description: >-
+                    - A list of LoRAs to be applied and their weights. 
+
+                    - Format example
+
+                    ``` 
+
+                    [        
+                        ["XXXXXXXX", 0.5],        
+                        ["XXXXXXXX", 0.6]
+                    ]
+
+                    ```
+
+                    - "XXXX" mean LoRA value. Such like
+                    "62efe75048d55a096a238c6e8c4e12d61b36bf59e388a90589335f750923954c". 
+
+                    - Refer to the Introduction section for supported list
+                    values. 
+                seed:
+                  type: integer
+                  description: '-1 for a random seed.'
+                steps:
+                  type: integer
+                  description: Number of inference steps. Valid range is [20, 60].
+                cfg_scale:
+                  type: integer
+                  description: >-
+                    A classifier-free guidance scale; Valid range is [1, 30].
+                    smaller values result in higher quality images, and larger
+                    values yield images closer to the provided prompt
+              required:
+                - prompt
+                - sampler_name
+                - width
+                - height
+                - denoising_strength
+                - init_image
+                - model
+            example:
+              prompt: A cat
+              loras:
+                - - >-
+                    62efe75048d55a096a238c6e8c4e12d61b36bf59e388a90589335f750923954c
+                  - 0.7
+              seed: -1
+              sampler_name: DDIM
+              steps: 20
+              cfg_scale: 7
+              width: 512
+              height: 512
+              negative_prompt: ''
+              model: 3a17d0deffa4592fd91c711a798031a258ab44041809ade8b4591c0225ea9401
+              denoising_strength: 0.5
+              init_image: >-
+                iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAwnRFWHRwYXJhbWV0ZXJzAEEgY2F0LDxsb3JhOmtvcmVhbkRvbGxMaWtlbmVzc192MTA6MC43PgpTdGVwczogMjAsIFNhbXBsZXI6IERESU0sIENGRyBzY2FsZTogNy4wLCBTZWVkOiAyMzAwMjY4MzQwLCBTaXplOiAxNngxNiwgTW9kZWwgaGFzaDogM2ExN2QwZGVmZiwgU2VlZCByZXNpemUgZnJvbTogLTF4LTEsIERlbm9pc2luZyBzdHJlbmd0aDogMOLvrY0AAAEWSURBVHicjZHBTkJBDEXPbWdAg4n+/3f5GSYuJIHHTFsXiKCCelYzyT1Nc6vXl+eHxyf3jbSGOxAfFAjy9E5ImKp6hQ4bvpNUIIGBoGAP3qCBIMC/Cobs4itYQzYA4sf4qzi4zf12LDs4/M+hbbc7804u/a6j9qdgy4hlHHIG85fFCgom0B42jyOGrNOvjv+MjmPLqqocb9ZWaH0Rmqfuj0JAgkCqKhjQT+mMHElkDbOJQqQhqMQER+HM5DBy5NxLU8yoxSy94Qgs4PI0H9vI0pzKOcahakQskXuRgE6HO9NZdQjX9KyxyAvMDMeg143iVw5OWU9wIyGgQYnVrSoFYaTokAbJLEy0q4Kgw71jYJAQRsAWeAf79pJ7zSui0wAAAABJRU5ErkJggg==
+      responses:
+        '200':
+          description: img2img
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: object
+                    properties:
+                      images:
+                        type: array
+                        items:
+                          type: string
+                        description: >-
+                          string of base 64 encoded png file, When status = 2, a
+                          list of images is returned
+                      taskId:
+                        type: string
+                      queuePosition:
+                        type: integer
+                        description: >-
+                          The length of the queue of pending tasks, when status
+                          != 0, queuePosition = 0
+                      status:
+                        type: integer
+                        description: 0:pending, 1:processing, 2:success, 3:fail
+                    required:
+                      - taskId
+                      - queuePosition
+                      - status
+                      - images
+                  message:
+                    type: string
+                required:
+                  - code
+                  - data
+                  - message
+              examples:
+                Success:
+                  summary: Success
+                  value:
+                    code: 200
+                    data:
+                      taskId: 60a4755e-ceb3-4172-8760-28ce47acf04d
+                      queuePosition: 0
+                      status: 2
+                      images:
+                        - >-
+                          iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAxHRFWHRwYXJhbWV0ZXJzAEEgY2F0LDxsb3JhOmtvcmVhbkRvbGxMaWtlbmVzc192MTA6MC43PgpTdGVwczogMjAsIFNhbXBsZXI6IERESU0sIENGRyBzY2FsZTogNy4wLCBTZWVkOiAxNjQ4MDc1MzQ1LCBTaXplOiAxNngxNiwgTW9kZWwgaGFzaDogM2ExN2QwZGVmZiwgU2VlZCByZXNpemUgZnJvbTogLTF4LTEsIERlbm9pc2luZyBzdHJlbmd0aDogMC41x0iUTgAAAjhJREFUeJwFwcluE0EUBdD7Xo3tbtuJTQggISGQ2OcD2PC/fAIrtggigRALBjEmxEkc91zdVfU4h77sfvv1idLWTFAKf/5ebLabdekEMAADGpiRGRyQh3pPQXIbySpwRghom4P3yvgFG67rZmoPq6pYVJXXjgEAmkAgZAIUMrBaGkojRWHylaLBGauN14ohgABMQeQQsrNcdzmO4d4SlQHYAwQAiEACHIAR8IDusoR5bJp0aPpC67yswA4QAAAm6DHrERDG7wB20MM8d9Ow3zcxz2W1gVMTcsB82fQfv1zc1V3bmY5N8tWfy10XDnQrcru/TcRF6bfGA7gJ/fuv31+9Pn/z9vM0hvXJ1vo15nLup+uw0wrw3h0XJQMMZCDbxdef4cP51dgZX9j7m9Xp/e3Nv+iPjs9OnusYkafU5F5SWlUlMccRK+/Onj12y8XLF2dPnywfHlW7u9Ea/6QEdSJ3+zqGZJ09rgpjuBNc37UyTKenGyMxY2ZWSmxkOAINIn03O6utIQlRkcAoAnhOwgDpRALJac7OWjB0AoxTVlPMEMEo0ZFSYLE0A5IJREJC1gSIA+kJaIYhBXHFYl1qBd0DCrAgSdkLEWUoylmyYgA8BMmksiNTsgAR2Nft39113baFYtIxNbfh5w9WrAEA9K3pCDGF0EftF8XlxdUwhG4aHp2sXeZw0/Z9PNquLpqAYrVZK/3v8mr74JQUAzjMGHmBwoV+uK47mdLNr52262YR3336pIuyRPgPgVo9viLutFEAAAAASUVORK5CYII=
+                    message: success
+  /api/sd/txt2img:
+    post:
+      summary: txt2img
+      deprecated: false
+      description: This interface provides a service for generating images from text.
+      tags:
+        - Stable Diffusion API
+      parameters:
+        - name: Content-Type
+          in: header
+          description: application/json is required
+          required: true
+          example: application/json
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          description: >-
+            Bearer DAN_API_KEY .Please refer to the Documentation/Authentication
+            section on how to obtain a private DAN_API_KEY.
+          required: true
+          example: Bearer sk-000000000000000000000000000000000000000000000000
+          schema:
+            type: string
+        - name: Accept
+          in: header
+          description: ''
+          required: false
+          example: application/json
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                prompt:
+                  type: string
+                  description: >-
+                    A positive prompt that describes what you want the image to
+                    be.
+                sampler_name:
+                  type: string
+                  description: >-
+                    The name of the sampling algorithm used. refer to the
+                    Introduction section for supported list values
+                model:
+                  type: string
+                  description: >-
+                    The model used to generate the image. refer to the
+                    Introduction section for supported list values
+                width:
+                  type: integer
+                  description: >-
+                    The desired width of the resulting image. Valid range is
+                    [16, 1024]. 
+                height:
+                  type: integer
+                  description: >-
+                    The desired height of the resulting image. Valid range is
+                    [16, 1024].
+                loras:
+                  type: array
+                  items:
+                    type: array
+                    items:
+                      type: string
+                      description: >-
+                        LoRAs value and weight . For example, fill in
+                        ["62efe75048d55a096a238c6e8c4e12d61b36bf59e388a90589335f750923954c",
+                        0.7]
+                    description: LoRAs list
+                  description: >-
+                    - A list of LoRAs to be applied and their weights. 
+
+                    - Format example
+
+                    ``` 
+
+                    [        
+                        ["XXXXXXXX", 0.5],        
+                        ["XXXXXXXX", 0.6]
+                    ]
+
+                    ```
+
+                    - "XXXX" mean LoRA value. Such like
+                    "62efe75048d55a096a238c6e8c4e12d61b36bf59e388a90589335f750923954c". 
+
+                    - Refer to the Introduction section for supported list
+                    values. 
+                seed:
+                  type: integer
+                  description: '-1 for a random seed.'
+                steps:
+                  type: integer
+                  description: Number of inference steps. Valid range is [20, 60].
+                cfg_scale:
+                  type: integer
+                  description: >-
+                    A classifier-free guidance scale; Valid range is [1, 30].
+                    smaller values result in higher quality images, and larger
+                    values yield images closer to the provided prompt
+                negative_prompt:
+                  type: string
+                  description: >-
+                    A negative prompt that describes what you don't want in the
+                    image.
+                upscale:
+                  type: object
+                  properties:
+                    denoising_strength:
+                      type: number
+                      description: >-
+                        Controls the level of denoising; smaller values yield
+                        results that are closer to the original generated image,
+                        but may be blurry; larger values may lead the output
+                        looks different from the original generated image and
+                        may looks strange. Valid range is [0, 1], but I
+                        recomment you make it between 0.4 and 0.6.
+                    scale:
+                      type: number
+                      description: The upscale rate. Valid range is (1.0, 2.0].
+                    upscaler:
+                      type: string
+                      description: >-
+                        The upscaler algorithm name, Currently only Latent is
+                        supported.
+                  description: Optional, add it if you want to upscale the result.
+              required:
+                - prompt
+                - sampler_name
+                - width
+                - height
+                - model
+              title: ''
+            example:
+              prompt: A cat
+              sampler_name: DDIM
+              width: 512
+              height: 512
+              model: 3a17d0deffa4592fd91c711a798031a258ab44041809ade8b4591c0225ea9401
+              cfg_scale: 7
+              negative_prompt: ''
+              seed: -1
+              loras:
+                - - >-
+                    62efe75048d55a096a238c6e8c4e12d61b36bf59e388a90589335f750923954c
+                  - 0.7
+              steps: 20
+              upscale:
+                denoising_strength: 0.5
+                scale: 2
+                upscaler: Latent
+      responses:
+        '200':
+          description: txt2img
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: object
+                    properties:
+                      images:
+                        type: array
+                        items:
+                          type: string
+                          description: >-
+                            string of base 64 encoded png file, When status = 2,
+                            a list of images is returned
+                      taskId:
+                        type: string
+                      queuePosition:
+                        type: integer
+                        description: >-
+                          The length of the queue of pending tasks, when status
+                          != 0, queuePosition = 0
+                      status:
+                        type: integer
+                        description: 0:pending, 1:processing, 2:success, 3:fail
+                    required:
+                      - taskId
+                      - queuePosition
+                      - status
+                      - images
+                  message:
+                    type: string
+                required:
+                  - code
+                  - data
+                  - message
+              examples:
+                Success:
+                  summary: Success
+                  value:
+                    code: 200
+                    data:
+                      taskId: 00ac7e02-bff0-4741-8798-0cd7821dedf7
+                      queuePosition: 0
+                      status: 2
+                      images:
+                        - >-
+                          iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAA0HRFWHRwYXJhbWV0ZXJzAEEgY2F0LDxsb3JhOmtvcmVhbkRvbGxMaWtlbmVzc192MTA6MC43PgpTdGVwczogMjAsIFNhbXBsZXI6IERESU0sIENGRyBzY2FsZTogNy4wLCBTZWVkOiAzMjc4NDYzMDQzLCBTaXplOiAxNngxNiwgTW9kZWwgaGFzaDogM2ExN2QwZGVmZiwgU2VlZCByZXNpemUgZnJvbTogLTF4LTEsIERlbm9pc2luZyBzdHJlbmd0aDogMCwgQ2xpcCBza2lwOiAy/5tbAgAAAlhJREFUeJxNkV1r21YAhh+dc6yvSJZT2V5mp6JJug4Cg32wi/YX7Dduv6BXZTcrvRyjUBjbLka3tZCEOE6tWk4cxV+SpXO0iyWw5/rlfXl5rN9/eJkMP4uTIw7AgpTVJbO/effb5fj0rDJLO2pqsdg01427ttql6sluHB0xAB+AhB2D/EDG8PzDFNkoZN3USvmyUdq6Fa1WnwaW3CGhhwiwbKSMaKKoPay3/u3clGvhWaFaLeXkPcWIwbc4jwGwGE2YZrSDgaO0amq2/uZGBG1PUok0zaXNwedIGwwAiqNj4h5Ztjo9yabpyvWiwcNE4JcFQiq7/wS+RiUgAPCwvuCbZ7g7QZrltzeF2VrlxhRaG0sJj1Z5AaP7+v8oKA2dT5zk8HD/4HBTNqOLqZFC2EIUi9Ufry///KmuJ/fpmvKMv97y8ePKCd1wF8f1bNepdG2MVip0ksfD7jHaY5ER9kDh9OjvI3zr/HRciY4fewcPHi11WpRL5cZh9zvoIIHp/cgjki85fus3eqhFkc0WeXXt9kUcRmpd1NxCB8AP/3djBz8k/tRuefY8F4vZldZFsS3E5dn01+cbTgGkfW9wxuwfTk6YZM1WYyzb9qLN1hghxflo8urHX158f7V9BxIC2MCK6zkX6XY2zyvDuqzH44kTOGEnULPrfPQ+b8V7T/N4jzsP7PPkKwZvbG2Zdhfd8sMb1w+kULUId3m4FwVYizEAFXBnMAyIIhm0cVyz+8ALQ1vLUvkD3d0bSClGk0r93Op2CEOwGKcsvcr052kdrP0rJ1kV/lzI/F8ENQcO/EplHAAAAABJRU5ErkJggg==
+                    message: success
+  /api/sd/interrogate:
+    post:
+      summary: interrogate
+      deprecated: false
+      description: 'Interrogate tasks will generate a description for an input image. '
+      tags:
+        - Stable Diffusion API
+      parameters:
+        - name: Content-Type
+          in: header
+          description: application/json is required
+          required: true
+          example: application/json
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          description: >-
+            Bearer DAN_API_KEY .Please refer to the Documentation/Authentication
+            section on how to obtain a private DAN_API_KEY.
+          required: true
+          example: Bearer sk-000000000000000000000000000000000000000000000000
+          schema:
+            type: string
+        - name: Accept
+          in: header
+          description: ''
+          required: false
+          example: application/json
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  description: The base64-encoded string of your input image
+                model:
+                  type: string
+                  description: >-
+                    The model name used to describe the image, avalaible options
+                    are clip and deepdanbooru
+                code:
+                  type: integer
+                data:
+                  type: object
+                  properties:
+                    taskId:
+                      type: string
+                    queuePosition:
+                      type: integer
+                    status:
+                      type: integer
+                    caption:
+                      type: string
+                  required:
+                    - taskId
+                    - queuePosition
+                    - status
+                    - caption
+                message:
+                  type: string
+              required:
+                - code
+                - data
+                - message
+                - image
+                - model
+            example:
+              image: >-
+                iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAwnRFWHRwYXJhbWV0ZXJzAEEgY2F0LDxsb3JhOmtvcmVhbkRvbGxMaWtlbmVzc192MTA6MC43PgpTdGVwczogMjAsIFNhbXBsZXI6IERESU0sIENGRyBzY2FsZTogNy4wLCBTZWVkOiAyMzAwMjY4MzQwLCBTaXplOiAxNngxNiwgTW9kZWwgaGFzaDogM2ExN2QwZGVmZiwgU2VlZCByZXNpemUgZnJvbTogLTF4LTEsIERlbm9pc2luZyBzdHJlbmd0aDogMOLvrY0AAAEWSURBVHicjZHBTkJBDEXPbWdAg4n+/3f5GSYuJIHHTFsXiKCCelYzyT1Nc6vXl+eHxyf3jbSGOxAfFAjy9E5ImKp6hQ4bvpNUIIGBoGAP3qCBIMC/Cobs4itYQzYA4sf4qzi4zf12LDs4/M+hbbc7804u/a6j9qdgy4hlHHIG85fFCgom0B42jyOGrNOvjv+MjmPLqqocb9ZWaH0Rmqfuj0JAgkCqKhjQT+mMHElkDbOJQqQhqMQER+HM5DBy5NxLU8yoxSy94Qgs4PI0H9vI0pzKOcahakQskXuRgE6HO9NZdQjX9KyxyAvMDMeg143iVw5OWU9wIyGgQYnVrSoFYaTokAbJLEy0q4Kgw71jYJAQRsAWeAf79pJ7zSui0wAAAABJRU5ErkJggg==
+              model: clip
+      responses:
+        '200':
+          description: interrogate
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: object
+                    properties:
+                      caption:
+                        type: string
+                        description: The input image description
+                      taskId:
+                        type: string
+                      queuePosition:
+                        type: integer
+                        description: >-
+                          The length of the queue of pending tasks, when status
+                          != 0, queuePosition = 0
+                      status:
+                        type: integer
+                        description: 0:pending, 1:processing, 2:success, 3:fail
+                    required:
+                      - taskId
+                      - queuePosition
+                      - status
+                      - caption
+                  message:
+                    type: string
+                required:
+                  - code
+                  - data
+                  - message
+              examples:
+                Success:
+                  summary: Success
+                  value:
+                    code: 200
+                    data:
+                      taskId: faa37545-b284-461d-85fc-32468c7af036
+                      queuePosition: 0
+                      status: 2
+                      caption: >-
+                        a blurry image of a white and blue background with a
+                        blurry effect of a blue and white background, Carlos
+                        Trillo Name, behance hd, a detailed matte painting, net
+                        art
+                    message: success
+components:
+  schemas: {}
+servers:
+  - url: https://api.opendan.ai
+    description: release
