@@ -165,6 +165,12 @@ export default class SdService {
         taskStatusResult = await this.executeImageGenerateTask(taskInfo);
       } else if (taskType == NodeTaskType.Interrogate) {
         taskStatusResult = await this.executeInterrogateTask(taskInfo);
+      } else {
+        taskStatusResult = {
+          taskId: taskId as string,
+          queuePosition: 0,
+          status: NodeTaskStatus.Failure,
+        };
       }
       await this.redisService.updateTaskStatus([taskStatusResult!]);
       await this.nodeTaskRepository.updateStatus({
@@ -173,7 +179,9 @@ export default class SdService {
         finishTime: new Date(),
       } as NodeTask);
       await this.redisService.userTaskCounterDecr(BigInt(taskInfo.userId as string));
-      await this.rewardHonorForTask(taskId as string);
+      if (taskStatusResult.status === NodeTaskStatus.Success) {
+        await this.rewardHonorForTask(taskId as string);
+      }
     } catch (error) {
       logger.error(`task error: ${taskId}`);
       logger.error(error);
