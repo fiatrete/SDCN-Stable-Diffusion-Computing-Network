@@ -66,7 +66,7 @@ export interface CommandResultData {
 }
 
 export interface CommandResultImageData {
-  images: string;
+  images: string[];
 }
 
 export interface CommandResultMessage {

@@ -162,8 +162,7 @@ export default class SdService {
       ]);
       let taskStatusResult: { taskId: string; queuePosition: number; status: number };
       if (taskType == NodeTaskType.Txt2img || taskType == NodeTaskType.Img2img) {
-        // taskStatusResult = await this.executeImageGenerateTask(taskInfo);
-        await this.executeImageGenerateTask(taskInfo);
+        taskStatusResult = await this.executeImageGenerateTask(taskInfo);
       } else if (taskType == NodeTaskType.Interrogate) {
         taskStatusResult = await this.executeInterrogateTask(taskInfo);
       }
@@ -192,12 +191,17 @@ export default class SdService {
   }
 
   private async executeImageGenerateTask(taskInfo: JsonObject) {
+    const { taskId, taskType, taskParams } = taskInfo;
+
     const { nodeId } = await this.getNextNodeName();
     if (nodeId === null) {
       logger.info('Cannot find a node for task.');
-      return;
+      return {
+        taskId: taskId as string,
+        queuePosition: 0,
+        status: NodeTaskStatus.Failure,
+      };
     }
-    const { taskId, taskType, taskParams } = taskInfo;
 
     const commandReq: CommandRequest = {
       type: 'sd',
