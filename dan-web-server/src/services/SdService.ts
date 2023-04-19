@@ -1,7 +1,7 @@
 import { gatewayParamsToWebUI_xxx2img, gatewayParamsToWebUI_interrogate } from './utils/ParamConvert';
 import NodeService from './NodeService';
 import { ErrorCode, SdcnError, StatusCode } from '../utils/responseHandler';
-import { CommandRequest, CommandResultData, NodeTask } from '../models';
+import { CommandRequest, CommandResultImageData, CommandResultCaptionData, NodeTask } from '../models';
 import { RedisService, NodeTaskRepository } from '../repositories';
 import { JsonObject } from '../utils/json';
 import _ from 'lodash';
@@ -255,31 +255,46 @@ export default class SdService {
   }
 
   private async executeInterrogateTask(taskInfo: JsonObject) {
-    const { workerAddress, nodeId } = await this.getNextWorkerNode();
-
     const { taskId, taskParams } = taskInfo;
+    const { nodeId } = await this.getNextNodeName();
+    if (nodeId === null) {
+      logger.info('Cannot find a node for task.');
+      return {
+        taskId: taskId as string,
+        queuePosition: 0,
+        status: NodeTaskStatus.Failure,
+      };
+    }
+
     await this.nodeTaskRepository.updateNodeSeqAndStatus({
       id: taskId as string,
       status: NodeTaskStatus.Processing,
       nodeSeq: BigInt(nodeId!),
     } as NodeTask);
 
-    const reqInit: RequestInit = {
-      body: JSON.stringify(taskParams),
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    const commandReq: CommandRequest = {
+      type: 'sd',
+      uri: kInterrogateHttpPath,
+      data: taskParams,
     };
-    const upstreamRes: globalThis.Response = await fetch(workerAddress + kInterrogateHttpPath, reqInit);
-    const status = upstreamRes.status;
+
+    await this.nodeTaskRepository.updateNodeSeqAndStatus({
+      id: taskId as string,
+      status: NodeTaskStatus.Processing,
+      nodeSeq: BigInt(nodeId!),
+    } as NodeTask);
+
+    const commandResultData = await this.websocketService.sendCommand(taskId as string, nodeId, commandReq);
+    const status = commandResultData.code;
     if (status !== 200) {
-      throw new SdcnError(StatusCode.InternalServerError, ErrorCode.UpstreamError, `Upstream response ${status}`);
+      throw new SdcnError(StatusCode.InternalServerError, ErrorCode.NodeError, `Node response ${status}`);
     }
 
-    const resultObj = await upstreamRes.json();
     this.nodeService.increaseTasksHandled(nodeId as string);
 
-    const caption = resultObj.caption;
     let taskStatus: number;
+    const caption = (commandResultData.data as CommandResultCaptionData).caption;
+
     if (_.isNil(caption)) {
       taskStatus = NodeTaskStatus.Failure;
     } else {

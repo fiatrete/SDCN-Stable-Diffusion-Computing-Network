@@ -70,6 +70,10 @@ export interface CommandResultImageData {
   images: string[];
 }
 
+export interface CommandResultCaptionData {
+  caption: string;
+}
+
 export interface CommandResultMessage {
   msgType: MessageType.CommandResult;
   sessionId: string;
