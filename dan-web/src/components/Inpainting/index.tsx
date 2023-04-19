@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useState } from 'react'
+import React, { Fragment, useCallback, useRef, useState } from 'react'
 import cx from 'classnames'
 import check from 'check-types'
 import {
@@ -15,30 +15,24 @@ import {
   LoraFormGroup,
   SamplingFormGroup,
 } from 'components/SettingsFormGroup'
+import { img2img, img2imgParams } from 'api/img2img'
 import ImageOutputWidget from 'components/ImageOutputWidget'
 import ImageInputWidget from 'components/ImageInputWidget'
 import { FormFinishInfo } from 'rc-field-form/es/FormContext'
 import GeneratingMask from 'components/GeneratingMask'
 import SliderSettingItem from 'components/SliderSettingItem'
 import { observer } from 'mobx-react-lite'
+import { flushSync } from 'react-dom'
 
 import styles from './index.module.css'
 
 import uiStore from 'stores/uiStore'
-import to from 'await-to-js'
-import { Task } from 'typings/Task'
-import { AxiosError } from 'axios'
-import {
-  Img2imgParams,
-  TaskResponseData,
-  getTaskStatus,
-  img2imgAsync,
-} from 'api/playground'
+import Paint from 'components/Paint'
 
 const { Title } = Typography
 const { TextArea } = Input
 
-function calclImgSize(
+function calcImgSize(
   inWid: number,
   inHei: number,
   setWid: number,
@@ -68,58 +62,24 @@ const sizes = [
   { value: '1024x768', label: '1024x768' },
 ]
 
-const Img2img = () => {
+const Inpainting = () => {
   const [form] = Form.useForm()
   const [outputImgUri, setOutputImgUri] = useState<string | undefined>()
   const [inputImg, setInputImg] = useState<string>('')
-  const [isGenerating, setIsGenerating] = useState<boolean>(false)
-  const [task, setTask] = useState<Task | undefined>(undefined)
-
-  const setGeneratingTask = (
-    _isGenerating: boolean,
-    _task: Task | undefined = undefined,
-  ) => {
-    setIsGenerating(_isGenerating)
-    setTask(_task)
-  }
-
-  const pollingTaskResult = useCallback((task: Task) => {
-    setGeneratingTask(true, task)
-
-    const timerId = setInterval(async () => {
-      const [_error, _resp] = await to<TaskResponseData, AxiosError>(
-        getTaskStatus(task.taskId),
-      )
-
-      if (_error !== null) {
-        message.error(_error.message)
-        console.error('getTaskStatus Error', _error)
-        setGeneratingTask(false)
-        return
-      }
-
-      setGeneratingTask(true, _resp)
-
-      if (_resp.status !== 0 && _resp.status !== 1) {
-        clearInterval(timerId)
-        setGeneratingTask(false)
-
-        if (_resp.status === 2) {
-          setOutputImgUri(`data:image/png;base64,${_resp.images[0]}`)
-        } else if (_resp.status === 3) {
-          message.error(`Failed: [${_resp.status}]`)
-        }
-      }
-    }, 1000)
-  }, [])
+  const [inputImgSize, setInputImgSize] = useState({
+    width: 0,
+    height: 0,
+  })
+  const [imgLoading, setImgLoading] = useState<boolean>(false)
+  const [showPaint, setShowPaint] = useState(false)
+  const inpaintMaskRef = useRef('')
 
   const onFormSubmit = useCallback(
     async (name: string, { values }: FormFinishInfo) => {
       try {
         check.assert(inputImg, 'input image must be existed')
 
-        setGeneratingTask(true)
-
+        setImgLoading(true)
         // Get input image size
         const [widthStr, heightStr] = values.size.split('x')
         delete values.size
@@ -128,60 +88,69 @@ const Img2img = () => {
         const inHei: number = values.input_height
         delete values.input_height
 
-        const apiParams: Img2imgParams = Object.assign(values)
+        const apiParams: img2imgParams = Object.assign(values)
 
         const setWid = parseInt(widthStr)
         const setHei = parseInt(heightStr)
         // Set submit image size
-        const [subWidth, subHeight] = calclImgSize(inWid, inHei, setWid, setHei)
+        const [subWidth, subHeight] = calcImgSize(inWid, inHei, setWid, setHei)
         apiParams.width = subWidth
         apiParams.height = subHeight
 
         apiParams.cfg_scale = 7
         apiParams.init_image = inputImg?.split(',')[1]
+
+        if (inpaintMaskRef.current !== '') {
+          apiParams.inpaint = {
+            mask: inpaintMaskRef.current,
+            mask_blur: 0,
+            mask_mode: 0,
+            inpaint_area: 0,
+          }
+        }
         //console.log('submit', apiParams)
 
-        // setOutputImgUri(await img2img(apiParams))
-
-        const [_error, _task] = await to<Task, AxiosError>(
-          img2imgAsync(apiParams),
-        )
-
-        if (_error !== null) {
-          message.error(_error.message)
-          console.error('img2img Async Error', _error)
-          setGeneratingTask(false)
-          return
-        }
-
-        pollingTaskResult(_task)
+        setOutputImgUri(await img2img(apiParams))
       } catch (err) {
         if (err instanceof String) message.error(err)
         if (err instanceof Error) message.error(err.message)
-
-        setGeneratingTask(false)
+      } finally {
+        setImgLoading(false)
       }
     },
-    [pollingTaskResult, inputImg],
+    [inputImg],
   )
 
   const onInputSize = useCallback(
     (width: number, height: number) => {
       form.setFieldValue('input_width', width)
       form.setFieldValue('input_height', height)
+      console.log('onInputSize', width, height)
+      flushSync(() => {
+        setInputImgSize({
+          width,
+          height,
+        })
+        setShowPaint(true)
+      })
     },
     [form],
   )
+
+  const handlePaintUpdate = useCallback((data: string) => {
+    inpaintMaskRef.current = data
+  }, [])
+
+  const handlePaintClose = useCallback(() => {
+    setShowPaint(false)
+    inpaintMaskRef.current = ''
+  }, [])
 
   return (
     /* when Form submitted, the parent Form.Provider received the submittion via onFormFinish */
     <Form.Provider onFormFinish={onFormSubmit}>
       <Form form={form} name='img2imgForm' layout='vertical'>
-        <GeneratingMask
-          open={isGenerating}
-          defaultTip='Generating...'
-          task={task}
-        />
+        <GeneratingMask open={imgLoading} />
         <Fragment>
           <Form.Item hidden={true} name='input_width'>
             <InputNumber />
@@ -211,7 +180,6 @@ const Img2img = () => {
                   name='prompt'
                   className={cx('self-stretch')}
                   style={{ marginBottom: '0px' }}
-                  rules={[{ required: true, message: 'Please input prompts' }]}
                 >
                   <TextArea
                     size='large'
@@ -232,7 +200,27 @@ const Img2img = () => {
                   : ['flex h-[388px] gap-2.5'],
               )}
             >
-              <ImageInputWidget onChanged={setInputImg} onSize={onInputSize} />
+              {showPaint === false && (
+                <ImageInputWidget
+                  onChanged={setInputImg}
+                  onSize={onInputSize}
+                />
+              )}
+              {showPaint && (
+                <div
+                  className={cx(
+                    'relative w-full h-full flex justify-center items-center',
+                  )}
+                >
+                  <Paint
+                    width={inputImgSize.width}
+                    height={inputImgSize.height}
+                    image={inputImg}
+                    onUpdate={handlePaintUpdate}
+                    onClose={handlePaintClose}
+                  />
+                </div>
+              )}
               <ImageOutputWidget src={outputImgUri} />
             </div>
           </div>
@@ -286,4 +274,4 @@ const Img2img = () => {
   )
 }
 
-export default observer(Img2img)
+export default observer(Inpainting)
