@@ -169,307 +169,299 @@ info:
   version: 1.0.0
 tags:
   - name: Stable Diffusion API
-paths:
-  /api/sd/img2img:
-    post:
-      summary: img2img
-      deprecated: false
-      description: This interface provides a service for generating images from images.
-      tags:
-        - Stable Diffusion API
-      parameters:
-        - name: Content-Type
-          in: header
-          description: application/json is required
-          required: true
-          example: application/json
-          schema:
-            type: string
-        - name: Authorization
-          in: header
+security:
+  - BearerAuth: []
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: >-
+    
+        - Bearer DAN_API_KEY.
+
+        - Public anonymous DAN_API_KEY is:
+
+        ```
+
+        sk-000000000000000000000000000000000000000000000000
+
+        ```
+
+        - Please refer to the [Authentication section](../Authentication.mdx) on how to obtain a private DAN_API_KEY.
+  schemas: {}
+  x-common-parameter-content-type: &common_parameters_content_type
+    name: Content-Type
+    in: header
+    description: application/json is required
+    required: true
+    example: application/json
+    schema:
+      type: string
+  x-common-parameters-authorization: &common_parameters_authorization
+    name: Authorization
+    in: header
+    description: >-
+    
+        - Bearer DAN_API_KEY.
+
+        - Public anonymous DAN_API_KEY is:
+
+        ```
+
+        sk-000000000000000000000000000000000000000000000000
+
+        ```
+
+        - Please refer to the [Authentication section](../Authentication.mdx) on how to obtain a private DAN_API_KEY.
+
+
+    required: true
+    example: Bearer sk-000000000000000000000000000000000000000000000000
+    schema:
+      type: string
+  x-common-parameters-accept: &common_parameters_accept
+    name: Accept
+    in: header
+    description: ''
+    required: false
+    example: application/json
+    schema:
+      type: string
+  x-common-parameters-basics: &common_parameters_basics
+    - *common_parameters_authorization
+    - *common_parameters_content_type
+    - *common_parameters_accept
+  x-common-xxx2img-parameters: &common_xxx2img_properties
+    prompt:
+      type: string
+      description: >-
+        A positive prompt that describes what you want the image to
+        be.
+    sampler_name:
+      type: string
+      description: >-
+        The name of the sampling algorithm used. refer to the
+        `Introduction section` for supported list values
+    model:
+      type: string
+      description: >-
+        The model used to generate the image. refer to the
+        `Introduction section` for supported list values
+    width:
+      type: integer
+      description: >-
+        The desired width of the resulting image. Valid range is
+        [8, 1024]. 
+    height:
+      type: integer
+      description: >-
+        The desired height of the resulting image. Valid range is
+        [8, 1024].
+    loras:
+      type: array
+      items:
+        type: array
+        items:
+          type: string
           description: >-
-            Bearer DAN_API_KEY .Please refer to the Documentation/Authentication
-            section on how to obtain a private DAN_API_KEY.
-          required: true
-          example: Bearer sk-000000000000000000000000000000000000000000000000
-          schema:
-            type: string
-        - name: Accept
-          in: header
-          description: ''
-          required: false
-          example: application/json
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
+            LoRAs value and weight . For example, fill in
+            ["62efe75048d55a096a238c6e8c4e12d61b36bf59e388a90589335f750923954c",
+            0.7]
+        description: LoRAs list
+      description: >-
+        - A list of LoRAs to be applied and their weights. 
+
+        - Format example
+
+        ``` 
+
+        [        
+            ["XXXXXXXX", 0.5],        
+            ["XXXXXXXX", 0.6]
+        ]
+
+        ```
+
+        - "XXXX" mean LoRA value. Such like
+        "62efe75048d55a096a238c6e8c4e12d61b36bf59e388a90589335f750923954c". 
+
+        - Refer to the Introduction section for supported list
+        values. 
+    seed:
+      type: integer
+      description: '-1 for a random seed.'
+    steps:
+      type: integer
+      description: Number of inference steps. Valid range is [20, 60], default 20.
+    cfg_scale:
+      type: integer
+      description: >-
+        A classifier-free guidance scale; smaller values result in higher quality images, and larger
+        values yield images closer to the provided prompt. Valid range is [1, 30].
+    negative_prompt:
+      type: string
+      description: >-
+        A negative prompt that describes what you don't want in the image.
+  x-common-xxx2img-200-content: &common_xxx2img_200
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            code:
+              type: integer
+            data:
               type: object
               properties:
-                init_image:
-                  type: string
-                  description: The base64-encoded string of your original image
-                denoising_strength:
-                  type: number
-                  description: "Controls the level of denoising; smaller values yield results that are closer to the original image. Valid range is [0, 1]"
-                prompt:
-                  type: string
-                  description: >-
-                    A positive prompt that describes what you want in the
-                    resulting image
-                sampler_name:
-                  type: string
-                  description: >-
-                    The name of the sampling algorithm used. refer to the
-                    Introduction section for supported list values
-                model:
-                  type: string
-                  description: >-
-                    The model used to generate the image. refer to the
-                    Introduction section for supported list values
-                width:
-                  type: integer
-                  description: >-
-                    The desired width of the resulting image. Valid range is [8,
-                    1024].
-                height:
-                  type: integer
-                  description: >-
-                    The desired height of the resulting image. Valid range is
-                    [8, 1024].
-                negative_prompt:
-                  type: string
-                  description: >-
-                    A negative prompt that describes what you don't want in the
-                    resulting image
-                loras:
+                images:
                   type: array
                   items:
                     type: string
-                    description: >-
-                      LoRAs value and weight . For example, fill in
-                      ["62efe75048d55a096a238c6e8c4e12d61b36bf59e388a90589335f750923954c",
-                      0.7]
                   description: >-
-                    - A list of LoRAs to be applied and their weights. 
-
-                    - Format example
-
-                    ``` 
-
-                    [        
-                        ["XXXXXXXX", 0.5],        
-                        ["XXXXXXXX", 0.6]
-                    ]
-
-                    ```
-
-                    - "XXXX" mean LoRA value. Such like
-                    "62efe75048d55a096a238c6e8c4e12d61b36bf59e388a90589335f750923954c". 
-
-                    - Refer to the Introduction section for supported list
-                    values. 
-                seed:
-                  type: integer
-                  description: '-1 for a random seed.'
-                steps:
-                  type: integer
-                  description: Number of inference steps. Valid range is [20, 60].
-                cfg_scale:
+                    string of base 64 encoded png file. When status = 2, a
+                    list of images is returned
+                taskId:
+                  type: string
+                queuePosition:
                   type: integer
                   description: >-
-                    A classifier-free guidance scale; Valid range is [1, 30].
-                    smaller values result in higher quality images, and larger
-                    values yield images closer to the provided prompt
+                    The length of the queue of pending tasks. When status
+                    != 0, queuePosition = 0
+                status:
+                  type: integer
+                  description: 0:pending, 1:processing, 2:success, 3:fail
               required:
-                - prompt
-                - sampler_name
-                - width
-                - height
-                - denoising_strength
-                - init_image
-                - model
-            example:
-              prompt: A cat
-              loras:
-                - - >-
-                    62efe75048d55a096a238c6e8c4e12d61b36bf59e388a90589335f750923954c
-                  - 0.7
-              seed: -1
-              sampler_name: DDIM
-              steps: 20
-              cfg_scale: 7
-              width: 512
-              height: 512
-              negative_prompt: ''
-              model: 3a17d0deffa4592fd91c711a798031a258ab44041809ade8b4591c0225ea9401
-              denoising_strength: 0.5
-              init_image: >-
-                iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAwnRFWHRwYXJhbWV0ZXJzAEEgY2F0LDxsb3JhOmtvcmVhbkRvbGxMaWtlbmVzc192MTA6MC43PgpTdGVwczogMjAsIFNhbXBsZXI6IERESU0sIENGRyBzY2FsZTogNy4wLCBTZWVkOiAyMzAwMjY4MzQwLCBTaXplOiAxNngxNiwgTW9kZWwgaGFzaDogM2ExN2QwZGVmZiwgU2VlZCByZXNpemUgZnJvbTogLTF4LTEsIERlbm9pc2luZyBzdHJlbmd0aDogMOLvrY0AAAEWSURBVHicjZHBTkJBDEXPbWdAg4n+/3f5GSYuJIHHTFsXiKCCelYzyT1Nc6vXl+eHxyf3jbSGOxAfFAjy9E5ImKp6hQ4bvpNUIIGBoGAP3qCBIMC/Cobs4itYQzYA4sf4qzi4zf12LDs4/M+hbbc7804u/a6j9qdgy4hlHHIG85fFCgom0B42jyOGrNOvjv+MjmPLqqocb9ZWaH0Rmqfuj0JAgkCqKhjQT+mMHElkDbOJQqQhqMQER+HM5DBy5NxLU8yoxSy94Qgs4PI0H9vI0pzKOcahakQskXuRgE6HO9NZdQjX9KyxyAvMDMeg143iVw5OWU9wIyGgQYnVrSoFYaTokAbJLEy0q4Kgw71jYJAQRsAWeAf79pJ7zSui0wAAAABJRU5ErkJggg==
-      responses:
-        '200':
-          description: img2img
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                  data:
-                    type: object
-                    properties:
-                      images:
-                        type: array
-                        items:
-                          type: string
-                        description: >-
-                          string of base 64 encoded png file, When status = 2, a
-                          list of images is returned
-                      taskId:
-                        type: string
-                      queuePosition:
-                        type: integer
-                        description: >-
-                          The length of the queue of pending tasks, when status
-                          != 0, queuePosition = 0
-                      status:
-                        type: integer
-                        description: 0:pending, 1:processing, 2:success, 3:fail
-                    required:
-                      - taskId
-                      - queuePosition
-                      - status
-                      - images
-                  message:
-                    type: string
-                required:
-                  - code
-                  - data
-                  - message
-              examples:
-                Success:
-                  summary: Success
-                  value:
-                    code: 200
-                    data:
-                      taskId: 60a4755e-ceb3-4172-8760-28ce47acf04d
-                      queuePosition: 0
-                      status: 2
-                      images:
-                        - >-
-                          iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAxHRFWHRwYXJhbWV0ZXJzAEEgY2F0LDxsb3JhOmtvcmVhbkRvbGxMaWtlbmVzc192MTA6MC43PgpTdGVwczogMjAsIFNhbXBsZXI6IERESU0sIENGRyBzY2FsZTogNy4wLCBTZWVkOiAxNjQ4MDc1MzQ1LCBTaXplOiAxNngxNiwgTW9kZWwgaGFzaDogM2ExN2QwZGVmZiwgU2VlZCByZXNpemUgZnJvbTogLTF4LTEsIERlbm9pc2luZyBzdHJlbmd0aDogMC41x0iUTgAAAjhJREFUeJwFwcluE0EUBdD7Xo3tbtuJTQggISGQ2OcD2PC/fAIrtggigRALBjEmxEkc91zdVfU4h77sfvv1idLWTFAKf/5ebLabdekEMAADGpiRGRyQh3pPQXIbySpwRghom4P3yvgFG67rZmoPq6pYVJXXjgEAmkAgZAIUMrBaGkojRWHylaLBGauN14ohgABMQeQQsrNcdzmO4d4SlQHYAwQAiEACHIAR8IDusoR5bJp0aPpC67yswA4QAAAm6DHrERDG7wB20MM8d9Ow3zcxz2W1gVMTcsB82fQfv1zc1V3bmY5N8tWfy10XDnQrcru/TcRF6bfGA7gJ/fuv31+9Pn/z9vM0hvXJ1vo15nLup+uw0wrw3h0XJQMMZCDbxdef4cP51dgZX9j7m9Xp/e3Nv+iPjs9OnusYkafU5F5SWlUlMccRK+/Onj12y8XLF2dPnywfHlW7u9Ea/6QEdSJ3+zqGZJ09rgpjuBNc37UyTKenGyMxY2ZWSmxkOAINIn03O6utIQlRkcAoAnhOwgDpRALJac7OWjB0AoxTVlPMEMEo0ZFSYLE0A5IJREJC1gSIA+kJaIYhBXHFYl1qBd0DCrAgSdkLEWUoylmyYgA8BMmksiNTsgAR2Nft39113baFYtIxNbfh5w9WrAEA9K3pCDGF0EftF8XlxdUwhG4aHp2sXeZw0/Z9PNquLpqAYrVZK/3v8mr74JQUAzjMGHmBwoV+uK47mdLNr52262YR3336pIuyRPgPgVo9viLutFEAAAAASUVORK5CYII=
-                    message: success
+                - taskId
+                - queuePosition
+                - status
+                - images
+            message:
+              type: string
+          required:
+            - code
+            - data
+            - message
+        examples:
+          Success:
+            summary: Success
+            value:
+              code: 200
+              data:
+                taskId: 60a4755e-ceb3-4172-8760-28ce47acf04d
+                queuePosition: 0
+                status: 2
+                images:
+                  - >-
+                    iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAxHRFWHRwYXJhbWV0ZXJzAEEgY2F0LDxsb3JhOmtvcmVhbkRvbGxMaWtlbmVzc192MTA6MC43PgpTdGVwczogMjAsIFNhbXBsZXI6IERESU0sIENGRyBzY2FsZTogNy4wLCBTZWVkOiAxNjQ4MDc1MzQ1LCBTaXplOiAxNngxNiwgTW9kZWwgaGFzaDogM2ExN2QwZGVmZiwgU2VlZCByZXNpemUgZnJvbTogLTF4LTEsIERlbm9pc2luZyBzdHJlbmd0aDogMC41x0iUTgAAAjhJREFUeJwFwcluE0EUBdD7Xo3tbtuJTQggISGQ2OcD2PC/fAIrtggigRALBjEmxEkc91zdVfU4h77sfvv1idLWTFAKf/5ebLabdekEMAADGpiRGRyQh3pPQXIbySpwRghom4P3yvgFG67rZmoPq6pYVJXXjgEAmkAgZAIUMrBaGkojRWHylaLBGauN14ohgABMQeQQsrNcdzmO4d4SlQHYAwQAiEACHIAR8IDusoR5bJp0aPpC67yswA4QAAAm6DHrERDG7wB20MM8d9Ow3zcxz2W1gVMTcsB82fQfv1zc1V3bmY5N8tWfy10XDnQrcru/TcRF6bfGA7gJ/fuv31+9Pn/z9vM0hvXJ1vo15nLup+uw0wrw3h0XJQMMZCDbxdef4cP51dgZX9j7m9Xp/e3Nv+iPjs9OnusYkafU5F5SWlUlMccRK+/Onj12y8XLF2dPnywfHlW7u9Ea/6QEdSJ3+zqGZJ09rgpjuBNc37UyTKenGyMxY2ZWSmxkOAINIn03O6utIQlRkcAoAnhOwgDpRALJac7OWjB0AoxTVlPMEMEo0ZFSYLE0A5IJREJC1gSIA+kJaIYhBXHFYl1qBd0DCrAgSdkLEWUoylmyYgA8BMmksiNTsgAR2Nft39113baFYtIxNbfh5w9WrAEA9K3pCDGF0EftF8XlxdUwhG4aHp2sXeZw0/Z9PNquLpqAYrVZK/3v8mr74JQUAzjMGHmBwoV+uK47mdLNr52262YR3336pIuyRPgPgVo9viLutFEAAAAASUVORK5CYII=
+              message: success
+  x-common-interrogate-200-content: &common_interrogate_200
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            code:
+              type: integer
+            data:
+              type: object
+              properties:
+                caption:
+                  type: string
+                  description: The input image description
+                taskId:
+                  type: string
+                queuePosition:
+                  type: integer
+                  description: >-
+                    The length of the queue of pending tasks, when status
+                    != 0, queuePosition = 0
+                status:
+                  type: integer
+                  description: 0:pending, 1:processing, 2:success, 3:fail
+              required:
+                - taskId
+                - queuePosition
+                - status
+                - caption
+            message:
+              type: string
+          required:
+            - code
+            - data
+            - message
+        examples:
+          Success:
+            summary: Success
+            value:
+              code: 200
+              data:
+                taskId: faa37545-b284-461d-85fc-32468c7af036
+                queuePosition: 0
+                status: 2
+                caption: >-
+                  a blurry image of a white and blue background with a
+                  blurry effect of a blue and white background, Carlos
+                  Trillo Name, behance hd, a detailed matte painting, net
+                  art
+              message: success
+  x-common-async-200-content: &common_async_200
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            code:
+              type: integer
+            data:
+              type: object
+              properties:
+                taskId:
+                  type: string
+                queuePosition:
+                  type: integer
+                  description: >-
+                    The length of the queue of pending tasks, when status
+                    != 0, queuePosition = 0
+                status:
+                  type: integer
+                  description: 0:pending, 1:processing, 2:success, 3:fail
+              required:
+                - taskId
+                - queuePosition
+                - status
+            message:
+              type: string
+          required:
+            - code
+            - data
+            - message
+        examples:
+          Success:
+            summary: Success
+            value:
+              code: 200
+              data:
+                taskId: 00ac7e02-bff0-4741-8798-0cd7821dedf7
+                queuePosition: 0
+                status: 2
+              message: success
+paths:
   /api/sd/txt2img:
-    post:
-      summary: txt2img
+    post: &txt2img_post
+      summary: /api/sd/txt2img
       deprecated: false
       description: This interface provides a service for generating images from text.
       tags:
         - Stable Diffusion API
-      parameters:
-        - name: Content-Type
-          in: header
-          description: application/json is required
-          required: true
-          example: application/json
-          schema:
-            type: string
-        - name: Authorization
-          in: header
-          description: >-
-            Bearer DAN_API_KEY .Please refer to the Documentation/Authentication
-            section on how to obtain a private DAN_API_KEY.
-          required: true
-          example: Bearer sk-000000000000000000000000000000000000000000000000
-          schema:
-            type: string
-        - name: Accept
-          in: header
-          description: ''
-          required: false
-          example: application/json
-          schema:
-            type: string
+      parameters: *common_parameters_basics
       requestBody:
         content:
           application/json:
             schema:
               type: object
               properties:
-                prompt:
-                  type: string
-                  description: >-
-                    A positive prompt that describes what you want the image to
-                    be.
-                sampler_name:
-                  type: string
-                  description: >-
-                    The name of the sampling algorithm used. refer to the
-                    Introduction section for supported list values
-                model:
-                  type: string
-                  description: >-
-                    The model used to generate the image. refer to the
-                    Introduction section for supported list values
-                width:
-                  type: integer
-                  description: >-
-                    The desired width of the resulting image. Valid range is
-                    [16, 1024]. 
-                height:
-                  type: integer
-                  description: >-
-                    The desired height of the resulting image. Valid range is
-                    [16, 1024].
-                loras:
-                  type: array
-                  items:
-                    type: array
-                    items:
-                      type: string
-                      description: >-
-                        LoRAs value and weight . For example, fill in
-                        ["62efe75048d55a096a238c6e8c4e12d61b36bf59e388a90589335f750923954c",
-                        0.7]
-                    description: LoRAs list
-                  description: >-
-                    - A list of LoRAs to be applied and their weights. 
-
-                    - Format example
-
-                    ``` 
-
-                    [        
-                        ["XXXXXXXX", 0.5],        
-                        ["XXXXXXXX", 0.6]
-                    ]
-
-                    ```
-
-                    - "XXXX" mean LoRA value. Such like
-                    "62efe75048d55a096a238c6e8c4e12d61b36bf59e388a90589335f750923954c". 
-
-                    - Refer to the Introduction section for supported list
-                    values. 
-                seed:
-                  type: integer
-                  description: '-1 for a random seed.'
-                steps:
-                  type: integer
-                  description: Number of inference steps. Valid range is [20, 60].
-                cfg_scale:
-                  type: integer
-                  description: >-
-                    A classifier-free guidance scale; Valid range is [1, 30].
-                    smaller values result in higher quality images, and larger
-                    values yield images closer to the provided prompt
-                negative_prompt:
-                  type: string
-                  description: >-
-                    A negative prompt that describes what you don't want in the
-                    image.
+                <<: *common_xxx2img_properties
                 upscale:
                   type: object
                   properties:
@@ -497,7 +489,6 @@ paths:
                 - width
                 - height
                 - model
-              title: ''
             example:
               prompt: A cat
               sampler_name: DDIM
@@ -518,89 +509,90 @@ paths:
                 upscaler: Latent
       responses:
         '200':
-          description: txt2img
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                  data:
-                    type: object
-                    properties:
-                      images:
-                        type: array
-                        items:
-                          type: string
-                          description: >-
-                            string of base 64 encoded png file, When status = 2,
-                            a list of images is returned
-                      taskId:
-                        type: string
-                      queuePosition:
-                        type: integer
-                        description: >-
-                          The length of the queue of pending tasks, when status
-                          != 0, queuePosition = 0
-                      status:
-                        type: integer
-                        description: 0:pending, 1:processing, 2:success, 3:fail
-                    required:
-                      - taskId
-                      - queuePosition
-                      - status
-                      - images
-                  message:
-                    type: string
-                required:
-                  - code
-                  - data
-                  - message
-              examples:
-                Success:
-                  summary: Success
-                  value:
-                    code: 200
-                    data:
-                      taskId: 00ac7e02-bff0-4741-8798-0cd7821dedf7
-                      queuePosition: 0
-                      status: 2
-                      images:
-                        - >-
-                          iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAA0HRFWHRwYXJhbWV0ZXJzAEEgY2F0LDxsb3JhOmtvcmVhbkRvbGxMaWtlbmVzc192MTA6MC43PgpTdGVwczogMjAsIFNhbXBsZXI6IERESU0sIENGRyBzY2FsZTogNy4wLCBTZWVkOiAzMjc4NDYzMDQzLCBTaXplOiAxNngxNiwgTW9kZWwgaGFzaDogM2ExN2QwZGVmZiwgU2VlZCByZXNpemUgZnJvbTogLTF4LTEsIERlbm9pc2luZyBzdHJlbmd0aDogMCwgQ2xpcCBza2lwOiAy/5tbAgAAAlhJREFUeJxNkV1r21YAhh+dc6yvSJZT2V5mp6JJug4Cg32wi/YX7Dduv6BXZTcrvRyjUBjbLka3tZCEOE6tWk4cxV+SpXO0iyWw5/rlfXl5rN9/eJkMP4uTIw7AgpTVJbO/effb5fj0rDJLO2pqsdg01427ttql6sluHB0xAB+AhB2D/EDG8PzDFNkoZN3USvmyUdq6Fa1WnwaW3CGhhwiwbKSMaKKoPay3/u3clGvhWaFaLeXkPcWIwbc4jwGwGE2YZrSDgaO0amq2/uZGBG1PUok0zaXNwedIGwwAiqNj4h5Ztjo9yabpyvWiwcNE4JcFQiq7/wS+RiUgAPCwvuCbZ7g7QZrltzeF2VrlxhRaG0sJj1Z5AaP7+v8oKA2dT5zk8HD/4HBTNqOLqZFC2EIUi9Ufry///KmuJ/fpmvKMv97y8ePKCd1wF8f1bNepdG2MVip0ksfD7jHaY5ER9kDh9OjvI3zr/HRciY4fewcPHi11WpRL5cZh9zvoIIHp/cgjki85fus3eqhFkc0WeXXt9kUcRmpd1NxCB8AP/3djBz8k/tRuefY8F4vZldZFsS3E5dn01+cbTgGkfW9wxuwfTk6YZM1WYyzb9qLN1hghxflo8urHX158f7V9BxIC2MCK6zkX6XY2zyvDuqzH44kTOGEnULPrfPQ+b8V7T/N4jzsP7PPkKwZvbG2Zdhfd8sMb1w+kULUId3m4FwVYizEAFXBnMAyIIhm0cVyz+8ALQ1vLUvkD3d0bSClGk0r93Op2CEOwGKcsvcr052kdrP0rJ1kV/lzI/F8ENQcO/EplHAAAAABJRU5ErkJggg==
-                    message: success
-  /api/sd/interrogate:
+          <<: *common_xxx2img_200
+          description: The generated image is returned here.
+  /api/sd/txt2img/async:
     post:
-      summary: interrogate
+      <<: *txt2img_post
+      summary: /api/sd/txt2img/async
+      description: >-
+        This interface provides a service for generating images from text. <br/>
+        Its usage is almost the same as `txt2img`. The difference between this interface and `txt2img` is that this interface will return immediately with task information.<br/>
+        After obtaining the task information, you can use the [`/api/sd/task/status`](./api-sd-task-status.api.mdx) interface to query the task status and get the result.
+      responses:
+        '200':
+          <<: *common_async_200
+          description: Instead of returning the final result, this API returns the `taskId` and `queueing information`. You can use [`/api/sd/task/status`](./api-sd-task-status.api.mdx) to query the latest status of the task or get the final result.
+  /api/sd/img2img:
+    post: &img2img_post
+      summary: /api/sd/img2img
+      deprecated: false
+      description: This interface provides a service for generating images from images.
+      tags:
+        - Stable Diffusion API
+      parameters: *common_parameters_basics
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                <<: *common_xxx2img_properties
+                init_image:
+                  type: string
+                  description: The base64-encoded string of your original image
+                denoising_strength:
+                  type: number
+                  description: "Controls the level of denoising; smaller values yield results that are closer to the original image. Valid range is [0, 1]"
+              required:
+                - prompt
+                - sampler_name
+                - width
+                - height
+                - denoising_strength
+                - init_image
+                - model
+            example:
+              prompt: A cat
+              loras:
+                - - >-
+                    62efe75048d55a096a238c6e8c4e12d61b36bf59e388a90589335f750923954c
+                  - 0.7
+              seed: -1
+              sampler_name: DDIM
+              steps: 20
+              cfg_scale: 7
+              width: 512
+              height: 512
+              negative_prompt: ''
+              model: 3a17d0deffa4592fd91c711a798031a258ab44041809ade8b4591c0225ea9401
+              denoising_strength: 0.5
+              init_image: >-
+                iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAwnRFWHRwYXJhbWV0ZXJzAEEgY2F0LDxsb3JhOmtvcmVhbkRvbGxMaWtlbmVzc192MTA6MC43PgpTdGVwczogMjAsIFNhbXBsZXI6IERESU0sIENGRyBzY2FsZTogNy4wLCBTZWVkOiAyMzAwMjY4MzQwLCBTaXplOiAxNngxNiwgTW9kZWwgaGFzaDogM2ExN2QwZGVmZiwgU2VlZCByZXNpemUgZnJvbTogLTF4LTEsIERlbm9pc2luZyBzdHJlbmd0aDogMOLvrY0AAAEWSURBVHicjZHBTkJBDEXPbWdAg4n+/3f5GSYuJIHHTFsXiKCCelYzyT1Nc6vXl+eHxyf3jbSGOxAfFAjy9E5ImKp6hQ4bvpNUIIGBoGAP3qCBIMC/Cobs4itYQzYA4sf4qzi4zf12LDs4/M+hbbc7804u/a6j9qdgy4hlHHIG85fFCgom0B42jyOGrNOvjv+MjmPLqqocb9ZWaH0Rmqfuj0JAgkCqKhjQT+mMHElkDbOJQqQhqMQER+HM5DBy5NxLU8yoxSy94Qgs4PI0H9vI0pzKOcahakQskXuRgE6HO9NZdQjX9KyxyAvMDMeg143iVw5OWU9wIyGgQYnVrSoFYaTokAbJLEy0q4Kgw71jYJAQRsAWeAf79pJ7zSui0wAAAABJRU5ErkJggg==
+      responses:
+        '200':
+          <<: *common_xxx2img_200
+          description: The generated image is returned here.
+  /api/sd/img2img/async:
+    post:
+      <<: *img2img_post
+      summary: /api/sd/img2img/async
+      description: >-
+        This interface provides a service for generating images from images. <br/>
+        Its usage is almost the same as `img2img`. The difference between this interface and `img2img` is that this interface will return immediately with task information.<br/>
+        After obtaining the task information, you can use the [`/api/sd/task/status`](./api-sd-task-status.api.mdx) interface to query the task status and get the result.
+      responses:
+        '200':
+          <<: *common_async_200
+          description: Instead of returning the final result, this API returns the `taskId` and `queueing information`. You can use [`/api/sd/task/status`](./api-sd-task-status.api.mdx) to query the latest status of the task or get the final result.
+  /api/sd/interrogate:
+    post: &interrogate_post
+      summary: /api/sd/interrogate
       deprecated: false
       description: 'Interrogate tasks will generate a description for an input image. '
       tags:
         - Stable Diffusion API
-      parameters:
-        - name: Content-Type
-          in: header
-          description: application/json is required
-          required: true
-          example: application/json
-          schema:
-            type: string
-        - name: Authorization
-          in: header
-          description: >-
-            Bearer DAN_API_KEY .Please refer to the Documentation/Authentication
-            section on how to obtain a private DAN_API_KEY.
-          required: true
-          example: Bearer sk-000000000000000000000000000000000000000000000000
-          schema:
-            type: string
-        - name: Accept
-          in: header
-          description: ''
-          required: false
-          example: application/json
-          schema:
-            type: string
+      parameters: *common_parameters_basics
       requestBody:
         content:
           application/json:
@@ -615,30 +607,7 @@ paths:
                   description: >-
                     The model name used to describe the image, avalaible options
                     are clip and deepdanbooru
-                code:
-                  type: integer
-                data:
-                  type: object
-                  properties:
-                    taskId:
-                      type: string
-                    queuePosition:
-                      type: integer
-                    status:
-                      type: integer
-                    caption:
-                      type: string
-                  required:
-                    - taskId
-                    - queuePosition
-                    - status
-                    - caption
-                message:
-                  type: string
               required:
-                - code
-                - data
-                - message
                 - image
                 - model
             example:
@@ -647,7 +616,48 @@ paths:
               model: clip
       responses:
         '200':
-          description: interrogate
+          <<: *common_interrogate_200
+          description: The input image's description is returned here.
+  /api/sd/interrogate/async:
+    post:
+      <<: *interrogate_post
+      summary: /api/sd/interrogate/async
+      deprecated: false
+      description: >-
+        Interrogate tasks will generate a description for an input image.<br/>
+        Its usage is almost the same as `interrogate`. The difference between this interface and `interrogate` is that this interface will return immediately with task information.<br/>
+        After obtaining the task information, you can use the [`/api/sd/task/status`](./api-sd-task-status.api.mdx) interface to query the task status and get the result.
+      tags:
+        - Stable Diffusion API
+      responses:
+        '200':
+          <<: *common_async_200
+          description: Instead of returning the final result, this API returns the `taskId` and `queueing information`. You can use [`/api/sd/task/status`](./api-sd-task-status.api.mdx) to query the latest status of the task or get the final result.
+  /api/sd/task/status:
+    post:
+      summary: /api/sd/task/status
+      deprecated: false
+      description: This API is used to query task's progress or retrive the task's result.
+      tags:
+        - Task
+      parameters: *common_parameters_basics
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                taskId:
+                  type: string
+                  description: The task id returned by asynchronous API, which is the task you care about.
+              required:
+                - taskId
+            example:
+              image: >-
+                iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAwnRFWHRwYXJhbWV0ZXJzAEEgY2F0LDxsb3JhOmtvcmVhbkRvbGxMaWtlbmVzc192MTA6MC43PgpTdGVwczogMjAsIFNhbXBsZXI6IERESU0sIENGRyBzY2FsZTogNy4wLCBTZWVkOiAyMzAwMjY4MzQwLCBTaXplOiAxNngxNiwgTW9kZWwgaGFzaDogM2ExN2QwZGVmZiwgU2VlZCByZXNpemUgZnJvbTogLTF4LTEsIERlbm9pc2luZyBzdHJlbmd0aDogMOLvrY0AAAEWSURBVHicjZHBTkJBDEXPbWdAg4n+/3f5GSYuJIHHTFsXiKCCelYzyT1Nc6vXl+eHxyf3jbSGOxAfFAjy9E5ImKp6hQ4bvpNUIIGBoGAP3qCBIMC/Cobs4itYQzYA4sf4qzi4zf12LDs4/M+hbbc7804u/a6j9qdgy4hlHHIG85fFCgom0B42jyOGrNOvjv+MjmPLqqocb9ZWaH0Rmqfuj0JAgkCqKhjQT+mMHElkDbOJQqQhqMQER+HM5DBy5NxLU8yoxSy94Qgs4PI0H9vI0pzKOcahakQskXuRgE6HO9NZdQjX9KyxyAvMDMeg143iVw5OWU9wIyGgQYnVrSoFYaTokAbJLEy0q4Kgw71jYJAQRsAWeAf79pJ7zSui0wAAAABJRU5ErkJggg==
+              model: clip
+      responses:
+        '200':
           content:
             application/json:
               schema:
@@ -660,7 +670,13 @@ paths:
                     properties:
                       caption:
                         type: string
-                        description: The input image description
+                        description: Maybe `undefined`. If the task a an interrogate task, This is the input image description.
+                      images:
+                        type: array
+                        items:
+                          type: string
+                        description: >-
+                          May be `undefined`. If the task is txt2img/img2img task, this is the generated file list, encoded in base64.
                       taskId:
                         type: string
                       queuePosition:
@@ -675,7 +691,6 @@ paths:
                       - taskId
                       - queuePosition
                       - status
-                      - caption
                   message:
                     type: string
                 required:
@@ -697,8 +712,9 @@ paths:
                         Trillo Name, behance hd, a detailed matte painting, net
                         art
                     message: success
-components:
-  schemas: {}
+          description: >-
+            If the task has not been finished, only the task information is returned.
+            Else return the task output.
 servers:
   - url: https://api.opendan.ai
     description: release
