@@ -340,4 +340,17 @@ export default class WebsocketService {
       };
     }
   }
+
+  async isAliveNode(nodeId: string): Promise<boolean> {
+    let existingClient: Client | undefined;
+    this.clients.forEach((client) => {
+      if (nodeId === String(client.nodeId)) {
+        existingClient = client;
+      }
+    });
+    if (existingClient === undefined) {
+      return false;
+    }
+    return true;
+  }
 }

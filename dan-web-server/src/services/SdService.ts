@@ -199,17 +199,20 @@ export default class SdService {
 
   private async executeImageGenerateTask(taskInfo: JsonObject) {
     const { taskId, taskType, taskParams } = taskInfo;
-    const { nodeId } = await this.getNextNodeName();
-    if (nodeId === null) {
-      logger.info('Cannot find a node for task.');
-      return {
-        taskId: taskId as string,
-        queuePosition: 0,
-        status: NodeTaskStatus.Failure,
-      };
-    }
-    //TODO selected node is offline
-
+    let nodeId;
+    do {
+      nodeId = (await this.getNextNodeName()).nodeId;
+      if (nodeId === null) {
+        logger.info('Cannot find a node for task.');
+        return {
+          taskId: taskId as string,
+          queuePosition: 0,
+          status: NodeTaskStatus.Failure,
+        };
+      }
+      logger.info(`try to select ${nodeId} for ${taskId}`);
+    } while (!(await this.websocketService.isAliveNode(nodeId)));
+    logger.info(`select ${nodeId} for ${taskId}`);
     const commandReq: CommandRequest = {
       type: 'sd',
       uri: kXxx2ImgHttpPath[taskType as number],
@@ -256,15 +259,20 @@ export default class SdService {
 
   private async executeInterrogateTask(taskInfo: JsonObject) {
     const { taskId, taskParams } = taskInfo;
-    const { nodeId } = await this.getNextNodeName();
-    if (nodeId === null) {
-      logger.info('Cannot find a node for task.');
-      return {
-        taskId: taskId as string,
-        queuePosition: 0,
-        status: NodeTaskStatus.Failure,
-      };
-    }
+    let nodeId;
+    do {
+      nodeId = (await this.getNextNodeName()).nodeId;
+      if (nodeId === null) {
+        logger.info('Cannot find a node for task.');
+        return {
+          taskId: taskId as string,
+          queuePosition: 0,
+          status: NodeTaskStatus.Failure,
+        };
+      }
+      logger.info(`try to select ${nodeId} for ${taskId}`);
+    } while (!(await this.websocketService.isAliveNode(nodeId)));
+    logger.info(`select ${nodeId} for ${taskId}`);
 
     await this.nodeTaskRepository.updateNodeSeqAndStatus({
       id: taskId as string,
