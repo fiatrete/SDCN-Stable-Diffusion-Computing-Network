@@ -303,6 +303,99 @@ components:
       type: string
       description: >-
         A negative prompt that describes what you don't want in the image.
+    control_net:
+      type: array
+      items:
+        type: object
+        properties:
+          image:
+            type: string
+            description: The reference image file, encoded in base64
+          model:
+            type: string
+            description: >-
+              The control net model. Valid options are: `sd15_canny` and `sd15_openpose`.
+          preprocess:
+            type: string
+            description: >-
+              How the reference image should be preprocessed, you can specify the preprocess method name. Valid options are: `canny` and `openopse`.
+          preprocess_param1:
+            type: unknown
+            description: |
+              Optional. Some control net model (e.g. sd15_canny) requires parameters, this is the first parameter.
+              See the table below. If you don't known what to fill in here, just leave it undefined.
+
+              <table>
+                <tr>
+                  <th>Control net model</th>
+                  <th>Type</th>
+                  <th>Description</th>
+                </tr>
+                <tr>
+                  <td>sd15_canny</td>
+                  <td>number</td>
+                  <td>The first threshold of canny algorithm. For more information, see <a a target="_blank" href="https://docs.opencv.org/3.4/da/d22/tutorial_py_canny.html">opencv doc</a></td>
+                </tr>
+                <tr>
+                  <td>sd15_openpose</td>
+                  <td>Ignored</td>
+                  <td>Ignored</td>
+                </tr>
+              </table>
+          preprocess_param2:
+            type: unknown
+            description: |
+              Optional. Some control net model (e.g. sd15_canny) requires parameters, this is the second parameter.
+              See the table below. If you don't known what to fill in here, just leave it undefined.
+
+              <table>
+                <tr>
+                  <th>Control net model</th>
+                  <th>Type</th>
+                  <th>Description</th>
+                </tr>
+                <tr>
+                  <td>sd15_canny</td>
+                  <td>number</td>
+                  <td>The second threshold of canny algorithm. For more information, see <a target="_blank" href="https://docs.opencv.org/3.4/da/d22/tutorial_py_canny.html">opencv doc</a></td>
+                </tr>
+                <tr>
+                  <td>sd15_openpose</td>
+                  <td>Ignored</td>
+                  <td>Ignored</td>
+                </tr>
+              </table>
+          weight:
+            type: number
+            description: >-
+              Before merging control net into the main SD model, all weights will be scaled by this value. Valid range is [0, 2], default value is 1.
+          resize_mode:
+            type: number
+            description: >-
+              If control image's dimension does not equal to target dimension, stable diffusion will resize the control image.
+              0 means just resize, 1 means resize and crop, 2 means resize and fill, otherwise use default value: 0.
+          guidance_start:
+            type: number
+            description: >-
+              The control net will be applied in [guidance_start, guidance_end] percents inference steps. Valid range is [0, 1], default: 0.
+          guidance_end:
+            type: number
+            description: >-
+              The control net will be applied in [guidance_start, guidance_end] percents inference steps. Valid range is [0, 1], default: 1.
+          guessmode:
+            type: bool
+            description: >-
+              Optional. Default: false.
+              If true, you can just remove all prompts, and then the control net encoder will recognize the content of the input control map.
+              For this mode, we recommend to use 50 steps and guidance scale between 3 and 5.
+        required:
+          - image
+          - preprocess
+          - model
+      description: >-
+        Optional. An array of control net parameters. Theoretically speaking, multiple control net can be applied simultaneously,
+        but currently only up to 1 control net is supported, if you specify more than 1 set of paramters, the rest (i.e. not the first one)
+        will be ignored.
   x-common-xxx2img-200-content: &common_xxx2img_200
     content:
       application/json:
@@ -537,13 +630,31 @@ paths:
             schema:
               type: object
               properties:
-                <<: *common_xxx2img_properties
                 init_image:
                   type: string
                   description: The base64-encoded string of your original image
                 denoising_strength:
                   type: number
                   description: "Controls the level of denoising; smaller values yield results that are closer to the original image. Valid range is [0, 1]"
+                <<: *common_xxx2img_properties
+                inpaint:
+                  type: object
+                  description: If you want to regenerate part of your image, this will be what you want.
+                  properties:
+                    mask:
+                      type: string
+                      description: This is a base64 encoded image of a mask which defined where you want to regenerate.
+                    mask_blur:
+                      type: number
+                      description: Before regenerating, the image and mask will be gaussian blured by this radius. Valid range is [0, 64], default 0.
+                    mask_mode:
+                      type: number
+                      description: 0 means regenerate where is masked; 1 means regenerate where is not masked.
+                    inpaint_area:
+                      type: number
+                      description: 0 means regenerate whole image, then paste corresponding area back. 1 means only the masked area will be regenereate, then paste corresponding area back.
+                  required:
+                    - mask
               required:
                 - prompt
                 - sampler_name
