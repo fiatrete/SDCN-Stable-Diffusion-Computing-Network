@@ -153,18 +153,19 @@ export default class WebsocketService {
         reason: 'Duplicate registration',
       };
       existingClient.socket.send(JSON.stringify(offlineMsg));
-
-      existingClient.socket.once('message', function onMessage(response: string) {
-        const responseMsg: OfflineResultMessage = JSON.parse(response);
-        if (responseMsg.msgType === 'offline-result' && responseMsg.sessionId === existingClient?.sessionId) {
-          logger.info(`received offline-result from ${registerMsg.nodeName}`);
-          existingClient.socket.close();
-        } else {
-          logger.error(`received unexpected message: ${response}`);
-        }
-      });
     }
     this.addNewClient(ws, registerMsg);
+  }
+
+  private async handleOfflineResult(ws: WebSocket, message: any) {
+    const responseMsg: OfflineResultMessage = JSON.parse(message);
+    const client = this.clientBySessionId.get(responseMsg.sessionId);
+    if (client === undefined) {
+      logger.info(`received offline-result from unknown client.`);
+    } else {
+      logger.info(`received offline-result from ${client.nodeName}.`);
+    }
+    ws.close();
   }
 
   private async handleHeartbeat(ws: WebSocket, message: any) {
@@ -225,10 +226,16 @@ export default class WebsocketService {
       const parsedMessage = JSON.parse(message);
       switch (parsedMessage.msgType) {
         case MessageType.Register:
+          logger.info(`Received message: ${message}`);
           this.registerClient(ws, parsedMessage);
           break;
         case MessageType.Heartbeat:
           this.handleHeartbeat(ws, parsedMessage);
+          break;
+        case MessageType.OfflineResult:
+          this.handleOfflineResult(ws, parsedMessage);
+          break;
+        case MessageType.CommandResult:
           break;
         default:
           logger.info(`Received unknown message type: ${parsedMessage.msgType}`);
@@ -243,7 +250,6 @@ export default class WebsocketService {
     const wss = new WebSocket.Server({ server, path: '/websocket' });
     wss.on('connection', (ws: WebSocket) => {
       ws.on('message', (message: string) => {
-        logger.info(`Received message: ${message}`);
         this.handleIncomingMessage(ws, message);
       });
 
