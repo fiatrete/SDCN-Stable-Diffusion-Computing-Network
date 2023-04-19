@@ -117,7 +117,7 @@ const Paint = (props: Props) => {
 
   const handleClickCloseButton = useCallback(() => {
     onClose()
-  }, [])
+  }, [onClose])
 
   const handleClickResetButton = useCallback(() => {
     const fabricCanvas = fabricCanvasRef.current
@@ -184,13 +184,13 @@ const Paint = (props: Props) => {
 
   const handleInputBrushSizeChanged = useCallback(
     (v: number | null) => {
-      const newWidth = v || 5
+      const newWidth = v || defaultSettings.current.brushSize
       setBrushSize(newWidth)
 
       const cursorLayer = cursorLayerRef.current
-      cursorLayer.width = newWidth
-      cursorLayer.height = newWidth
-      cursorLayer.radius = newWidth / 2
+      cursorLayer.set('width', newWidth)
+      cursorLayer.set('height', newWidth)
+      cursorLayer.set('radius', newWidth / 2)
 
       const pencilBrush = pencilBrushRef.current
       if (pencilBrush !== undefined) {
@@ -272,7 +272,7 @@ const Paint = (props: Props) => {
       if (paintActionRef.current === 'draw') {
         drawPathCloned.globalCompositeOperation = 'source-over'
         drawPathCloned.stroke = 'black'
-        drawPathCloned.opacity = 0.8
+        drawPathCloned.opacity = 1
         drawResultLayer.addWithUpdate(drawPathCloned)
       } else if (paintActionRef.current === 'erase') {
         drawPathCloned.globalCompositeOperation = 'destination-out'
@@ -307,13 +307,13 @@ const Paint = (props: Props) => {
 
   return (
     <div
-      className={cx('w-full h-full flex flex-col justify-center')}
+      className={cx('w-full h-full flex flex-col justify-center gap-2')}
       ref={containerElRef}
     >
-      <div className={cx('relative w-full h-full')}>
+      <div className={cx('relative w-full')}>
         <div
           className={cx(
-            'absolute top-0 left-0 w-full h-full z-[2] flex flex-col justify-center',
+            'absolute top-0 left-0 w-full z-[2] flex flex-col justify-center',
           )}
         >
           <canvas ref={canvasElRef} />
@@ -326,13 +326,29 @@ const Paint = (props: Props) => {
         <div
           className={cx('absolute right-2 bottom-2 z-[3] flex flex-col gap-2')}
         >
-          <Button icon={<CloseOutlined />} onClick={handleClickCloseButton} />
-          <Button icon={<ReloadOutlined />} onClick={handleClickResetButton} />
+          <Button
+            icon={<CloseOutlined />}
+            onClick={handleClickCloseButton}
+            title='Close'
+          />
+          <Button
+            icon={<ReloadOutlined />}
+            onClick={handleClickResetButton}
+            title='Reset'
+          />
           {paintAction === 'erase' && (
-            <Button icon={<EditOutlined />} onClick={handleClickDrawButton} />
+            <Button
+              icon={<EditOutlined />}
+              onClick={handleClickDrawButton}
+              title='Erase'
+            />
           )}
           {paintAction === 'draw' && (
-            <Button icon={<ClearOutlined />} onClick={handleClickEraseButton} />
+            <Button
+              icon={<ClearOutlined />}
+              onClick={handleClickEraseButton}
+              title='Draw'
+            />
           )}
         </div>
       </div>

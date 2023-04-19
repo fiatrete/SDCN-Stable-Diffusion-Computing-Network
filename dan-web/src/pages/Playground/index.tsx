@@ -26,13 +26,13 @@ const items: TabsProps['items'] = [
   },
   {
     key: '3',
-    label: `interrogate`,
-    children: <Interrogate />,
+    label: `inpainting`,
+    children: <Inpainting />,
   },
   {
     key: '4',
-    label: `inpainting`,
-    children: <Inpainting />,
+    label: `interrogate`,
+    children: <Interrogate />,
   },
 ]
 

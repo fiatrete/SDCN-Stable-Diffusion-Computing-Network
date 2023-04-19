@@ -75,43 +75,46 @@ const Img2img = () => {
   const [isGenerating, setIsGenerating] = useState<boolean>(false)
   const [task, setTask] = useState<Task | undefined>(undefined)
 
-  const setGeneratingTask = (
-    _isGenerating: boolean,
-    _task: Task | undefined = undefined,
-  ) => {
-    setIsGenerating(_isGenerating)
-    setTask(_task)
-  }
+  const setGeneratingTask = useCallback(
+    (_isGenerating: boolean, _task: Task | undefined = undefined) => {
+      setIsGenerating(_isGenerating)
+      setTask(_task)
+    },
+    [],
+  )
 
-  const pollingTaskResult = useCallback((task: Task) => {
-    setGeneratingTask(true, task)
+  const pollingTaskResult = useCallback(
+    (task: Task) => {
+      setGeneratingTask(true, task)
 
-    const timerId = setInterval(async () => {
-      const [_error, _resp] = await to<TaskResponseData, AxiosError>(
-        getTaskStatus(task.taskId),
-      )
+      const timerId = setInterval(async () => {
+        const [_error, _resp] = await to<TaskResponseData, AxiosError>(
+          getTaskStatus(task.taskId),
+        )
 
-      if (_error !== null) {
-        message.error(_error.message)
-        console.error('getTaskStatus Error', _error)
-        setGeneratingTask(false)
-        return
-      }
-
-      setGeneratingTask(true, _resp)
-
-      if (_resp.status !== 0 && _resp.status !== 1) {
-        clearInterval(timerId)
-        setGeneratingTask(false)
-
-        if (_resp.status === 2) {
-          setOutputImgUri(`data:image/png;base64,${_resp.images[0]}`)
-        } else if (_resp.status === 3) {
-          message.error(`Failed: [${_resp.status}]`)
+        if (_error !== null) {
+          message.error(_error.message)
+          console.error('getTaskStatus Error', _error)
+          setGeneratingTask(false)
+          return
         }
-      }
-    }, 1000)
-  }, [])
+
+        setGeneratingTask(true, _resp)
+
+        if (_resp.status !== 0 && _resp.status !== 1) {
+          clearInterval(timerId)
+          setGeneratingTask(false)
+
+          if (_resp.status === 2) {
+            setOutputImgUri(`data:image/png;base64,${_resp.images[0]}`)
+          } else if (_resp.status === 3) {
+            message.error(`Failed: [${_resp.status}]`)
+          }
+        }
+      }, 1000)
+    },
+    [setGeneratingTask],
+  )
 
   const onFormSubmit = useCallback(
     async (name: string, { values }: FormFinishInfo) => {
@@ -141,8 +144,6 @@ const Img2img = () => {
         apiParams.init_image = inputImg?.split(',')[1]
         //console.log('submit', apiParams)
 
-        // setOutputImgUri(await img2img(apiParams))
-
         const [_error, _task] = await to<Task, AxiosError>(
           img2imgAsync(apiParams),
         )
@@ -162,7 +163,7 @@ const Img2img = () => {
         setGeneratingTask(false)
       }
     },
-    [pollingTaskResult, inputImg],
+    [inputImg, setGeneratingTask, pollingTaskResult],
   )
 
   const onInputSize = useCallback(
@@ -201,7 +202,7 @@ const Img2img = () => {
             className={cx(
               uiStore.isMobile
                 ? ['flex flex-col gap-6']
-                : ['flex flex-col flex-1'],
+                : ['flex flex-col flex-1 gap-6'],
             )}
           >
             <div className={cx('flex flex-col items-start gap-6')}>
@@ -229,7 +230,7 @@ const Img2img = () => {
               className={cx(
                 uiStore.isMobile
                   ? ['flex flex-col gap-2.5']
-                  : ['flex h-[388px] gap-2.5'],
+                  : ['min-h-[388px] flex gap-2.5'],
               )}
             >
               <ImageInputWidget onChanged={setInputImg} onSize={onInputSize} />

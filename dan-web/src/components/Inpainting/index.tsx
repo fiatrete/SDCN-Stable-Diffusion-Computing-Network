@@ -15,7 +15,6 @@ import {
   LoraFormGroup,
   SamplingFormGroup,
 } from 'components/SettingsFormGroup'
-import { img2img, img2imgParams } from 'api/img2img'
 import ImageOutputWidget from 'components/ImageOutputWidget'
 import ImageInputWidget from 'components/ImageInputWidget'
 import { FormFinishInfo } from 'rc-field-form/es/FormContext'
@@ -23,11 +22,20 @@ import GeneratingMask from 'components/GeneratingMask'
 import SliderSettingItem from 'components/SliderSettingItem'
 import { observer } from 'mobx-react-lite'
 import { flushSync } from 'react-dom'
+import to from 'await-to-js'
 
 import styles from './index.module.css'
 
 import uiStore from 'stores/uiStore'
 import Paint from 'components/Paint'
+import { Task } from 'typings/Task'
+import { AxiosError } from 'axios'
+import {
+  Img2imgParams,
+  TaskResponseData,
+  getTaskStatus,
+  img2imgAsync,
+} from 'api/playground'
 
 const { Title } = Typography
 const { TextArea } = Input
@@ -73,13 +81,57 @@ const Inpainting = () => {
   const [imgLoading, setImgLoading] = useState<boolean>(false)
   const [showPaint, setShowPaint] = useState(false)
   const inpaintMaskRef = useRef('')
+  const [isGenerating, setIsGenerating] = useState<boolean>(false)
+  const [task, setTask] = useState<Task | undefined>(undefined)
+
+  const setGeneratingTask = useCallback(
+    (_isGenerating: boolean, _task: Task | undefined = undefined) => {
+      setIsGenerating(_isGenerating)
+      setTask(_task)
+    },
+    [],
+  )
+
+  const pollingTaskResult = useCallback(
+    (task: Task) => {
+      setGeneratingTask(true, task)
+
+      const timerId = setInterval(async () => {
+        const [_error, _resp] = await to<TaskResponseData, AxiosError>(
+          getTaskStatus(task.taskId),
+        )
+
+        if (_error !== null) {
+          message.error(_error.message)
+          console.error('getTaskStatus Error', _error)
+          setGeneratingTask(false)
+          return
+        }
+
+        setGeneratingTask(true, _resp)
+
+        if (_resp.status !== 0 && _resp.status !== 1) {
+          clearInterval(timerId)
+          setGeneratingTask(false)
+
+          if (_resp.status === 2) {
+            setOutputImgUri(`data:image/png;base64,${_resp.images[0]}`)
+          } else if (_resp.status === 3) {
+            message.error(`Failed: [${_resp.status}]`)
+          }
+        }
+      }, 1000)
+    },
+    [setGeneratingTask],
+  )
 
   const onFormSubmit = useCallback(
     async (name: string, { values }: FormFinishInfo) => {
       try {
         check.assert(inputImg, 'input image must be existed')
 
-        setImgLoading(true)
+        setGeneratingTask(true)
+
         // Get input image size
         const [widthStr, heightStr] = values.size.split('x')
         delete values.size
@@ -88,7 +140,7 @@ const Inpainting = () => {
         const inHei: number = values.input_height
         delete values.input_height
 
-        const apiParams: img2imgParams = Object.assign(values)
+        const apiParams: Img2imgParams = Object.assign(values)
 
         const setWid = parseInt(widthStr)
         const setHei = parseInt(heightStr)
@@ -110,7 +162,18 @@ const Inpainting = () => {
         }
         //console.log('submit', apiParams)
 
-        setOutputImgUri(await img2img(apiParams))
+        const [_error, _task] = await to<Task, AxiosError>(
+          img2imgAsync(apiParams),
+        )
+
+        if (_error !== null) {
+          message.error(_error.message)
+          console.error('img2img Async Error', _error)
+          setGeneratingTask(false)
+          return
+        }
+
+        pollingTaskResult(_task)
       } catch (err) {
         if (err instanceof String) message.error(err)
         if (err instanceof Error) message.error(err.message)
@@ -118,7 +181,7 @@ const Inpainting = () => {
         setImgLoading(false)
       }
     },
-    [inputImg],
+    [inputImg, pollingTaskResult, setGeneratingTask],
   )
 
   const onInputSize = useCallback(
@@ -150,7 +213,11 @@ const Inpainting = () => {
     /* when Form submitted, the parent Form.Provider received the submittion via onFormFinish */
     <Form.Provider onFormFinish={onFormSubmit}>
       <Form form={form} name='img2imgForm' layout='vertical'>
-        <GeneratingMask open={imgLoading} />
+        <GeneratingMask
+          open={isGenerating}
+          defaultTip='Generating...'
+          task={task}
+        />
         <Fragment>
           <Form.Item hidden={true} name='input_width'>
             <InputNumber />
@@ -170,7 +237,7 @@ const Inpainting = () => {
             className={cx(
               uiStore.isMobile
                 ? ['flex flex-col gap-6']
-                : ['flex flex-col flex-1'],
+                : ['flex flex-col flex-1 gap-6'],
             )}
           >
             <div className={cx('flex flex-col items-start gap-6')}>
@@ -197,7 +264,7 @@ const Inpainting = () => {
               className={cx(
                 uiStore.isMobile
                   ? ['flex flex-col gap-2.5']
-                  : ['flex h-[388px] gap-2.5'],
+                  : ['min-h-[388px] flex gap-2.5'],
               )}
             >
               {showPaint === false && (

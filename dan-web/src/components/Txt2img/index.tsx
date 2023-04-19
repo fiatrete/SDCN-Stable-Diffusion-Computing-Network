@@ -134,7 +134,7 @@ const Txt2img = () => {
             className={cx(
               uiStore.isMobile
                 ? ['w-full flex flex-col']
-                : ['w-full flex flex-col flex-1 gap-8'],
+                : ['w-full flex flex-col flex-1 gap-6'],
             )}
           >
             <div className={cx('flex flex-col items-start gap-6')}>
@@ -161,7 +161,7 @@ const Txt2img = () => {
               className={cx(
                 uiStore.isMobile
                   ? ['w-full mt-4']
-                  : ['h-[388px] w-full flex justify-center'],
+                  : ['min-h-[388px] w-full flex justify-center'],
               )}
             >
               <div
