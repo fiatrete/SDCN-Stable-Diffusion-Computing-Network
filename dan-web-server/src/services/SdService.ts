@@ -210,9 +210,7 @@ export default class SdService {
           status: NodeTaskStatus.Failure,
         };
       }
-      logger.info(`try to select ${nodeId} for ${taskId}`);
     } while (!(await this.websocketService.isAliveNode(nodeId)));
-    logger.info(`select ${nodeId} for ${taskId}`);
     const commandReq: CommandRequest = {
       type: 'sd',
       uri: kXxx2ImgHttpPath[taskType as number],
@@ -270,9 +268,7 @@ export default class SdService {
           status: NodeTaskStatus.Failure,
         };
       }
-      logger.info(`try to select ${nodeId} for ${taskId}`);
     } while (!(await this.websocketService.isAliveNode(nodeId)));
-    logger.info(`select ${nodeId} for ${taskId}`);
 
     await this.nodeTaskRepository.updateNodeSeqAndStatus({
       id: taskId as string,

@@ -158,7 +158,7 @@ export default class WebsocketService {
   }
 
   private async handleOfflineResult(ws: WebSocket, message: any) {
-    const responseMsg: OfflineResultMessage = JSON.parse(message);
+    const responseMsg: OfflineResultMessage = message as OfflineResultMessage;
     const client = this.clientBySessionId.get(responseMsg.sessionId);
     if (client === undefined) {
       logger.info(`received offline-result from unknown client.`);
