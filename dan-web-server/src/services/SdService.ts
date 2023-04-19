@@ -223,14 +223,14 @@ export default class SdService {
       nodeSeq: BigInt(nodeId!),
     } as NodeTask);
 
-    const commandResult = await this.websocketService.sendCommand(nodeId, commandReq);
-    const status = commandResult.status;
+    const commandResultData = await this.websocketService.sendCommand(taskId as string, nodeId, commandReq);
+    const status = commandResultData.code;
     if (status !== 200) {
       throw new SdcnError(StatusCode.InternalServerError, ErrorCode.NodeError, `Node response ${status}`);
     }
 
     this.nodeService.increaseTasksHandled(nodeId as string);
-    logger.info('commandResult', commandResult);
+    logger.info('commandResultData', commandResultData);
 
     // update task status
 <<<<<<< HEAD
@@ -239,7 +239,7 @@ export default class SdService {
 =======
 >>>>>>> 8356b8b... feat: implement sendCommand in Websocket.ts
     let taskStatus: number;
-    const images = (commandResult.data as CommandResultImageData).images;
+    const images = (commandResultData.data as CommandResultImageData).images;
     logger.info('images', images);
 
     if (_.isNaN(images) || _.isNull(images) || _.isEmpty(images)) {
@@ -254,7 +254,7 @@ export default class SdService {
       seeds: seeds,
     };
     logger.info('taskStatusResult', taskStatusResult);
-    return _.assign(taskStatusResult, _.omit(commandResult.data, 'info', 'parameters'));
+    return _.assign(taskStatusResult, _.omit(commandResultData.data, 'info', 'parameters'));
   }
 
   private async executeInterrogateTask(taskInfo: JsonObject) {

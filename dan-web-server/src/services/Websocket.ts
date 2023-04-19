@@ -262,7 +262,7 @@ export default class WebsocketService {
     });
   }
 
-  async sendCommand(nodeId: string, request: CommandRequest): Promise<CommandResultData> {
+  async sendCommand(taskId: string, nodeId: string, request: CommandRequest): Promise<CommandResultData> {
     let existingClient: Client | undefined;
     this.clients.forEach((client) => {
       if (nodeId === String(client.nodeId)) {
@@ -272,10 +272,8 @@ export default class WebsocketService {
     if (existingClient === undefined) {
       return {
         type: 'sd',
-        status: 500,
-        data: {
-          result: false,
-        },
+        code: 500,
+        data: {},
       };
     }
 
@@ -283,6 +281,7 @@ export default class WebsocketService {
     const commandMsg: CommandMessage = {
       msgType: MessageType.Command,
       sessionId: sessionId,
+      taskId: taskId,
       request: request,
     };
     const ws = existingClient.socket;
@@ -296,17 +295,15 @@ export default class WebsocketService {
         });
 
         ws.once('error', (err) => {
-          logger.info(err);
+          logger.error(err);
           reject(err);
         });
       });
     } else {
       return {
         type: 'sd',
-        status: 500,
-        data: {
-          result: false,
-        },
+        code: 500,
+        data: {},
       };
     }
   }

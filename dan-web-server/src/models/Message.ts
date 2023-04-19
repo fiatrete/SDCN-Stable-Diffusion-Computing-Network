@@ -56,12 +56,13 @@ export interface CommandRequest {
 export interface CommandMessage {
   msgType: MessageType.Command;
   sessionId: string;
+  taskId: string;
   request: CommandRequest;
 }
 
 export interface CommandResultData {
   type: string;
-  status: number;
+  code: number;
   data: any;
 }
 
@@ -72,5 +73,6 @@ export interface CommandResultImageData {
 export interface CommandResultMessage {
   msgType: MessageType.CommandResult;
   sessionId: string;
+  taskId: string;
   result: CommandResultData;
 }
