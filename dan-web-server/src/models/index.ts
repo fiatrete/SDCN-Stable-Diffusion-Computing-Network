@@ -13,6 +13,7 @@ import {
   CommandRequest,
   CommandResultMessage,
   CommandResultData,
+  CommandResultImageData,
 } from './Message';
 export {
   User,
@@ -35,4 +36,5 @@ export {
   CommandRequest,
   CommandResultMessage,
   CommandResultData,
+  CommandResultImageData,
 };

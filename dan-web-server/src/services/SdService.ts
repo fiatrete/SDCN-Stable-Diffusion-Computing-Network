@@ -13,7 +13,6 @@ import { JobType, Queue, Worker } from 'bullmq';
 import config from '../config';
 import calculateTaskPriority from '../utils/taskPriority';
 import WebsocketService from './Websocket';
-import { CommandResultImageData } from '../models/Message';
 
 const kXxx2ImgHttpPath = ['/sdapi/v1/txt2img', '/sdapi/v1/img2img'];
 const kInterrogateHttpPath = '/sdapi/v1/interrogate';
@@ -200,7 +199,6 @@ export default class SdService {
 
   private async executeImageGenerateTask(taskInfo: JsonObject) {
     const { taskId, taskType, taskParams } = taskInfo;
-
     const { nodeId } = await this.getNextNodeName();
     if (nodeId === null) {
       logger.info('Cannot find a node for task.');
@@ -210,6 +208,7 @@ export default class SdService {
         status: NodeTaskStatus.Failure,
       };
     }
+    //TODO selected node is offline
 
     const commandReq: CommandRequest = {
       type: 'sd',
@@ -230,7 +229,6 @@ export default class SdService {
     }
 
     this.nodeService.increaseTasksHandled(nodeId as string);
-    logger.info('commandResultData', commandResultData);
 
     // update task status
 <<<<<<< HEAD
@@ -240,7 +238,6 @@ export default class SdService {
 >>>>>>> 8356b8b... feat: implement sendCommand in Websocket.ts
     let taskStatus: number;
     const images = (commandResultData.data as CommandResultImageData).images;
-    logger.info('images', images);
 
     if (_.isNaN(images) || _.isNull(images) || _.isEmpty(images)) {
       taskStatus = NodeTaskStatus.Failure;

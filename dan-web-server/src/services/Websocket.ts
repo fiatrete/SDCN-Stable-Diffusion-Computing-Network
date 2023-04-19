@@ -270,6 +270,7 @@ export default class WebsocketService {
       }
     });
     if (existingClient === undefined) {
+      logger.info('existingClient is undefined');
       return {
         type: 'sd',
         code: 500,
@@ -287,19 +288,45 @@ export default class WebsocketService {
     const ws = existingClient.socket;
     if (ws) {
       return new Promise((resolve, reject) => {
+        let hasResolved = false;
+        const timer = setTimeout(() => {
+          if (!hasResolved) {
+            reject(new Error('Timeout'));
+          }
+        }, 180 * 1000);
         ws.send(JSON.stringify(commandMsg));
 
-        ws.once('message', (data) => {
-          const commandResult: CommandResultMessage = JSON.parse(data.toString()) as CommandResultMessage;
-          resolve(commandResult.result);
-        });
+        function onMessage(event: WebSocket.MessageEvent) {
+          let data: any;
+          if (typeof event.data === 'string') {
+            data = JSON.parse(event.data);
+          } else if (event.data instanceof ArrayBuffer) {
+            const buffer = new Uint8Array(event.data);
+            data = JSON.parse(Buffer.from(buffer).toString());
+          } else if (event.data instanceof Array) {
+            const buffer = Buffer.concat(event.data);
+            data = JSON.parse(buffer.toString());
+          } else {
+            throw new Error('Invalid message format.');
+          }
+          if (data.msgType === MessageType.CommandResult && data.taskId === taskId) {
+            const resultMsg: CommandResultMessage = data as CommandResultMessage;
+            ws.removeEventListener('message', onMessage);
+            clearTimeout(timer);
+            hasResolved = true;
+            resolve(resultMsg.result);
+          }
+        }
+        ws.addEventListener('message', onMessage);
 
         ws.once('error', (err) => {
           logger.error(err);
+          ws.removeEventListener('message', onMessage);
           reject(err);
         });
       });
     } else {
+      logger.info('ws is:', ws);
       return {
         type: 'sd',
         code: 500,
