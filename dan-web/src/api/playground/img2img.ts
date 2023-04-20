@@ -19,6 +19,12 @@ export interface Img2imgParams {
   height: number
   negative_prompt: string
   model: string
+  inpaint?: {
+    mask: string
+    mask_blur: number // [0, 64], default 0
+    mask_mode: 0 | 1
+    inpaint_area: 0 | 1
+  }
 }
 
 export async function img2imgAsync(params: Img2imgParams): Promise<Task> {
@@ -44,6 +50,7 @@ export async function img2imgAsync(params: Img2imgParams): Promise<Task> {
     height: params.height,
     negative_prompt: params.negative_prompt,
     model: params.model,
+    inpaint: params.inpaint,
   }
 
   return new Promise((resolve, reject) => {
