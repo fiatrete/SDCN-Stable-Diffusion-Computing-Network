@@ -162,42 +162,8 @@ export default class NodeControler {
       throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, error.message);
     }
     const { type, pageNo, pageSize } = value;
-
-    const nodeList = await this.nodeService.getNodeListByType(type, pageNo, pageSize);
-    if (nodeList.length === 0) {
-      return responseHandler.success(context, {
-        items: [],
-        pageNo: pageNo,
-        pageSize: pageSize,
-        totolPages: 0,
-        totalSize: 0,
-      });
-    }
-    const promises = nodeList.map(async (node) => {
-      const user = await this.userService.getUserInfo(node.accountId);
-      if (user === undefined) {
-        return;
-      }
-      const userInfo = user as unknown as User;
-      const accountInfo = { nickname: userInfo?.nickname, avatarImgUrl: userInfo?.avatarImg, email: userInfo?.email };
-      const item = {
-        nodeId: node.nodeSeq,
-        account: accountInfo,
-        status: node.status,
-        taskHandlerCount: node.taskCount,
-      };
-      return item;
-    });
-
-    const result = await Promise.all(promises);
-    // logger.info('out-result', result);
-    return responseHandler.success(context, {
-      items: result,
-      pageNo: pageNo,
-      pageSize: pageSize,
-      totolPages: Math.ceil(nodeList.length / pageSize),
-      totalSize: nodeList.length,
-    });
+    const result = await this.nodeService.getNodeListByType(type, pageNo, pageSize);
+    return responseHandler.success(context, result);
   }
 
   @RequireLoginAsync

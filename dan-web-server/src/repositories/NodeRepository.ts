@@ -32,6 +32,26 @@ const nodeFields: Record<NodeFields, string> = {
 };
 const nodeTable = 'node';
 
+interface Account {
+  nickname: string;
+  avatarImgUrl: string;
+  email: string;
+}
+
+interface NodeItem {
+  nodeId: number;
+  account: Account;
+  taskHandlerCount: number;
+  status: number;
+}
+
+interface NodeQueryResult {
+  items: NodeItem[];
+  pageNo: number;
+  pageSize: number;
+  totalSize: number;
+  totalPages: number;
+}
 export interface NodeHash {
   account_id: bigint;
   worker: string;
@@ -104,29 +124,82 @@ export default class NodeRepository {
     }
   }
 
-  async getNodeListbyStatus(type: number, pageNo: number, pageSize: number): Promise<Node[]> {
+  async getNodeListbyStatus(type: number, pageNo: number, pageSize: number): Promise<NodeQueryResult> {
     if (type === 0) {
-      const nodes = await this.Nodes()
+      const query = this.Nodes()
+        .join('account', 'node.account_id', '=', 'account.id')
+        .select(
+          'node.node_seq as nodeId',
+          'account.nickname',
+          'account.avatar_img as avatarImgUrl',
+          'account.email',
+          'node.task_count as taskHandlerCount',
+          'node.status',
+        )
         .where({ deleted: 0 })
         .offset((pageNo - 1) * pageSize)
         .limit(pageSize)
         .orderBy([
-          { column: 'task_count', order: SortDirection.Desc },
+          { column: 'taskHandlerCount', order: SortDirection.Desc },
           { column: 'node_seq', order: SortDirection.Asc },
         ]);
-      return nodes;
+      const [items, [{ count: totalSize }]] = await Promise.all([query, this.Nodes().count().where({ deleted: 0 })]);
+      const totalPages = Math.ceil((totalSize as number) / pageSize);
+      return {
+        items: items.map(({ nodeId, nickname, avatarImgUrl, email, taskHandlerCount, status }) => ({
+          nodeId,
+          account: { nickname, avatarImgUrl, email },
+          taskHandlerCount,
+          status,
+        })),
+        pageNo,
+        pageSize,
+        totalSize: totalSize as number,
+        totalPages,
+      };
     } else if (type === 1) {
-      const nodes = await this.Nodes()
+      const query = this.Nodes()
+        .join('account', 'node.account_id', '=', 'account.id')
+        .select(
+          'node.node_seq as nodeId',
+          'account.nickname',
+          'account.avatar_img as avatarImgUrl',
+          'account.email',
+          'node.task_count as taskHandlerCount',
+          'node.status',
+        )
         .where({ status: 1, deleted: 0 })
         .offset((pageNo - 1) * pageSize)
         .limit(pageSize)
         .orderBy([
-          { column: 'task_count', order: SortDirection.Desc },
+          { column: 'taskHandlerCount', order: SortDirection.Desc },
           { column: 'node_seq', order: SortDirection.Asc },
         ]);
-      return nodes;
+      const [items, [{ count: totalSize }]] = await Promise.all([
+        query,
+        this.Nodes().count().where({ status: 1, deleted: 0 }),
+      ]);
+      const totalPages = Math.ceil((totalSize as number) / pageSize);
+      return {
+        items: items.map(({ nodeId, nickname, avatarImgUrl, email, taskHandlerCount, status }) => ({
+          nodeId,
+          account: { nickname, avatarImgUrl, email },
+          taskHandlerCount,
+          status,
+        })),
+        pageNo,
+        pageSize,
+        totalSize: totalSize as number,
+        totalPages,
+      };
     }
-    return [];
+    return {
+      items: [],
+      pageNo: pageNo,
+      pageSize: pageSize,
+      totalSize: 0,
+      totalPages: 0,
+    };
   }
 
   async getAllUndeletedNodes() {
