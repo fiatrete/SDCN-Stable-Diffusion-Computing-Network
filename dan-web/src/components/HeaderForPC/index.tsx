@@ -17,6 +17,7 @@ import useSignInModal from 'hooks/useSignModal'
 import userStore from 'stores/userStore'
 import useUser from 'hooks/useUser'
 import UserAvatar from 'components/UserAvatar'
+import { env } from 'env'
 
 const Header = () => {
   const { showSignModel } = useSignInModal()
@@ -47,14 +48,14 @@ const Header = () => {
           </Link>
         </div>
         <nav className={cx('grow flex items-center gap-x-1')}>
-          <NavLink
-            to={'/api-reference'}
-            className={({ isActive }) =>
-              isActive ? cx(styles.navLinkActive) : cx(styles.navLink)
-            }
+          <a
+            className={styles.navLink}
+            href={env.REACT_APP_DOCS_DOMAIN}
+            target='_blank'
+            rel='noreferrer'
           >
             API Reference
-          </NavLink>
+          </a>
           <NavLink
             to={'/nodes'}
             className={({ isActive }) =>
