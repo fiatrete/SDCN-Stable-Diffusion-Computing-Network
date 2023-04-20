@@ -239,6 +239,7 @@ export default class SdService {
 >>>>>>> 8356b8b... feat: implement sendCommand in Websocket.ts
     let taskStatus: number;
     const images = (commandResultData.data as CommandResultImageData).images;
+    const seeds = JSON.parse((commandResultData.data as CommandResultImageData).info).all_seeds;
 
     if (_.isNaN(images) || _.isNull(images) || _.isEmpty(images)) {
       taskStatus = NodeTaskStatus.Failure;
