@@ -205,6 +205,7 @@ export default class SdService {
 
     // update task status
     const images = resultObj.images;
+    const seeds = JSON.parse(resultObj.info).all_seeds;
     let taskStatus: number;
     if (_.isNaN(images) || _.isNull(images) || _.isEmpty(images)) {
       taskStatus = NodeTaskStatus.Failure;
@@ -215,6 +216,7 @@ export default class SdService {
       taskId: taskId as string,
       queuePosition: 0,
       status: taskStatus,
+      seeds: seeds,
     };
     return _.assign(taskStatusResult, _.omit(resultObj, 'info', 'parameters'));
   }
