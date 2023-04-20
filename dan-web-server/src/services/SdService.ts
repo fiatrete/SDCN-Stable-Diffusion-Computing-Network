@@ -131,6 +131,13 @@ export default class SdService {
     return { totalCount, countInLast24Hours, countInLastWeek };
   }
 
+  async supportedModelInfo() {
+    const Models = Object.entries(config.sdConfig.kValidModels).map(([hash, name]) => ({ name, hash }));
+    const LoRAs = Object.entries(config.sdConfig.kValidLoras).map(([hash, name]) => ({ name, hash }));
+    const Samplers = config.sdConfig.kValidSamplers;
+    return { Models, LoRAs, Samplers };
+  }
+
   private async executeTaskWrapper(taskInfo: JsonObject) {
     const { taskId, taskType } = taskInfo;
     try {

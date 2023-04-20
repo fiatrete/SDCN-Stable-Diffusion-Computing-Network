@@ -116,6 +116,11 @@ export default class SdControler {
     responseHandler.success(context, taskStatistics);
   }
 
+  async supportedModelInfo(context: Context) {
+    const supportedModelInfo = await this.sdService.supportedModelInfo();
+    responseHandler.success(context, supportedModelInfo);
+  }
+
   private async getAccount(context: Context) {
     const userId = context.session?.authUserInfo?.id;
     const apiKey = context.request.headers?.authorization?.replace('Bearer ', '') as string;
@@ -143,6 +148,7 @@ export default class SdControler {
     router.post('/task/status', this.taskStatus.bind(this));
     router.post('/statistics', this.taskStatistics.bind(this));
     router.get('/statistics', this.taskStatistics.bind(this));
+    router.get('/supportedModelInfo', this.supportedModelInfo.bind(this));
     return router;
   }
 }
