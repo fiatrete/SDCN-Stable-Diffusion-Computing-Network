@@ -10,7 +10,7 @@
 <p align="center">
   <a href="https://www.opendan.ai" target="_blank">Website</a> |
   <a href="https://www.opendan.ai/play" target="_blank">Playground</a> |
-  <a href="doc/api.md">API Docs</a>
+  <a href="https://docs.opendan.ai">API Docs</a>
 </p>
 
 
