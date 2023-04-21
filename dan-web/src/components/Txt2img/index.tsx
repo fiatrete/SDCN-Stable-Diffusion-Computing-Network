@@ -1,11 +1,13 @@
 import React, { useCallback, useState } from 'react'
 import cx from 'classnames'
-import { Form, Select, Button, Input, Typography, message } from 'antd'
+import { Form, Select, Button, Input, Typography, message, Tooltip } from 'antd'
 import {
   ModelFormGroup,
   LoraFormGroup,
   SamplingFormGroup,
   CFGFormGroup,
+  modelsData,
+  samplingMethodsData,
 } from 'components/SettingsFormGroup'
 import ImageWidget from 'components/ImageOutputWidget'
 import { FormFinishInfo } from 'rc-field-form/es/FormContext'
@@ -23,6 +25,12 @@ import {
 } from 'api/playground'
 import { Task } from 'typings/Task'
 import GeneratingMask from 'components/GeneratingMask'
+import {
+  ArrowDownOutlined,
+  ExclamationCircleOutlined,
+  ExclamationOutlined,
+} from '@ant-design/icons'
+import _ from 'lodash'
 
 const { Title } = Typography
 const { TextArea } = Input
@@ -42,43 +50,113 @@ const Txt2img = () => {
   const [isGenerating, setIsGenerating] = useState<boolean>(false)
   const [task, setTask] = useState<Task | undefined>(undefined)
 
-  const setGeneratingTask = (
-    _isGenerating: boolean,
-    _task: Task | undefined = undefined,
-  ) => {
-    setIsGenerating(_isGenerating)
-    setTask(_task)
-  }
+  const handleClickReadParamsButton = useCallback(() => {
+    const promptValue = form.getFieldValue('prompt')
+    if (promptValue === undefined) {
+      return
+    }
 
-  const pollingTaskResult = useCallback((task: Task) => {
-    setGeneratingTask(true, task)
+    const splitParts = promptValue.split('\n')
 
-    const timerId = setInterval(async () => {
-      const [_error, _resp] = await to<TaskResponseData, AxiosError>(
-        getTaskStatus(task.taskId),
+    const prompt = splitParts[0]
+    const negativePrompt = splitParts[1]?.split('Negative prompt: ')[1]
+    const params = splitParts[2]
+      ?.split(', ')
+      .reduce((s: { [k: string]: string }, v: string) => {
+        const [key, value] = v.split(': ')
+        s[key] = value
+        return s
+      }, {})
+
+    if (prompt !== undefined) {
+      form.setFieldValue('prompt', prompt)
+    }
+
+    if (negativePrompt !== undefined) {
+      form.setFieldValue('negative_prompt', negativePrompt)
+    }
+
+    if (params !== undefined) {
+      const modelTarget = params['Model hash']
+      const model = _.find(modelsData, (modelData) =>
+        _.startsWith(modelData.value, modelTarget),
       )
-
-      if (_error !== null) {
-        message.error(_error.message)
-        console.error('getTaskStatus Error', _error)
-        setGeneratingTask(false)
-        return
+      if (model !== undefined) {
+        form.setFieldValue('model', model.value)
       }
 
-      setGeneratingTask(true, _resp)
+      const sizeTarget = params['Size']
+      const size = _.find(sizes, (s) => s.value === sizeTarget)
+      if (size !== undefined) {
+        form.setFieldValue('size', size.value)
+      }
 
-      if (_resp.status !== 0 && _resp.status !== 1) {
-        clearInterval(timerId)
-        setGeneratingTask(false)
+      const samplerTarget = params['Sampler']
+      const sampler = _.find(
+        samplingMethodsData,
+        (s) => s.value === samplerTarget,
+      )
+      if (sampler !== undefined) {
+        form.setFieldValue('sampler_name', sampler.value)
+      }
 
-        if (_resp.status === 2) {
-          setImgUri(`data:image/png;base64,${_resp.images[0]}`)
-        } else if (_resp.status === 3) {
-          message.error(`Failed: [${_resp.status}]`)
+      const steps = parseInt(params['Steps'], 10)
+      if (_.isSafeInteger(steps)) {
+        form.setFieldValue('steps', steps)
+      }
+
+      const seed = parseInt(params['Seed'], 10)
+      if (_.isSafeInteger(seed)) {
+        form.setFieldValue('seed', seed)
+      }
+
+      const cfgScale = parseInt(params['CFG scale'], 10)
+      if (_.isSafeInteger(cfgScale)) {
+        form.setFieldValue('cfg_scale', cfgScale)
+      }
+    }
+  }, [form])
+
+  const setGeneratingTask = useCallback(
+    (_isGenerating: boolean, _task: Task | undefined = undefined) => {
+      setIsGenerating(_isGenerating)
+      setTask(_task)
+    },
+    [],
+  )
+
+  const pollingTaskResult = useCallback(
+    (task: Task) => {
+      setGeneratingTask(true, task)
+
+      const timerId = setInterval(async () => {
+        const [_error, _resp] = await to<TaskResponseData, AxiosError>(
+          getTaskStatus(task.taskId),
+        )
+
+        if (_error !== null) {
+          message.error(_error.message)
+          console.error('getTaskStatus Error', _error)
+          setGeneratingTask(false)
+          return
         }
-      }
-    }, 1000)
-  }, [])
+
+        setGeneratingTask(true, _resp)
+
+        if (_resp.status !== 0 && _resp.status !== 1) {
+          clearInterval(timerId)
+          setGeneratingTask(false)
+
+          if (_resp.status === 2) {
+            setImgUri(`data:image/png;base64,${_resp.images[0]}`)
+          } else if (_resp.status === 3) {
+            message.error(`Failed: [${_resp.status}]`)
+          }
+        }
+      }, 1000)
+    },
+    [setGeneratingTask],
+  )
 
   const onFormSubmit = useCallback(
     async (name: string, { values }: FormFinishInfo) => {
@@ -111,7 +189,7 @@ const Txt2img = () => {
         setGeneratingTask(false)
       }
     },
-    [pollingTaskResult],
+    [pollingTaskResult, setGeneratingTask],
   )
 
   return (
@@ -153,9 +231,31 @@ const Txt2img = () => {
                   />
                 </Form.Item>
               </div>
-              <Button type='primary' htmlType='submit' size='large'>
-                Generate
-              </Button>
+              <div className={cx('w-full flex justify-between items-start')}>
+                <Button type='primary' htmlType='submit' size='large'>
+                  Generate
+                </Button>
+                <div className={cx('flex gap-2 justify-center items-center')}>
+                  <Button
+                    icon={
+                      <ArrowDownOutlined
+                        style={{ transform: 'rotate(-45deg)' }}
+                      />
+                    }
+                    title='Read generation parameters from prompt'
+                    onClick={handleClickReadParamsButton}
+                  />
+                  <Tooltip
+                    placement='top'
+                    title='Currently, only generation data copied from civitai.com is supported.'
+                    arrow={{
+                      pointAtCenter: true,
+                    }}
+                  >
+                    <ExclamationCircleOutlined style={{ color: 'gray' }} />
+                  </Tooltip>
+                </div>
+              </div>
             </div>
             <div
               className={cx(

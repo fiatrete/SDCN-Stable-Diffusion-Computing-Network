@@ -3,7 +3,7 @@ import { Form, Select, InputNumber } from 'antd'
 import SliderSettingItem from 'components/SliderSettingItem'
 import { Fragment } from 'react'
 
-const modelsData = [
+export const modelsData = [
   {
     value: '3a17d0deffa4592fd91c711a798031a258ab44041809ade8b4591c0225ea9401',
     label: 'chillout_mix',
@@ -17,6 +17,7 @@ const modelsData = [
     label: 'anything-v4.5-pruned',
   },
 ]
+
 interface ModelFormGroupProps {
   label?: string
   name?: string
@@ -33,7 +34,7 @@ const ModelFormGroup = (props: ModelFormGroupProps) => {
   )
 }
 
-const lorasData = [
+export const lorasData = [
   {
     value: '62efe75048d55a096a238c6e8c4e12d61b36bf59e388a90589335f750923954c',
     label: 'koreanDollLikeness_v10',
@@ -78,7 +79,7 @@ const LoraFormGroup = (props: LoraFormGroupProps) => {
   )
 }
 
-const samplingMethodsData = [
+export const samplingMethodsData = [
   { value: 'DPM++ SDE Karras', label: 'DPM++ SDE Karras' },
   { value: 'Euler a', label: 'Euler a' },
   { value: 'Euler', label: 'Euler' },
@@ -123,11 +124,7 @@ interface CFGFormGroupProps {
 const CFGFormGroup = (props: CFGFormGroupProps) => {
   return (
     <Fragment>
-      <Form.Item
-        label='CFG Scale'
-        name={props.scaleName}
-        initialValue={7}
-      >
+      <Form.Item label='CFG Scale' name={props.scaleName} initialValue={7}>
         <SliderSettingItem min={1} max={30} step={0.5} />
       </Form.Item>
     </Fragment>
