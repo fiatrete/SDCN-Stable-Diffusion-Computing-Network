@@ -214,7 +214,7 @@ export default class NodeRepository {
 
   async getNodeListByAccountIdPaged(account_id: bigint, pageNo: number, pageSize: number): Promise<Node[]> {
     return await this.Nodes()
-      .select('node_seq as nodeId', 'worker', 'status', 'task_count as taskHandlerCount')
+      .select('node_seq as nodeId', 'node_name', 'status', 'task_count as taskHandlerCount')
       .where({ accountId: account_id, deleted: 0 })
       .offset((pageNo - 1) * pageSize)
       .limit(pageSize)
