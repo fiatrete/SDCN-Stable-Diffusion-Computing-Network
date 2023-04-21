@@ -1,0 +1,62 @@
+{
+    "nodeRegister": {
+        "msgType" : "register",
+        "apiKey" :"123",
+        "nodeName" : "123"
+    },
+    "servRegisterResult" : {
+        "msgType" : "register-result",
+        "sessionId" :"",
+        "code" : 200
+    },
+    
+    "nodeHeartbeat" : {
+        "msgType" : "heartbeat",
+        "sessionId" :"",
+        "time" : "",
+        "status" : 1
+
+    },
+    "servHeartbeatResult" : {
+        "msgType" : "heartbeat-result",
+        "sessionId" :"",
+        "time" : ""
+    },
+
+    "servCommand" : {
+        "msgType" : "command",
+        "sessionId" :"",
+        "taskId": "",
+        "request" : {
+            "type":"",
+            "url": "",   
+            "data":{
+        
+            }
+        
+        }
+    },
+    "nodeCommandResult" : {
+        "msgType" : "command-result",
+        "sessionId" :"",
+        "taskId": "",
+        "result" : {
+            "type":"",
+            "code":200,
+            "data":{
+        
+            }
+        }
+    },
+
+    "servAskOffline" : {
+        "msgType" : "offline",
+        "sessionId" :"",
+        "type" : 1,    
+        "reason" : ""
+    },
+    "servAskOfflineResult" : {
+        "msgType" : "offline-result",
+        "sessionId" :""
+        }
+}

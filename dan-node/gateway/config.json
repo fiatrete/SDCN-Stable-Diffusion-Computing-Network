@@ -1,0 +1,30 @@
+{
+    "servAddr" : "wss://api.opendan.ai/websocket",
+    "apiKey" : "REPLACE_WITH_DAN_API_KEY",
+    "nodeName" : "REPLACE_WITH_NAME_OF_MY_NODE",
+    "webuiLocalUrl" : "http://127.0.0.1:7860",
+    "supportModels": {
+        "downloadPrefix": "https://huggingface.co/fiatrete/dan-used-models/resolve/main/",
+        "Lora": {
+            "Moxin_10.safetensors":"3fd52c707c31b9af2207f697d9dd26b400683d011914471814bb33645f518f07",
+            "yaeMikoRealistic_yaemikoMixed.safetensors":"336ca6afbcd712b14fdfc7c3f9db044ab6020bdcbec5ed66c926caf639fd2691", 
+            "stLouisLuxuriousWheels_v1.safetensors": "f1efd7b748634120b70343bc3c3b425c06c51548431a1264a2fcb5368352349f", 
+            "hanfu_v30Song.safetensors": "55aef962864e844cf426c518c2a13a38073b8c078c3cd1d600dc6debb4c4fa32", 
+            "chilloutmixss_xss10.safetensors":"7dc213110f3d9f2074d7773d3fb3082f571d33132ad8f3b16e70a4e4b4ec984b", 
+            "makimaChainsawMan_offset.safetensors":"ef403e13f794421c26e7575636696fd6453de691cf8e10b4027c9a68a0c28ab8", 
+            "cuteGirlMix4_v10.safetensors": "9f3b38bf660e91b464c5a25d790f53eb876ac8cf17b479974d426b9732acac56", 
+            "arknightsTexasThe_v10.safetensors":"0b86fe247c1a02d781e236abd356b2b7180f4250f1f7c2633ede7bac2cd40272", 
+            "gachaSplashLORA_v40.safetensors":"eebdb8e46fafdaf3fca98d0b3adb0cbb16f71e138b65ddf8e43288d0b4a511eb", 
+            "raidenShogunRealistic_raidenshogunHandsfix.safetensors":"b688e3dd62f1e12261887fd70a89e262c0e54ff509c6b22189bdbbe20d2677c7",
+            "elysia5in1Lora_v20.safetensors":"4495d15f676b707dd27d8de28ea4d00ae65d075618d23194fbb5459afdf4fb9b"
+        },
+        "CheckPoint": {
+            "chilloutmix_NiPrunedFp32Fix.safetensors":"fc2511737a54c5e80b89ab03e0ab4b98d051ab187f92860f3cd664dc9d08b271", 
+            "deliberate_v2.safetensors":"9aba26abdfcd46073e0a1d42027a3a3bcc969f562d58a03637bf0a0ded6586c9", 
+            "realisticVisionV20_v20.safetensors":"c0d1994c73d784a17a5b335ae8bda02dcc8dd2fc5f5dbf55169d5aab385e53f2", 
+            "abyssorangemix3AOM3_aom3a1b.safetensors":"5493a0ec491f5961dbdc1c861404088a6ae9bd4007f6a3a7c5dee8789cdc1361", 
+            "dreamshaper_5Bakedvae.safetensors": "a60cfaa90decb28a1447f955e29220eb867e8e157f0ca8a4d3b839cd9cd4832a"
+        }
+    }
+
+}
