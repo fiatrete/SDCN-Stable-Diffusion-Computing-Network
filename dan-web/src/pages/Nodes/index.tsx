@@ -6,7 +6,6 @@ import NodeList from './NodeList'
 import DonorList from './DonorList'
 import { Button, message, Modal } from 'antd'
 import MyNodes from './MyNodes'
-import DonateNode from './DonateNode'
 import { NodesResponseData, DonorsResponseData } from 'api/nodes'
 import { AxiosError } from 'axios'
 import to from 'await-to-js'
@@ -78,59 +77,22 @@ const Nodes = () => {
     [],
   )
 
-  const handleDonateNode = useCallback(() => {
-    if (!userStore.isLoggedIn) {
-      showSignModel()
-      return
-    }
-
-    const modal: { destroy: () => void } = Modal.info({
-      title: 'Donate Node',
-      closable: true,
-      icon: null,
-      footer: null,
-      transitionName: '',
-      width: 368,
-      content: (
-        <DonateNode
-          refresh={() => {
-            getNodesList(nodesPageNo)
-            getDonorsList(donorsPageNo)
-          }}
-          close={() => {
-            modal.destroy()
-          }}
-        />
-      ),
-    })
-  }, [getNodesList, nodesPageNo, getDonorsList, donorsPageNo, showSignModel])
-
   const handleMyNodesButton = useCallback(() => {
     if (!userStore.isLoggedIn) {
       showSignModel()
       return
     }
 
-    const modal: { destroy: () => void } = Modal.info({
+    Modal.info({
       title: 'My Nodes',
       closable: true,
       icon: null,
       footer: null,
       transitionName: '',
       width: 900,
-      content: (
-        <MyNodes
-          refresh={() => {
-            getNodesList(nodesPageNo)
-            getDonorsList(donorsPageNo)
-          }}
-          close={() => {
-            modal.destroy()
-          }}
-        />
-      ),
+      content: <MyNodes />,
     })
-  }, [getNodesList, nodesPageNo, getDonorsList, donorsPageNo, showSignModel])
+  }, [showSignModel])
 
   return (
     <div className={cx(styles.wrap)}>
@@ -157,9 +119,6 @@ const Nodes = () => {
           getDonorsList={getDonorsList}
         />
         <div className={cx('flex justify-center gap-4 mt-8')}>
-          <Button type='primary' onClick={handleDonateNode}>
-            Donate Node
-          </Button>
           <Button onClick={handleMyNodesButton}>My Nodes</Button>
         </div>
       </div>

@@ -307,7 +307,10 @@ const Paint = (props: Props) => {
 
   return (
     <div
-      className={cx('w-full h-full flex flex-col justify-center gap-2')}
+      className={cx(
+        'w-full h-full flex flex-col justify-center gap-2',
+        styles.wrap,
+      )}
       ref={containerElRef}
     >
       <div className={cx('relative w-full')}>
