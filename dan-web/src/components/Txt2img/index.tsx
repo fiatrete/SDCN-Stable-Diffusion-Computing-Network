@@ -25,11 +25,7 @@ import {
 } from 'api/playground'
 import { Task } from 'typings/Task'
 import GeneratingMask from 'components/GeneratingMask'
-import {
-  ArrowDownOutlined,
-  ExclamationCircleOutlined,
-  ExclamationOutlined,
-} from '@ant-design/icons'
+import { ArrowDownOutlined, ExclamationCircleOutlined } from '@ant-design/icons'
 import _ from 'lodash'
 
 const { Title } = Typography

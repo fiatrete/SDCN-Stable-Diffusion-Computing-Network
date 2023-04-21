@@ -5,7 +5,7 @@ export interface Node {
   account: User
   status: NodeStatus
   taskHandlerCount: number
-  worker?: string // Worker URL
+  nodeName?: string
 }
 
 export enum NodeStatus {

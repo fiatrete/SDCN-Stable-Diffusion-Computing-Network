@@ -78,7 +78,6 @@ const Inpainting = () => {
     width: 0,
     height: 0,
   })
-  const [imgLoading, setImgLoading] = useState<boolean>(false)
   const [showPaint, setShowPaint] = useState(false)
   const inpaintMaskRef = useRef('')
   const [isGenerating, setIsGenerating] = useState<boolean>(false)
@@ -177,8 +176,8 @@ const Inpainting = () => {
       } catch (err) {
         if (err instanceof String) message.error(err)
         if (err instanceof Error) message.error(err.message)
-      } finally {
-        setImgLoading(false)
+
+        setGeneratingTask(false)
       }
     },
     [inputImg, pollingTaskResult, setGeneratingTask],
