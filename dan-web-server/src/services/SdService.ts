@@ -131,6 +131,13 @@ export default class SdService {
     return { totalCount, countInLast24Hours, countInLastWeek };
   }
 
+  async supportedModelInfo() {
+    const Models = Object.entries(config.sdConfig.kValidModels).map(([hash, name]) => ({ name, hash }));
+    const LoRAs = Object.entries(config.sdConfig.kValidLoras).map(([hash, name]) => ({ name, hash }));
+    const Samplers = config.sdConfig.kValidSamplers;
+    return { Models, LoRAs, Samplers };
+  }
+
   private async executeTaskWrapper(taskInfo: JsonObject) {
     const { taskId, taskType } = taskInfo;
     try {
@@ -198,6 +205,7 @@ export default class SdService {
 
     // update task status
     const images = resultObj.images;
+    const seeds = JSON.parse(resultObj.info).all_seeds;
     let taskStatus: number;
     if (_.isNaN(images) || _.isNull(images) || _.isEmpty(images)) {
       taskStatus = NodeTaskStatus.Failure;
@@ -208,6 +216,7 @@ export default class SdService {
       taskId: taskId as string,
       queuePosition: 0,
       status: taskStatus,
+      seeds: seeds,
     };
     return _.assign(taskStatusResult, _.omit(resultObj, 'info', 'parameters'));
   }
