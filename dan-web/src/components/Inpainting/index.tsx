@@ -187,7 +187,6 @@ const Inpainting = () => {
     (width: number, height: number) => {
       form.setFieldValue('input_width', width)
       form.setFieldValue('input_height', height)
-      console.log('onInputSize', width, height)
       flushSync(() => {
         setInputImgSize({
           width,

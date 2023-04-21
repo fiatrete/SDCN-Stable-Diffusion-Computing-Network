@@ -6,8 +6,6 @@ import {
   LoraFormGroup,
   SamplingFormGroup,
   CFGFormGroup,
-  modelsData,
-  samplingMethodsData,
 } from 'components/SettingsFormGroup'
 import ImageWidget from 'components/ImageOutputWidget'
 import { FormFinishInfo } from 'rc-field-form/es/FormContext'
@@ -27,6 +25,7 @@ import { Task } from 'typings/Task'
 import GeneratingMask from 'components/GeneratingMask'
 import { ArrowDownOutlined, ExclamationCircleOutlined } from '@ant-design/icons'
 import _ from 'lodash'
+import modelInfoStore from 'stores/modelInfoStore'
 
 const { Title } = Typography
 const { TextArea } = Input
@@ -74,11 +73,11 @@ const Txt2img = () => {
 
     if (params !== undefined) {
       const modelTarget = params['Model hash']
-      const model = _.find(modelsData, (modelData) =>
-        _.startsWith(modelData.value, modelTarget),
+      const model = _.find(modelInfoStore.modelInfos.Models, (modelData) =>
+        _.startsWith(modelData.hash, modelTarget),
       )
       if (model !== undefined) {
-        form.setFieldValue('model', model.value)
+        form.setFieldValue('model', model.hash)
       }
 
       const sizeTarget = params['Size']
@@ -89,11 +88,11 @@ const Txt2img = () => {
 
       const samplerTarget = params['Sampler']
       const sampler = _.find(
-        samplingMethodsData,
-        (s) => s.value === samplerTarget,
+        modelInfoStore.modelInfos.Samplers,
+        (s) => s === samplerTarget,
       )
       if (sampler !== undefined) {
-        form.setFieldValue('sampler_name', sampler.value)
+        form.setFieldValue('sampler_name', sampler)
       }
 
       const steps = parseInt(params['Steps'], 10)
