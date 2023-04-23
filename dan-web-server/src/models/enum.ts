@@ -23,6 +23,7 @@ export enum NodeTaskType {
   Txt2img = 0,
   Img2img = 1,
   Interrogate = 2,
+  Upscale = 3,
 }
 export function getNodeTaskType(num: number) {
   return _.findKey(NodeTaskType, (value) => value === num);

@@ -24,4 +24,13 @@ export default {
     '3e5d8fe726b4c0f1e7f0905f32ea3d1c9ce89a54028209e8179d64d323048dac': 'kobeni_v10',
     '759d6fdf539f44f6991efd27ef1767c7779ac8884defc71dd909e5808b5ea74b': 'thickerLinesAnimeStyle_loraVersion',
   },
+  kValidStandaloneUpscalers: {
+    "Lanczos": "Lanczos",
+    "Nearest": "Nearest",
+    "ESRGAN 4x": "ESRGAN_4x",
+    // "LDSR": "LDSR", // Disabled since it's very expensive and it produces poor outputs.
+    "R-ESRGAN 4x+": "R-ESRGAN 4x+",
+    "R-ESRGAN 4x+ Anime6B": "R-ESRGAN 4x+ Anime6B",
+    "SwinIR 4x": "SwinIR_4x",
+  }
 };

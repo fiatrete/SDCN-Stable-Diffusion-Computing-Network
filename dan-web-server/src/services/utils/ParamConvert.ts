@@ -241,4 +241,53 @@ function gatewayParamsToWebUI_interrogate(gatewayParams: DictionaryLike): Dictio
   return webuiParams;
 }
 
-export { gatewayParamsToWebUI_xxx2img, gatewayParamsToWebUI_interrogate };
+function gatewayParamsToWebUI_upscale(gatewayParams: DictionaryLike): DictionaryLike {
+  const image = requireString(gatewayParams.image, undefined);
+  if (image === undefined) {
+    throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid image');
+  }
+  const upscalingRate = requireNumberRangeOr(gatewayParams.upscalingRate, 1, 100, -1); // (1, 10]
+  if (upscalingRate === -1 || upscalingRate === 1) {
+    throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid upscalingRate');
+  }
+  const upscaler1 = (sdConfig.kValidStandaloneUpscalers as DictionaryLike)[gatewayParams.upscaler];
+  if (!upscaler1) {
+    throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid upscaler');
+  }
+  const upscaler2 = (sdConfig.kValidStandaloneUpscalers as DictionaryLike)[gatewayParams.upscaler2];
+  if (!upscaler2) {
+    throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid upscaler');
+  }
+  const upscaler2Factor = requireNumberRangeOr(gatewayParams.upscaler2_factor, 0, 1, 1);
+  if (upscaler2Factor === 1) {
+    throw new SdcnError(StatusCode.BadRequest, ErrorCode.InvalidArgument, 'Invalid upscaler2_factor');
+  }
+
+  // The image will be process by UpScaler, gfpgan and codeformer in a certain order.
+  const webuiParams = {
+    image: image,
+    resize_mode: 0, // 0 use upscaling_resize, 1 use upscaling_resize_w and upscaling_resize_h. We stick using 0.
+    show_extras_results: false, // True will make webui return all the intermediate generated images to us. But only the final result if what we want
+    upscaling_resize: upscalingRate,
+    // upscaling_resize_w: 512,
+    // upscaling_resize_h: 512,
+    // upscaling_crop: false, // Since we don't use resize_mode 1, this is not necessary
+
+    extras_upscaler_2_visibility: upscaler2Factor, // upscale1 and  upscale2 will be blended: up1*(1-v) + up2*v
+    upscaler_1: upscaler1,
+    upscaler_2: upscaler2,
+    upscale_first: false, // SD-webui does not use it
+
+    // [0,1). If > 0, use gfpgan to restore faces, then blend it with the output: i*(1-v) * gfpgan(i)*v
+    // since the order is not defined, don't use it now
+    gfpgan_visibility: 0,
+
+    // [0, 1). Similar to gfpgan_visibility
+    // since the order is not defined, don't use it now
+    codeformer_visibility: 0,
+    codeformer_weight: 0,
+  };
+  return webuiParams;
+}
+
+export { gatewayParamsToWebUI_xxx2img, gatewayParamsToWebUI_interrogate, gatewayParamsToWebUI_upscale };

@@ -1,4 +1,4 @@
-openapi: 3.1.0
+openapi: 3.0.0
 info:
   title: DAN API
   description: >-
@@ -539,6 +539,9 @@ components:
                 queuePosition: 0
                 status: 2
               message: success
+    description: >-
+      Instead of returning the final result, this API returns the `taskId` and `queueing information`.
+      You can use [`/api/sd/task/status`](./api-sd-task-status.api.mdx) to query the latest status of the task or get the final result.
 paths:
   /api/sd/txt2img:
     post: &txt2img_post
@@ -615,7 +618,6 @@ paths:
       responses:
         '200':
           <<: *common_async_200
-          description: Instead of returning the final result, this API returns the `taskId` and `queueing information`. You can use [`/api/sd/task/status`](./api-sd-task-status.api.mdx) to query the latest status of the task or get the final result.
   /api/sd/img2img:
     post: &img2img_post
       summary: /api/sd/img2img
@@ -695,7 +697,6 @@ paths:
       responses:
         '200':
           <<: *common_async_200
-          description: Instead of returning the final result, this API returns the `taskId` and `queueing information`. You can use [`/api/sd/task/status`](./api-sd-task-status.api.mdx) to query the latest status of the task or get the final result.
   /api/sd/interrogate:
     post: &interrogate_post
       summary: /api/sd/interrogate
@@ -743,7 +744,105 @@ paths:
       responses:
         '200':
           <<: *common_async_200
-          description: Instead of returning the final result, this API returns the `taskId` and `queueing information`. You can use [`/api/sd/task/status`](./api-sd-task-status.api.mdx) to query the latest status of the task or get the final result.
+  /api/sd/upscale:
+    post: &upscale_post
+      summary: /api/sd/upscale
+      deprecated: false
+      description: Upscale the input image.
+      tags:
+        - Stable Diffusion API
+      parameters: *common_parameters_basics
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  description: The base64-encoded string of your input image
+                upscalingRate:
+                  type: number
+                  description: >-
+                    How many times you want the image be scaled,
+                    the output image's width and height will be multiplied by this rate. Valid range is (1, 10].
+                    If you set this rate to large, the task may fail due to memory issue.
+                upscaler:
+                  type: string
+                  description: >-
+                    The upscaling algorithm to use. Valid values are listed below:
+                    <table>
+                      <tr>
+                        <th>Option</th>
+                        <th>Description</th>
+                      </tr>
+                      <tr>
+                        <td>Lanczos</td>
+                        <td>This is a mathematical function-based interpolation method that can keep the edges of the image clear and avoid the jagged effect. It is suitable for video enlargement, but for static images, it may produce ringing or oversharpening effects.</td>
+                      </tr>
+                      <tr>
+                        <td>Neareast</td>
+                        <td>This is the simplest interpolation method that just copies each pixel in the image to adjacent positions, enlarging the size of the image by 3. Its advantage is that it is fast, but the disadvantage is that the enlarged image will be very blurry and distorted.</td>
+                      </tr>
+                      <tr>
+                        <td>ESRGAN 4x</td>
+                        <td>This is a deep learning based super-resolution method that uses an Enhanced Super Resolution Generative Adversarial Network to enlarge the image by 4. Its advantage is that it can restore details and textures in the image, but the disadvantage is that it requires large computing resources and training data.</td>
+                      </tr>
+                      <tr>
+                        <td><del>LDSR</del></td>
+                        <td>Disabled since it's very expensive and it produces poor outputs. This is an image generation method based on stable diffusion that can enlarge the image while maintaining the style and texture of the image. Its advantage is that it can handle various types of images, but the disadvantage is that it requires a long time and a lot of memory.</td>
+                      </tr>
+                      <tr>
+                        <td>R-ESRGAN 4x+</td>
+                        <td>This is an improved method based on Real-ESRGAN, which uses residual connections and adaptive instance normalization to improve the clarity and naturalness of the image. Its advantage is that it can restore details and textures in the image, but the disadvantage is that it requires large computing resources and training data.</td>
+                      </tr>
+                      <tr>
+                        <td>R-ESRGAN 4x+ Anime6B</td>
+                        <td>This is an image enlargement method specifically designed for anime style. It uses the R-ESRGAN 4x+ model and is fine-tuned on the Anime6B dataset. Its advantage is that it can maintain the color and lines of anime images, but the disadvantage is that it may not be suitable for other types of images.</td>
+                      </tr>
+                      <tr>
+                        <td>SwinIR 4x</td>
+                        <td>This is an image restoration method based on Swin Transformer, which uses self-attention mechanism and multi-scale fusion to enlarge the image. Its advantage is that it can adapt to different scenes and noise levels, but the disadvantage is that it requires high hardware configuration and memory consumption.</td>
+                      </tr>
+                    </table>
+                upscaler2:
+                  type: string
+                  description: >-
+                    Required only if `upscaler2_factor` > 0.
+                    The upscaling algorithm to use. Valid values are same as `upscaler`.
+                    This field is necessary only if `upscaler2_factor` > 0, if so, denoting `I` as the input image, 
+                    the final image will be: `blend(upscaler(I), upscaler2(I), upscaler2_factor)`,
+                    i.e. `upscaler(I) * (1-upscaler2_factor) + upscaler2(I) * upscaler2_factor`.
+                upscaler2_factor:
+                  type: number
+                  description: See `upscaler2`. Valid range is [0, 1), default 0.
+              required:
+                - image
+                - upscalingRate
+                - upscaler
+            example:
+              image: >-
+                iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAwnRFWHRwYXJhbWV0ZXJzAEEgY2F0LDxsb3JhOmtvcmVhbkRvbGxMaWtlbmVzc192MTA6MC43PgpTdGVwczogMjAsIFNhbXBsZXI6IERESU0sIENGRyBzY2FsZTogNy4wLCBTZWVkOiAyMzAwMjY4MzQwLCBTaXplOiAxNngxNiwgTW9kZWwgaGFzaDogM2ExN2QwZGVmZiwgU2VlZCByZXNpemUgZnJvbTogLTF4LTEsIERlbm9pc2luZyBzdHJlbmd0aDogMOLvrY0AAAEWSURBVHicjZHBTkJBDEXPbWdAg4n+/3f5GSYuJIHHTFsXiKCCelYzyT1Nc6vXl+eHxyf3jbSGOxAfFAjy9E5ImKp6hQ4bvpNUIIGBoGAP3qCBIMC/Cobs4itYQzYA4sf4qzi4zf12LDs4/M+hbbc7804u/a6j9qdgy4hlHHIG85fFCgom0B42jyOGrNOvjv+MjmPLqqocb9ZWaH0Rmqfuj0JAgkCqKhjQT+mMHElkDbOJQqQhqMQER+HM5DBy5NxLU8yoxSy94Qgs4PI0H9vI0pzKOcahakQskXuRgE6HO9NZdQjX9KyxyAvMDMeg143iVw5OWU9wIyGgQYnVrSoFYaTokAbJLEy0q4Kgw71jYJAQRsAWeAf79pJ7zSui0wAAAABJRU5ErkJggg==
+              upscalingRate: 2
+              upscaler: Neareast
+      responses:
+        '200':
+          <<: *common_xxx2img_200
+          description: The upscaled image is returned here.
+  /api/sd/upscale/async:
+    post:
+      <<: *upscale_post
+      summary: /api/sd/upscale/async
+      deprecated: false
+      description: >-
+        Upscale the input image.<br/>
+        Its usage is almost the same as `upscale`. The difference between this interface and `upscale` is that this interface will return immediately with task information.<br/>
+        After obtaining the task information, you can use the [`/api/sd/task/status`](./api-sd-task-status.api.mdx) interface to query the task status and get the result.
+      tags:
+        - Stable Diffusion API
+      responses:
+        '200':
+          <<: *common_async_200
   /api/sd/task/status:
     post:
       summary: /api/sd/task/status

@@ -1,4 +1,8 @@
-import { gatewayParamsToWebUI_xxx2img, gatewayParamsToWebUI_interrogate } from './utils/ParamConvert';
+import {
+  gatewayParamsToWebUI_xxx2img,
+  gatewayParamsToWebUI_interrogate,
+  gatewayParamsToWebUI_upscale,
+} from './utils/ParamConvert';
 import NodeService from './NodeService';
 import { ErrorCode, SdcnError, StatusCode } from '../utils/responseHandler';
 import { CommandRequest, CommandResultImageData, CommandResultCaptionData, NodeTask } from '../models';
@@ -16,6 +20,7 @@ import WebsocketService from './Websocket';
 
 const kXxx2ImgHttpPath = ['/sdapi/v1/txt2img', '/sdapi/v1/img2img'];
 const kInterrogateHttpPath = '/sdapi/v1/interrogate';
+const kUpscaleHttpPath = '/sdapi/v1/extra-single-image';
 
 export default class SdService {
   nodeService: NodeService;
@@ -96,6 +101,9 @@ export default class SdService {
     } else if (handlerType == NodeTaskType.Interrogate) {
       taskInfo = gatewayParamsToWebUI_interrogate(requestBody);
       priority = 1 - calculateTaskPriority(Number(honorAmount), 1, 1, 1, 1);
+    } else if (handlerType == NodeTaskType.Upscale) {
+      taskInfo = gatewayParamsToWebUI_upscale(requestBody);
+      priority = 1 - calculateTaskPriority(Number(honorAmount), 1, 1, 1, 1);
     }
 
     const { model } = requestBody;
@@ -160,16 +168,24 @@ export default class SdService {
         },
       ]);
       let taskStatusResult: { taskId: string; queuePosition: number; status: number };
-      if (taskType == NodeTaskType.Txt2img || taskType == NodeTaskType.Img2img) {
-        taskStatusResult = await this.executeImageGenerateTask(taskInfo);
-      } else if (taskType == NodeTaskType.Interrogate) {
-        taskStatusResult = await this.executeInterrogateTask(taskInfo);
-      } else {
-        taskStatusResult = {
-          taskId: taskId as string,
-          queuePosition: 0,
-          status: NodeTaskStatus.Failure,
-        };
+      switch (taskType) {
+        case NodeTaskType.Txt2img:
+        case NodeTaskType.Img2img:
+          taskStatusResult = await this.executeImageGenerateTask(taskInfo);
+          break;
+        case NodeTaskType.Interrogate:
+          taskStatusResult = await this.executeInterrogateTask(taskInfo);
+          break;
+        case NodeTaskType.Upscale:
+          taskStatusResult = await this.executeUpscaleTask(taskInfo);
+          break;
+        default:
+          taskStatusResult = {
+            taskId: taskId as string,
+            queuePosition: 0,
+            status: NodeTaskStatus.Failure,
+          };
+          break;
       }
       await this.redisService.updateTaskStatus([taskStatusResult!]);
       await this.nodeTaskRepository.updateStatus({
@@ -305,6 +321,55 @@ export default class SdService {
       queuePosition: 0,
       status: taskStatus,
       caption: caption,
+    };
+  }
+
+  private async executeUpscaleTask(taskInfo: JsonObject) {
+    const { taskId, taskParams } = taskInfo;
+    let nodeId;
+    do {
+      nodeId = (await this.getNextNodeName()).nodeId;
+      if (nodeId === null) {
+        logger.info('Cannot find a node for task.');
+        return {
+          taskId: taskId as string,
+          queuePosition: 0,
+          status: NodeTaskStatus.Failure,
+        };
+      }
+    } while (!(await this.websocketService.isAliveNode(nodeId)));
+    const commandReq: CommandRequest = {
+      type: 'sd',
+      uri: kUpscaleHttpPath,
+      data: taskParams,
+    };
+
+    await this.nodeTaskRepository.updateNodeSeqAndStatus({
+      id: taskId as string,
+      status: NodeTaskStatus.Processing,
+      nodeSeq: BigInt(nodeId!),
+    } as NodeTask);
+
+    const commandResultData = await this.websocketService.sendCommand(taskId as string, nodeId, commandReq);
+    const status = commandResultData.code;
+    if (status !== 200) {
+      throw new SdcnError(StatusCode.InternalServerError, ErrorCode.NodeError, `Node response ${status}`);
+    }
+
+    this.nodeService.increaseTasksHandled(nodeId as string);
+
+    let taskStatus: number;
+    const image = commandResultData.data.image as string;
+    if (_.isNil(image)) {
+      taskStatus = NodeTaskStatus.Failure;
+    } else {
+      taskStatus = NodeTaskStatus.Success;
+    }
+    return {
+      taskId: taskId as string,
+      queuePosition: 0,
+      status: taskStatus,
+      images: _.isNil(image) ? undefined : [image],
     };
   }
 

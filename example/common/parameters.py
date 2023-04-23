@@ -164,5 +164,5 @@ def handle_image_response(response):
     else:
         print(response.content)
         print(
-            "The response is not as expected,\
-            I have print out the original response string")
+            "The response is not as expected, "
+            "I have print out the original response string")

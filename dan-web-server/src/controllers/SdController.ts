@@ -29,6 +29,10 @@ export default class SdControler {
     await this.taskSubmitAndWait(context, NodeTaskType.Interrogate);
   }
 
+  async upscale(context: Context) {
+    await this.taskSubmitAndWait(context, NodeTaskType.Upscale);
+  }
+
   private async taskSubmitAndWait(context: Context, nodeTaskType: NodeTaskType) {
     const user = await this.getAccount(context);
     const taskStatusResult = await this.sdService.taskSubmit(
@@ -96,6 +100,10 @@ export default class SdControler {
     await this.taskSubmit(context, NodeTaskType.Interrogate);
   }
 
+  async upscaleAsync(context: Context) {
+    await this.taskSubmit(context, NodeTaskType.Upscale);
+  }
+
   async taskSubmit(context: Context, nodeTaskType: NodeTaskType) {
     const user = await this.getAccount(context);
     const requestBody = context.request.body;
@@ -142,9 +150,11 @@ export default class SdControler {
     router.post('/txt2img', this.txt2img.bind(this));
     router.post('/img2img', this.img2img.bind(this));
     router.post('/interrogate', this.interrogate.bind(this));
+    router.post('/upscale', this.upscale.bind(this));
     router.post('/txt2img/async', this.txt2imgAsync.bind(this));
     router.post('/img2img/async', this.img2imgAsync.bind(this));
     router.post('/interrogate/async', this.interrogateAsync.bind(this));
+    router.post('/upscale/async', this.upscaleAsync.bind(this));
     router.post('/task/status', this.taskStatus.bind(this));
     router.post('/statistics', this.taskStatistics.bind(this));
     router.get('/statistics', this.taskStatistics.bind(this));
