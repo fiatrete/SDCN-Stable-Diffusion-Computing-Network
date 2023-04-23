@@ -4,7 +4,6 @@ import threading
 import time
 import os
 import inspect
-import sys
 
 running = True
 servAskOffline = False
@@ -104,16 +103,6 @@ def onDisconnect(ws, close_status_code, close_msg):
             threading.Thread(target=creatConnection).start()
     return True
 
-def onDisconnectInLinux(ws):
-    if running:
-        print("disconnect, need restart")
-        global hasConnected
-        hasConnected = False
-        if not servAskOffline:
-            time.sleep(0.5)
-            threading.Thread(target=creatConnection).start()
-    return True
-
 def onError(ws, err):
     print("websocket error:", err)
 
@@ -128,13 +117,10 @@ def creatConnection():
     needSendMsgs = []
     needGetResultMsgs = []
     sessionId = ""
-    if sys.platform == "win32":
-        ws = websocket.WebSocketApp(servAddr, on_open=onConnect, on_message=onMessage, on_close=onDisconnect, on_error=onError)
-    elif sys.platform.startswith('linux'):
-        ws = websocket.WebSocketApp(servAddr, on_open=onConnect, on_message=onMessage, on_close=onDisconnectInLinux, on_error=onError)
+    ws = websocket.WebSocketApp(servAddr, on_open=onConnect, on_message=onMessage, on_close=onDisconnect, on_error=onError)
     ws.run_forever()
     print("create socketio over")
-    
+
         # threading.Thread(target=creatConnection).start()
     return True
 
