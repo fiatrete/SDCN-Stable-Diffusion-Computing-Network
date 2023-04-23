@@ -98,7 +98,7 @@ info:
 
 
 
-    ### LoRas
+    ### LoRAs
 
 
     | Name                               |
@@ -414,6 +414,12 @@ components:
                   description: >-
                     string of base 64 encoded png file. When status = 2, a
                     list of images is returned
+                seeds:
+                  type: array
+                  items:
+                    type: int
+                  description: >-
+                    The seed value used to generate the image, and the index of the seeds array corresponds to the index of the images.
                 taskId:
                   type: string
                 queuePosition:
@@ -429,6 +435,7 @@ components:
                 - queuePosition
                 - status
                 - images
+                - seeds
             message:
               type: string
           required:
@@ -826,6 +833,108 @@ paths:
           description: >-
             If the task has not been finished, only the task information is returned.
             Else return the task output.
+  /api/sd/task/supportedModelInfo:
+    get:
+      summary: /api/sd/task/supportedModelInfo
+      deprecated: false
+      description: This API is used to obtain a list of supported models, LoRA, samples and other modules for DAN.
+      tags:
+        - Query
+      parameters: *common_parameters_basics
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: object
+                    properties:
+                      Models:
+                        type: array
+                        description: List of supported DAN models, including name and hash value.
+                        items:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                              description: Models name. Used for display.
+                            hash:
+                              type: string
+                              description: Models hash. Used for calling the interface.
+                      LoRAs:
+                        type: array
+                        description: List of supported DAN models, including name and hash value.
+                        items:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                              description: LoRAs name. Used for display.
+                            hash:
+                              type: string
+                              description: LoRAs hash. Used for calling the interface.
+                      Samplers:
+                        type: array
+                        description: List of supported Samplers.
+                        items:
+                          type: string
+                          description: Supported sampler names.
+                    required:
+                      - Models
+                      - LoRAs
+                      - Samplers
+                  message:
+                    type: string
+                required:
+                  - code
+                  - data
+                  - message
+              examples:
+                Success:
+                  summary: Success
+                  value:
+                    code: 200
+                    data:
+                      Models:
+                        - name: chillout_mix
+                          hash: >-
+                            3a17d0deffa4592fd91c711a798031a258ab44041809ade8b4591c0225ea9401
+                        - name: clarity
+                          hash: >-
+                            627a6f5c8bf7669d4a224ac041d527debc65d2d435b16e54ead8ee2c901d1634
+                        - name: anything-v4.5-pruned
+                          hash: >-
+                            6e430eb51421ce5bf18f04e2dbe90b2cad437311948be4ef8c33658a73c86b2a
+                      LoRAs:
+                        - name: koreanDollLikeness_v10
+                          hash: >-
+                            62efe75048d55a096a238c6e8c4e12d61b36bf59e388a90589335f750923954c
+                        - name: stLouisLuxuriousWheels_v1
+                          hash: >-
+                            f1efd7b748634120b70343bc3c3b425c06c51548431a1264a2fcb5368352349f
+                        - name: taiwanDollLikeness_v10
+                          hash: >-
+                            5bbaabc04553d5821a3a45e4de5a02b2e66ecb00da677dd8ae862efd8ba59050
+                        - name: kobeni_v10
+                          hash: >-
+                            3e5d8fe726b4c0f1e7f0905f32ea3d1c9ce89a54028209e8179d64d323048dac
+                        - name: thickerLinesAnimeStyle_loraVersion
+                          hash: >-
+                            759d6fdf539f44f6991efd27ef1767c7779ac8884defc71dd909e5808b5ea74b
+                      Samplers:
+                        - DPM++ SDE Karras
+                        - Euler a
+                        - Euler
+                        - DPM++ SDE
+                        - LMS
+                        - DDIM
+                    message: success
+          description: >-
+            The returned content will include a list of available models, LoRA, and samples.
 servers:
   - url: https://api.opendan.ai
     description: release
