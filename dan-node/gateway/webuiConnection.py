@@ -13,23 +13,23 @@ import hashlib
 import json
 import sys
 
-webuiModelDir = ""
-webuiFileDir = ""
-modelsUrl = ""
-webuiApiMsg = []
+webui_model_dir = ""
+webui_file_dir = ""
+models_url = ""
+webui_api_msg = []
 running = True
-webuiApirequest = {}
-webuiWatchDogInterval = 3
-firstSetupWebui = True
+webui_watch_dog_interval = 3
+first_setup_webui = True
 blocksize = 10485760
 cond = threading.Condition()
-lastLaunchTime = int(time.time())
+last_launch_time = int(time.time())
 headers = {
     "accept": "application/json",
     "Content-Type": "application/json",
 }
 
-def downloadModel(url, path):
+
+def download_model(url, path):
     print("download model from:", url, ", to:", path)
     with urllib.request.urlopen(url) as response:
         with open(path, 'wb') as f:
@@ -40,9 +40,10 @@ def downloadModel(url, path):
                 f.write(data)
     print("download finish")
 
+
 # if models exit, need to check it's hash with we support
-def checkHash(filename, hasl):
-    print("checkHash from:", filename)
+def check_hash(filename, hasl):
+    print("check_hash from:", filename)
     sha256 = hashlib.sha256()
     # Open the file and read data by block
     with open(filename, 'rb') as f:
@@ -55,119 +56,129 @@ def checkHash(filename, hasl):
     result = sha256.hexdigest()
     return result == hasl
 
+
 # check models
-def checkFiles(fileName, models, type):
-    needModels = models[type]
-    dir = os.path.join(webuiModelDir, fileName)
+def check_files(file_name, models, type):
+    need_models = models[type]
+    dir = os.path.join(webui_model_dir, file_name)
     print("all models:", dir)
     files = os.listdir(dir)
-    for model in needModels.keys():
+    for model in need_models.keys():
         if model not in files:
             # download
             path = os.path.join(dir, model)
-            downloadModel(modelsUrl+model, path)
+            download_model(models_url+model, path)
         else:
             # check sha256
             path = os.path.join(dir, model)
-            re = checkHash(path, needModels[model])
+            re = check_hash(path, need_models[model])
             if not re:
                 print("check hash error, path:", path)
-                downloadModel(modelsUrl+model, path)
+                download_model(models_url+model, path)
 
-def checkModels(models):
+
+def check_models(models):
     for type in models.keys():
         if type == "Lora":
-            fileName = "Lora"
-            checkFiles(fileName, models, type)
+            file_name = "Lora"
+            check_files(file_name, models, type)
         elif type == "CheckPoint":
-            fileName = "Stable-diffusion"
-            checkFiles(fileName, models, type)
+            file_name = "Stable-diffusion"
+            check_files(file_name, models, type)
     return True
 
+
 # webui watchDog
-def webuiWatchDog():
+def webui_watchdog():
     print("start watch dog")
-    webuiUseable = False
-    global firstSetupWebui
-    global lastLaunchTime
+    webui_useable = False
+    global first_setup_webui
+    global last_launch_time
     while running:
         try:
             # visit Stable Diffusion WebUI page
-            response = requests.get(webuiUrl)
-            if not webuiUseable:
-                if not firstSetupWebui:
+            requests.get(webui_url)
+            if not webui_useable:
+                if not first_setup_webui:
                     print("webui reconnect")
-                    callback("nodeOnline", None)
-                webuiUseable = True
-                
-            # If the returned status code is not within the range of 200-299, it indicates that there is a problem with the Stable Diffusion and it needs to be restarted
+                    callback("node_online", None)
+                webui_useable = True
+
+            # If the returned status code is not within the range of 200-299,
+            # it indicates that there is a problem with the Stable Diffusion
+            # and it needs to be restarted
             # if not(200 <= response.status_code < 300):
-            #     print(f'Stable Diffusion WebUI returned status code {response.status_code}. Restarting...')
+            #     print(f'Stable Diffusion WebUI returned status code
+            #     {response.status_code}. Restarting...')
             #     subprocess.run(restart_cmd, check=True)
-            if firstSetupWebui:
+            if first_setup_webui:
                 print("first connect webui, congratulation!")
-                callback("webuiSetup", None)
-                firstSetupWebui = False
+                callback("webui_setup", None)
+                first_setup_webui = False
         except Exception as e:
-            # If there is an exception when accessing the Stable Diffusion WebUI, a reboot is also required
-            if webuiUseable:
-                callback("nodeOffline", None)
-                webuiUseable = False
-            if (not firstSetupWebui) and (int(time.time()) - lastLaunchTime > 120):
+            # If there is an exception when accessing the Stable Diffusion
+            # WebUI, a reboot is also required
+            if webui_useable:
+                callback("node_offline", None)
+                webui_useable = False
+            if (not first_setup_webui) and (int(time.time()) - last_launch_time > 120):
                 print(f'Error accessing Stable Diffusion WebUI: {e}. Restarting...')
-                launchWebui()
+                launch_webui()
             else:
                 print(f"can't connect webui, maybe wait a miniute")
         # Wait for the specified interval before detecting again
-        time.sleep(webuiWatchDogInterval)
+        time.sleep(webui_watch_dog_interval)
     print("webui watchdog over")
 
+
 def launch():
-    global lastLaunchTime
-    lastLaunchTime = int(time.time())
+    global last_launch_time
+    last_launch_time = int(time.time())
 
     if sys.platform == "win32":
-        os.chdir(webuiFileDir)
-        print("launch in win, dir:", webuiFileDir + "/webui-user.bat")
-        cmd = os.path.join(webuiFileDir, "webui-user.bat")
+        os.chdir(webui_file_dir)
+        print("launch in win, dir:", webui_file_dir + "/webui-user.bat")
+        cmd = os.path.join(webui_file_dir, "webui-user.bat")
         subprocess.call(cmd)
     elif sys.platform.startswith('linux'):
-        os.chdir(webuiFileDir)
-        print("launch in linux, dir:", webuiFileDir+"/webui.sh")
+        os.chdir(webui_file_dir)
+        print("launch in linux, dir:", webui_file_dir+"/webui.sh")
         # Start another Python program
-        subprocess.run(['bash', webuiFileDir+"/webui.sh"])
+        subprocess.run(['bash', webui_file_dir+"/webui.sh"])
     else:
         print("unknow system")
         callback("stop", None)
 
-def launchWebui():
+
+def launch_webui():
     thread1 = threading.Thread(target=launch)
     thread1.start()
-    
 
-def getWebuiDir():
-    global webuiFileDir
-    global webuiModelDir
+
+def get_webui_dir():
+    global webui_file_dir
+    global webui_model_dir
     currentFileName = inspect.getfile(inspect.currentframe())
     currentFileDir = os.path.dirname(currentFileName)
     dir = os.path.dirname(currentFileDir)
-    webuiFileDir = os.path.join(dir, "stable-diffusion-webui-master")
-    webuiModelDir = os.path.join(webuiFileDir, "models")
-    if not os.path.exists(webuiFileDir):
-        print("webui dir error, should be:", webuiFileDir)
+    webui_file_dir = os.path.join(dir, "stable-diffusion-webui-master")
+    webui_model_dir = os.path.join(webui_file_dir, "models")
+    if not os.path.exists(webui_file_dir):
+        print("webui dir error, should be:", webui_file_dir)
         callback("stop", None)
 
-def dealWebuiApiRequest():
+
+def deal_webui_api_request():
     print("start deal webui api request")
-    global webuiApiMsg
-    apiRequests = []
+    global webui_api_msg
+    api_requests = []
     while running:
-        for apiRequest in apiRequests:
-            request = apiRequest["request"]
+        for api_request in api_requests:
+            request = api_request["request"]
             data = request["data"]
             type = request["type"]
-            url = webuiUrl + request["uri"]
-            print(int(time.time()), ", command url:", url, ", taskId:", apiRequest["taskId"])
+            url = webui_url + request["uri"]
+            print(int(time.time()), ", command url:", url, ", taskId:", api_request["taskId"])
             try:
                 response = requests.post(url, headers=headers, data=json.dumps(data))
                 result = {}
@@ -176,63 +187,67 @@ def dealWebuiApiRequest():
                 if response.status_code == 200:
                     result["data"] = response.json()
                 re = {}
-                re["taskId"] = apiRequest["taskId"]
+                re["taskId"] = api_request["taskId"]
                 re["result"] = result
-                print("webui response code:", response.status_code) #, ", text:", response.text)
+                print("webui response code:", response.status_code)
             except Exception as e:
                 result = {}
                 result["type"] = type
                 result["code"] = 10001
                 re = {}
-                re["taskId"] = apiRequest["taskId"]
+                re["taskId"] = api_request["taskId"]
                 re["result"] = result
-                print("webui request error:", e) #, ", text:", response.text)
+                print("webui request error:", e)
 
             callback("command", re)
-        apiRequests.clear()
+        api_requests.clear()
         cond.acquire()
-        if (len(webuiApiMsg) == 0):
+        if (len(webui_api_msg) == 0):
             cond.wait()
-            apiRequests = webuiApiMsg[:]
-            webuiApiMsg.clear()
+            api_requests = webui_api_msg[:]
+            webui_api_msg.clear()
         else:
-            apiRequests = webuiApiMsg
-            webuiApiMsg.clear()
+            api_requests = webui_api_msg
+            webui_api_msg.clear()
             cond.release()
-        # print("apiRequests len:", len(apiRequests))
-    print("dealWebuiApiRequest over")
+        # print("api_requests len:", len(api_requests))
+    print("deal_webui_api_request over")
 
-def sendWebuiApiRequest(data):
-    global webuiApiMsg
+
+def send_webui_api_request(data):
+    global webui_api_msg
     cond.acquire()
-    webuiApiMsg.append(data)
-    # print("webuiApiMsg len:", len(webuiApiMsg))
+    webui_api_msg.append(data)
+    # print("webui_api_msg len:", len(webui_api_msg))
     cond.notify()
     cond.release()
 
-def startWebuiCon(webuiurl, models, cb):
-    global webuiUrl, modelsUrl
-    webuiUrl = webuiurl
-    modelsUrl = models["downloadPrefix"]
+
+def start_webui_con(webuiurl, models, cb):
+    global webui_url, models_url
+    webui_url = webuiurl
+    models_url = models["downloadPrefix"]
 
     global callback
     callback = cb
-    getWebuiDir()
-    if not checkModels(models):
-       print("check models error")
-       callback("stop", None)
-    watchDogThread = threading.Thread(target=webuiWatchDog)
-    taskThread = threading.Thread(target=dealWebuiApiRequest)
+    get_webui_dir()
+    if not check_models(models):
+        print("check models error")
+        callback("stop", None)
+    watch_dog_thread = threading.Thread(target=webui_watchdog)
+    task_thread = threading.Thread(target=deal_webui_api_request)
 
-    watchDogThread.start()
-    taskThread.start()
-    launchWebui()
+    watch_dog_thread.start()
+    task_thread.start()
+    launch_webui()
+
 
 def stop():
     global running
     running = False
-    # if not launchWebui():
+    # if not launch_webui():
     #     exit(0)
 
+
 if __name__ == "__main__":
-    startWebuiCon()
+    start_webui_con()

@@ -6,7 +6,7 @@ import time
 import websocket_server
 import base64
 
-currentDir= os.path.dirname(inspect.getfile(inspect.currentframe()))
+current_dir = os.path.dirname(inspect.getfile(inspect.currentframe()))
 
 lock = threading.Lock()
 # eventlet.monkey_patch()
@@ -39,16 +39,18 @@ def connect(client, server):
     print("New client connected and was given id %d" % client['id'])
     global sessionId
     sessionId = "111hhh"
-    th = threading.Thread(target=emitMsg).start()
-    global client1 
+    threading.Thread(target=emit_msg).start()
+    global client1
     client1 = client
 
 
 def disconnect(client, server):
     print("Client(%d) disconnected" % client['id'])
 
+
 def error():
     return True
+
 
 def message(client, server, data):
     data = json.loads(data)
@@ -58,14 +60,10 @@ def message(client, server, data):
         re = msgBody["servRegisterResult"]
         re["sessionId"] = str(sessionId)
         re["code"] = 200
-        co = sendCommand()
-        # threading.Thread(target=send_command, args=(5, co)).start()
+        co = create_command()
+        threading.Thread(target=send_command, args=(5, co)).start()
         # threading.Thread(target=send_command, args=(10, co)).start()
-        # threading.Thread(target=send_offline, args=(20,)).start()
-        # eventlet.spawn(send_command, 5, co, sessionId)
-        # eventlet.spawn(send_command, 10, co, sessionId)
-        # eventlet.spawn(send_offline, 20, sessionId)
-        putMsg(re)
+        threading.Thread(target=send_offline, args=(10,)).start()
     if msgtype == "heartbeat":
         re = msgBody["servHeartbeatResult"]
         re["sessionId"] = data["sessionId"]
@@ -84,35 +82,32 @@ def message(client, server, data):
                     f.write(da)
         return
     if msgtype == "offline-result":
-        return 
-    # sio.emit('message', json.dumps(re), room=sessionId)   
+        return
+    # sio.emit('message', json.dumps(re), room=sessionId)
     # eventlet.spawn(other_function, sessionId, re)
-    # putMsg(re)
+    put_msg(re)
+
 
 def other_function(sid, data):
     print("emit data")
     server1.send(json.dumps(data))
 
+
 def send_command(t, data):
     time.sleep(t)
     print("seng command, sid:{sessionId}")
-    putMsg(data)
-    putMsg(data)
-    putMsg(data)
+    put_msg(data)
+
 
 def send_offline(t):
     time.sleep(t)
     re = msgBody["servAskOffline"]
     re["sessionId"] = sessionId
     re["reason"] = "kick offline"
-    putMsg(re)
+    put_msg(re)
 
-def getMessageBody():
-    global msgBody
-    f = open(os.path.join(currentDir, "messageBody.json"), "r", encoding="utf-8")
-    msgBody = json.load(f)
 
-def sendCommand():
+def create_command():
     re = msgBody["servCommand"]
     re["sessionId"] = sessionId
     re["taskId"] = "taskId"
@@ -123,20 +118,16 @@ def sendCommand():
     }
     return re
 
-def sendOffline():
-    time.sleep(15)
-    info = msgBody["offline"]
-    info["sessionId"] = sessionId
-    info["reason"] = "test"
-    
-def putMsg(info):
+
+def put_msg(info):
     lock.acquire()
     global msgs
     msgs.append(info)
-    # print("putMsg:", msgs)
+    # print("put_msg:", msgs)
     lock.release()
 
-def emitMsg():
+
+def emit_msg():
     print("start emitmsg")
     global msgs
     global sessionId
@@ -149,16 +140,17 @@ def emitMsg():
         msgs.clear()
         lock.release()
 
-def getMessageBody():
+
+def get_message_body():
     global msgBody
-    dir = os.path.dirname(currentDir)
+    dir = os.path.dirname(current_dir)
     f = open(os.path.join(dir, "messageBody.json"), "r", encoding="utf-8")
     msgBody = json.load(f)
 
 
 if __name__ == '__main__':
-    getMessageBody()
-    # th = threading.Thread(target=emitMsg)
+    get_message_body()
+    # th = threading.Thread(target=emit_msg)
     # th.start()
     # wsgi.server(eventlet.listen(('localhost', 12345)), app)
     global server1

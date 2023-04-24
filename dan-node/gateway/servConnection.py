@@ -6,266 +6,286 @@ import os
 import inspect
 
 running = True
-servAskOffline = False
-msgBody = {}
-apiKey = ""
-nodeName = ""
-needSendMsgs = []
-needGetResultMsgs = []  # Add the sendtime field on top of needSendMsgs to determine if the message has timed out
-sessionId = "" 
-needSendMsgsLock = threading.Lock()
-needGetResultMsgsLock = threading.Lock()
-currentDir= os.path.dirname(inspect.getfile(inspect.currentframe()))
-heartCondition = threading.Condition()
-heartbeatStatus = 1
-hasConnected = False
-webuiStatus = {
+serv_adk_offline = False
+msg_body = {}
+api_key = ""
+node_name = ""
+need_send_msgs = []
+# Add the sendtime field on top of need_send_msgs to determine if the message has timed out
+need_get_result_msgs = []
+session_id = ""
+need_send_msgs_lock = threading.Lock()
+need_get_result_msgs_lock = threading.Lock()
+current_dir = os.path.dirname(inspect.getfile(inspect.currentframe()))
+heart_condition = threading.Condition()
+heartbeat_status = 1
+has_connected = False
+webui_status = {
     "offline": 0,
     "online": 1
 }
-msgTypePair = {
-    "register" : "register-result",
-    "heartbeat" : "heartbeat-result",
-    #"command" : "command-result",
-    "offline" : "offline-result",
-    "online" : "online-result"
+msg_type_pair = {
+    "register": "register-result",
+    "heartbeat": "heartbeat-result",
+    "offline": "offline-result",
+    "online": "online-result"
 }
 
-def onConnect(ws):
+
+def on_connect(ws):
     print("connect success, now login")
-    createOnlineInfo()
+    create_online_info()
     return True
 
-def checkSid(msg):
-    if sessionId != "" and msg["sessionId"] != sessionId:
-        print("sessionId is different, local:", sessionId, ", remote:", msg["sessionId"])
+
+def check_sid(msg):
+    if session_id != "" and msg["sessionId"] != session_id:
+        print("session_id is different, local:", session_id, ", remote:", msg["sessionId"])
         return False
     return True
 
-def delNeedGetResultMsgs(msg):
-    needGetResultMsgsLock.acquire()
+
+def del_need_get_result_msgs(msg):
+    need_get_result_msgs_lock.acquire()
 
     delList = []
-    for info in needGetResultMsgs:
-        if msg["msgType"] == msgTypePair[info["msgType"]]:
+    for info in need_get_result_msgs:
+        if msg["msgType"] == msg_type_pair[info["msgType"]]:
             if msg["msgType"] != "heartbeat-result":
                 delList.append(info)
             elif msg["time"] == info["time"]:
                 delList.append(info)
     # print("delList:", delList)
     for info in delList:
-        needGetResultMsgs.remove(info)
-    needGetResultMsgsLock.release()    
+        need_get_result_msgs.remove(info)
+    need_get_result_msgs_lock.release()
 
-def onMessage(ws, msg):
+
+def on_message(ws, msg):
     # print("omMessage:", msg)
-    global sessionId
+    global session_id
     msg = json.loads(msg)
-    if not checkSid(msg):
+    if not check_sid(msg):
         return False
     type = msg["msgType"]
     if type == "register-result":
         if msg["code"] != 200:
             print("error, code:", msg["code"])
             return False
-        sessionId = msg["sessionId"]
-        print("connect server, sessionId:", sessionId)
+        session_id = msg["sessionId"]
+        print("connect server, session_id:", session_id)
         # start heartbeat
-        global hasConnected
-        hasConnected = True
-        heartCondition.acquire()
-        heartCondition.notify()
-        heartCondition.release()
+        global has_connected
+        has_connected = True
+        heart_condition.acquire()
+        heart_condition.notify()
+        heart_condition.release()
 
     elif type == "command":
         msgs = {}
         msgs["request"] = msg["request"]
         msgs["taskId"] = msg["taskId"]
-        
         callback("command", msgs)
     # elif type == "offline-result":
     #     callback("offline-result")
     elif type == "offline" and msg["type"] == 1:
         print("serv ask this node offline, reason:", msg["reason"])
         callback("offline", None)
-        global servAskOffline
-        servAskOffline = True
-    delNeedGetResultMsgs(msg)
+        global serv_adk_offline
+        serv_adk_offline = True
+    del_need_get_result_msgs(msg)
     return True
 
-def onDisconnect(ws, close_status_code, close_msg):
+
+def on_disconnect(ws, close_status_code, close_msg):
     if running:
         print("disconnect, need restart, code", close_status_code, ", msg:", close_msg)
-        global hasConnected
-        hasConnected = False
-        if not servAskOffline:
+        global has_connected
+        has_connected = False
+        if not serv_adk_offline:
             time.sleep(0.5)
-            threading.Thread(target=creatConnection).start()
+            threading.Thread(target=create_connection).start()
     return True
 
-def onError(ws, err):
+
+def on_error(ws, err):
     print("websocket error:", err)
 
-def getMessageBody():
-    global msgBody
-    f = open(os.path.join(currentDir, "messageBody.json"), "r", encoding="utf-8")
-    msgBody = json.load(f)
+
+def get_message_body():
+    global msg_body
+    f = open(os.path.join(current_dir, "messageBody.json"), "r", encoding="utf-8")
+    msg_body = json.load(f)
+
 
 # create socketIo connection
-def creatConnection():
-    global ws, needSendMsgs, needGetResultMsgs, sessionId
-    needSendMsgs = []
-    needGetResultMsgs = []
-    sessionId = ""
-    ws = websocket.WebSocketApp(servAddr, on_open=onConnect, on_message=onMessage, on_close=onDisconnect, on_error=onError)
+def create_connection():
+    global ws, need_send_msgs, need_get_result_msgs, session_id
+    need_send_msgs = []
+    need_get_result_msgs = []
+    session_id = ""
+    ws = websocket.WebSocketApp(servAddr,
+                                on_open=on_connect,
+                                on_message=on_message,
+                                on_close=on_disconnect,
+                                on_error=on_error)
     ws.run_forever()
     print("create socketio over")
-
-        # threading.Thread(target=creatConnection).start()
     return True
 
-def appendMsg(msg):
-    global needSendMsgs
-    needSendMsgsLock.acquire()
-    needSendMsgs.append(msg)
-    needSendMsgsLock.release()
+
+def append_msg(msg):
+    global need_send_msgs
+    need_send_msgs_lock.acquire()
+    need_send_msgs.append(msg)
+    need_send_msgs_lock.release()
+
 
 # heartbeat
-def Heartbeat():
+def heartbeat():
     while running:
-        if hasConnected:
-            heartbeatMsg = dict(msgBody["nodeHeartbeat"])
-            heartbeatMsg["sessionId"] = sessionId
-            heartbeatMsg["time"] = str(timeNow())
-            heartbeatMsg["status"] = heartbeatStatus
-            appendMsg(heartbeatMsg)
-        heartCondition.acquire()
-        heartCondition.wait(4)
+        if has_connected:
+            heartbeatMsg = dict(msg_body["nodeHeartbeat"])
+            heartbeatMsg["sessionId"] = session_id
+            heartbeatMsg["time"] = str(time_now())
+            heartbeatMsg["status"] = heartbeat_status
+            append_msg(heartbeatMsg)
+        heart_condition.acquire()
+        heart_condition.wait(4)
     print("heartbeat over")
     return True
 
+
 # register
-def createOnlineInfo():
-    onlineMsg = dict(msgBody["nodeRegister"])
-    onlineMsg["apiKey"] = apiKey
-    onlineMsg["nodeName"] = nodeName
-    appendMsg(onlineMsg)
+def create_online_info():
+    onlineMsg = dict(msg_body["nodeRegister"])
+    onlineMsg["apiKey"] = api_key
+    onlineMsg["nodeName"] = node_name
+    append_msg(onlineMsg)
     return True
+
 
 # webui offline
-def createNodeOfflineInfo():
-    global heartbeatStatus
-    heartCondition.acquire()
-    heartbeatStatus = webuiStatus["offline"]
-    heartCondition.notify()
-    heartCondition.release()
+def create_node_offline_info():
+    global heartbeat_status
+    heart_condition.acquire()
+    heartbeat_status = webui_status["offline"]
+    heart_condition.notify()
+    heart_condition.release()
     return True
+
 
 # webui online
-def createNodeOnlineInfo():
-    global heartbeatStatus
-    heartCondition.acquire()
-    heartbeatStatus = webuiStatus["online"]
-    heartCondition.notify()
-    heartCondition.release()
+def create_node_online_info():
+    global heartbeat_status
+    heart_condition.acquire()
+    heartbeat_status = webui_status["online"]
+    heart_condition.notify()
+    heart_condition.release()
     return True
 
-def createCommandResult(msg):
-    commandResult = dict(msgBody["nodeCommandResult"])
-    commandResult["sessionId"] = sessionId
+
+def create_command_result(msg):
+    commandResult = dict(msg_body["nodeCommandResult"])
+    commandResult["sessionId"] = session_id
     commandResult["taskId"] = msg.get("taskId")
     commandResult["result"] = msg.get("result")
-    appendMsg(commandResult)
+    append_msg(commandResult)
     return True
 
-def createServAskOfflineResult():
-    offlineResult = dict(msgBody["servAskOfflineResult"])
-    offlineResult["sessionId"] = sessionId
-    appendMsg(offlineResult)
+
+def create_serv_adk_offline_result():
+    offlineResult = dict(msg_body["servAskOfflineResult"])
+    offlineResult["sessionId"] = session_id
+    append_msg(offlineResult)
     return True
 
-def sendMsgs():
-    global needSendMsgs, needGetResultMsgs
+
+def send_msgs():
+    global need_send_msgs, need_get_result_msgs
     while running:
         time.sleep(0.2)
-        needSendMsgsLock.acquire()
-       
-        needResultMsgsCopy = []
-        needSaveMsgs = []
-        # print("needSendMsgs:", needSendMsgs)
-        for msg in needSendMsgs:
+        need_send_msgs_lock.acquire()
+
+        need_result_msgs_copy = []
+        need_save_msgs = []
+        # print("need_send_msgs:", need_send_msgs)
+        for msg in need_send_msgs:
             msgStr = json.dumps(msg)
             try:
                 ws.send(msgStr)
-                msg["sendTime"] = timeNow()
+                msg["sendTime"] = time_now()
                 if (msg["msgType"] != "command-result") and (msg["msgType"] != "offline-result"):
-                    needResultMsgsCopy.append(msg)
+                    need_result_msgs_copy.append(msg)
             except Exception as e:
                 print("send msg error:", e, ", msg:", msg)
-                needSaveMsgs.append(msg)
-        needSendMsgs = needSaveMsgs
-        needSendMsgsLock.release()
-        
-        needGetResultMsgsLock.acquire()
-        needGetResultMsgs.extend(needResultMsgsCopy) 
-        needGetResultMsgsLock.release()
-    print("sendMsgs over")
+                need_save_msgs.append(msg)
+        need_send_msgs = need_save_msgs
+        need_send_msgs_lock.release()
+        need_get_result_msgs_lock.acquire()
+        need_get_result_msgs.extend(need_result_msgs_copy)
+        need_get_result_msgs_lock.release()
+    print("send_msgs over")
     return True
 
-def timerCheck():
-    global needGetResultMsgs
+
+def timer_check():
+    global need_get_result_msgs
     while running:
         time.sleep(0.5)
-        needGetResultMsgsLock.acquire()
+        need_get_result_msgs_lock.acquire()
         needDel = []
-        for msg in needGetResultMsgs:
+        for msg in need_get_result_msgs:
             type = msg["msgType"]
             if type == "heartbeat":
-                if (timeNow() - msg["sendTime"]) > 5:
+                if (time_now() - msg["sendTime"]) > 5:
                     print("heart msgs block, need send register again")
                     needDel.append(msg)
                     # ws.close()
                     # continue
-            elif (timeNow() - msg["sendTime"]) > 3:
+            elif (time_now() - msg["sendTime"]) > 3:
                 print("msg no response, need resend")
                 copyMsg = dict(msg)
                 copyMsg.pop("sendTime")
                 # don't check this msg again
-                appendMsg(copyMsg)
+                append_msg(copyMsg)
                 needDel.append(msg)
-        
-        for msg in needDel:
-            needGetResultMsgs.remove(msg)
 
-        needGetResultMsgsLock.release()
-    print("timerCheck over")
+        for msg in needDel:
+            need_get_result_msgs.remove(msg)
+
+        need_get_result_msgs_lock.release()
+    print("timer_check over")
     return True
 
-def timeNow():
+
+def time_now():
     return int(time.time())
+
 
 def stop():
     global running
-    createServAskOfflineResult()
+    create_serv_adk_offline_result()
     time.sleep(1)
     print("stop servConnection!!!!!!!!!!!!!")
     running = False
     ws.close()
 
-def startConnection(addr, key, name, cb):
-    global apiKey,nodeName, callback, servAddr
-    apiKey = key
-    nodeName = name
+
+def start_connection(addr, key, name, cb):
+    global api_key, node_name, callback, servAddr
+    api_key = key
+    node_name = name
     callback = cb
     servAddr = addr
-    getMessageBody()
-    threading.Thread(target=sendMsgs).start()
-    threading.Thread(target=timerCheck).start()
-    threading.Thread(target=Heartbeat).start()
+    get_message_body()
+    threading.Thread(target=send_msgs).start()
+    threading.Thread(target=timer_check).start()
+    threading.Thread(target=heartbeat).start()
 
-    threading.Thread(target=creatConnection).start()
+    threading.Thread(target=create_connection).start()
 
-if __name__ == "__main__" :
-    startConnection("ws://127.0.0.1:8888", "111", "222", None)
-   
+
+if __name__ == "__main__":
+    start_connection("ws://127.0.0.1:8888", "111", "222", None)
     
