@@ -13,7 +13,6 @@ import hashlib
 import json
 import sys
 
-webui_model_dir = ""
 webui_file_dir = ""
 models_url = ""
 webui_api_msg = []
@@ -58,11 +57,10 @@ def check_hash(filename, hasl):
 
 
 # check models
-def check_files(file_name, models, type):
+def check_files(dir, models, type):
     need_models = models[type]
-    dir = os.path.join(webui_model_dir, file_name)
-    print("all models:", dir)
     files = os.listdir(dir)
+    print("all models:", files, ", in:", dir)
     for model in need_models.keys():
         if model not in files:
             # download
@@ -80,11 +78,14 @@ def check_files(file_name, models, type):
 def check_models(models):
     for type in models.keys():
         if type == "Lora":
-            file_name = "Lora"
-            check_files(file_name, models, type)
+            dir = os.path.join(webui_file_dir, "models", "Lora")
+            check_files(dir, models, type)
         elif type == "CheckPoint":
-            file_name = "Stable-diffusion"
-            check_files(file_name, models, type)
+            dir = os.path.join(webui_file_dir, "models", "Stable-diffusion")
+            check_files(dir, models, type)
+        elif type == "ControlNet":
+            dir = os.path.join(webui_file_dir, "extensions", "sd-webui-controlnet", "models")
+            check_files(dir, models, type)
     return True
 
 
@@ -157,12 +158,10 @@ def launch_webui():
 
 def get_webui_dir():
     global webui_file_dir
-    global webui_model_dir
     currentFileName = inspect.getfile(inspect.currentframe())
     currentFileDir = os.path.dirname(currentFileName)
     dir = os.path.dirname(currentFileDir)
     webui_file_dir = os.path.join(dir, "stable-diffusion-webui-master")
-    webui_model_dir = os.path.join(webui_file_dir, "models")
     if not os.path.exists(webui_file_dir):
         print("webui dir error, should be:", webui_file_dir)
         callback("stop", None)
