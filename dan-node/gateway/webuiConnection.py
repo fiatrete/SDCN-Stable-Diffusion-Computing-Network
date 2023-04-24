@@ -12,6 +12,7 @@ import urllib.request
 import hashlib
 import json
 import sys
+import tqdm
 
 webui_file_dir = ""
 models_url = ""
@@ -30,14 +31,19 @@ headers = {
 
 def download_model(url, path):
     print("download model from:", url, ", to:", path)
-    with urllib.request.urlopen(url) as response:
-        with open(path, 'wb') as f:
-            while True:
-                data = response.read(blocksize)
-                if not data:
-                    break
-                f.write(data)
-    print("download finish")
+    response = urllib.request.urlopen(url)
+    total_size = int(response.headers.get('Content-Length', 0))
+    progress_bar = tqdm(total=total_size, unit='ib', unit_scale=True)
+
+    with open(path, 'wb') as output:
+        while True:
+            buffer = response.read(blocksize)
+            if not buffer:
+                break
+            output.write(buffer)
+            progress_bar.update(len(buffer))
+
+    progress_bar.close()
 
 
 # if models exit, need to check it's hash with we support
