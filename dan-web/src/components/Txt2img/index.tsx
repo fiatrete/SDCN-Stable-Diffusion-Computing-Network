@@ -272,11 +272,20 @@ const Txt2img = () => {
             <Title level={5}>Settings</Title>
             <div className={cx('gap-0')}>
               <ModelFormGroup label='Model' name='model' />
-              <Form.Item label='Size' name='size' initialValue={sizes[0].value}>
+              <Form.Item
+                label='Size'
+                name='size'
+                initialValue={sizes[0].value}
+                tooltip='The desired [width x height] of the generated image(s) in pixels.'
+              >
                 <Select size='large' options={sizes} />
               </Form.Item>
               <LoRAFormGroup />
-              <Form.Item label='Negative Prompts' name='negative_prompt'>
+              <Form.Item
+                label='Negative Prompts'
+                name='negative_prompt'
+                tooltip='A negative prompt that describes what you don&#39;t want in the image.'
+              >
                 <TextArea
                   size='large'
                   rows={4}
