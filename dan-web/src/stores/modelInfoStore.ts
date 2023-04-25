@@ -1,11 +1,12 @@
 import { makeAutoObservable, observable } from 'mobx'
 
-import { ModelInfos } from 'api/playground'
+import { ModelDetails, ModelInfos } from 'api/playground'
 
 class UIStore {
   constructor() {
     makeAutoObservable(this, {
       modelInfos: observable.ref,
+      modelDetails: observable.ref,
     })
   }
 
@@ -15,12 +16,15 @@ class UIStore {
     Samplers: [],
   }
 
+  modelDetails: ModelDetails = {}
+
   reset() {
     this.modelInfos = {
       Models: [],
       LoRAs: [],
       Samplers: [],
     }
+    this.modelDetails = {}
   }
 }
 

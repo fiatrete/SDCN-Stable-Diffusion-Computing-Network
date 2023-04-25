@@ -33,3 +33,35 @@ export async function getSupportedModelInfo(): Promise<ModelInfos> {
       })
   })
 }
+
+export interface ModelDetails {
+  [key: string]: {
+    name: string
+    hash: string
+    type: 'model' | 'LoRA'
+    images?: string[]
+    download: {
+      fileurl: string
+      path: string
+    }
+  }
+}
+
+export async function getModelDetails(): Promise<ModelDetails> {
+  return new Promise((resolve, reject) => {
+    axios
+      .get<ModelDetails>(
+        `https://raw.githubusercontent.com/Synthintel/DAN-Stable-Diffusion-Computing-Network/dev/model-reference/info.json?t=${Date.now()}`,
+      )
+      .then((resp) => {
+        if (resp.status === 200) {
+          resolve(resp.data)
+        } else {
+          reject(new Error(`Failed - ${resp.status}`))
+        }
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}
