@@ -1,0 +1,324 @@
+{
+    "abyssorangemix3AOM3_aom3a1b": {
+        "name": "abyssorangemix3AOM3_aom3a1b",
+        "hash": "5493a0ec491f5961dbdc1c861404088a6ae9bd4007f6a3a7c5dee8789cdc1361",
+        "download": {
+            "fileurl": "https://huggingface.co/fiatrete/dan-used-models/resolve/main/checkpoint/abyssorangemix3AOM3_aom3a1b.safetensors",
+            "path": "/models/Stable-diffusion"
+        },
+        "type": "model"
+    },
+    "anything-v4.5-pruned": {
+        "name": "anything-v4.5-pruned",
+        "hash": "6e430eb51421ce5bf18f04e2dbe90b2cad437311948be4ef8c33658a73c86b2a",
+        "download": {
+            "fileurl": "https://huggingface.co/fiatrete/dan-used-models/resolve/main/checkpoint/anything-v4.5-pruned.safetensors",
+            "path": "/models/Stable-diffusion"
+        },
+        "type": "model"
+    },
+    "AnythingV5_v5PrtRE": {
+        "name": "AnythingV5_v5PrtRE",
+        "hash": "7f96a1a9ca9b3a3242a9ae95d19284f0d2da8d5282b42d2d974398bf7663a252",
+        "download": {
+            "fileurl": "https://huggingface.co/fiatrete/dan-used-models/resolve/main/checkpoint/AnythingV5_v5PrtRE.safetensors",
+            "path": "/models/Stable-diffusion"
+        },
+        "type": "model"
+    },
+    "chilloutmix_NiPrunedFp32Fix": {
+        "name": "chilloutmix_NiPrunedFp32Fix",
+        "hash": "fc2511737a54c5e80b89ab03e0ab4b98d051ab187f92860f3cd664dc9d08b271",
+        "download": {
+            "fileurl": "https://huggingface.co/fiatrete/dan-used-models/resolve/main/checkpoint/chilloutmix_NiPrunedFp32Fix.safetensors",
+            "path": "/models/Stable-diffusion"
+        },
+        "type": "model"
+    },
+    "clarity": {
+        "name": "clarity",
+        "hash": "627a6f5c8bf7669d4a224ac041d527debc65d2d435b16e54ead8ee2c901d1634",
+        "download": {
+            "fileurl": "https://huggingface.co/fiatrete/dan-used-models/resolve/main/checkpoint/clarity.safetensors",
+            "path": "/models/Stable-diffusion"
+        },
+        "type": "model"
+    },
+    "dalcefo_painting_v5": {
+        "name": "dalcefo_painting_v5",
+        "hash": "66189c46ac52062f0a7dd3ed7a7d0849912f35791ad3d5c732df654e1c596e87",
+        "download": {
+            "fileurl": "https://huggingface.co/fiatrete/dan-used-models/resolve/main/checkpoint/dalcefo_painting_v5.safetensors",
+            "path": "/models/Stable-diffusion"
+        },
+        "type": "model"
+    },
+    "dalcefo_v5": {
+        "name": "dalcefo_v5",
+        "hash": "e6de149b14b60cc91f32ac784ff40cf640a55d337403f5e13b9c32484e9030ac",
+        "download": {
+            "fileurl": "https://huggingface.co/fiatrete/dan-used-models/resolve/main/checkpoint/dalcefo_v5.safetensors",
+            "path": "/models/Stable-diffusion"
+        },
+        "type": "model"
+    },
+    "deliberate_v2": {
+        "name": "deliberate_v2",
+        "hash": "9aba26abdfcd46073e0a1d42027a3a3bcc969f562d58a03637bf0a0ded6586c9",
+        "download": {
+            "fileurl": "https://huggingface.co/fiatrete/dan-used-models/resolve/main/checkpoint/deliberate_v2.safetensors",
+            "path": "/models/Stable-diffusion"
+        },
+        "type": "model"
+    },
+    "dreamshaper_5Bakedvae": {
+        "name": "dreamshaper_5Bakedvae",
+        "hash": "a60cfaa90decb28a1447f955e29220eb867e8e157f0ca8a4d3b839cd9cd4832a",
+        "download": {
+            "fileurl": "https://huggingface.co/fiatrete/dan-used-models/resolve/main/checkpoint/dreamshaper_5Bakedvae.safetensors",
+            "path": "/models/Stable-diffusion"
+        },
+        "type": "model"
+    },
+    "MareAcernis": {
+        "name": "MareAcernis",
+        "hash": "fbc82b317dd938c58360768fb2572dc73c6843a4a01f58f60530531f29bf4751",
+        "download": {
+            "fileurl": "https://huggingface.co/fiatrete/dan-used-models/resolve/main/checkpoint/MareAcernis.safetensors",
+            "path": "/models/Stable-diffusion"
+        },
+        "type": "model"
+    },
+    "realisticVisionV20_v20": {
+        "name": "realisticVisionV20_v20",
+        "hash": "c0d1994c73d784a17a5b335ae8bda02dcc8dd2fc5f5dbf55169d5aab385e53f2",
+        "download": {
+            "fileurl": "https://huggingface.co/fiatrete/dan-used-models/resolve/main/checkpoint/realisticVisionV20_v20.safetensors",
+            "path": "/models/Stable-diffusion"
+        },
+        "type": "model"
+    },
+    "arknightsTexasThe_v10": {
+        "name": "arknightsTexasThe_v10",
+        "hash": "0b86fe247c1a02d781e236abd356b2b7180f4250f1f7c2633ede7bac2cd40272",
+        "images": ["https://raw.githubusercontent.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/main/model-reference/imgs/arknightsTexasThe_v10.jpg"],
+        "download": {
+            "fileurl": "https://huggingface.co/fiatrete/dan-used-models/resolve/main/lora/arknightsTexasThe_v10.safetensors",
+            "path": "/models/Lora"
+        },
+        "type": "LoRA"
+    },
+    "chilloutmixss_xss10": {
+        "name": "chilloutmixss_xss10",
+        "hash": "7dc213110f3d9f2074d7773d3fb3082f571d33132ad8f3b16e70a4e4b4ec984b",
+        "images": ["https://raw.githubusercontent.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/main/model-reference/imgs/chilloutmixss_xss10.jpg"],
+        "download": {
+            "fileurl": "https://huggingface.co/fiatrete/dan-used-models/resolve/main/lora/chilloutmixss_xss10.safetensors",
+            "path": "/models/Lora"
+        },
+        "type": "LoRA"
+    },
+    "cuteGirlMix4_v10": {
+        "name": "cuteGirlMix4_v10",
+        "hash": "9f3b38bf660e91b464c5a25d790f53eb876ac8cf17b479974d426b9732acac56",
+        "images": ["https://raw.githubusercontent.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/main/model-reference/imgs/cuteGirlMix4_v10.jpg"],
+        "download": {
+            "fileurl": "https://huggingface.co/fiatrete/dan-used-models/resolve/main/lora/cuteGirlMix4_v10.safetensors",
+            "path": "/models/Lora"
+        },
+        "type": "LoRA"
+    },
+    "elysia5in1Lora_v20": {
+        "name": "elysia5in1Lora_v20",
+        "hash": "4495d15f676b707dd27d8de28ea4d00ae65d075618d23194fbb5459afdf4fb9b",
+        "images": ["https://raw.githubusercontent.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/main/model-reference/imgs/elysia5in1Lora_v20.jpg"],
+        "download": {
+            "fileurl": "https://huggingface.co/fiatrete/dan-used-models/resolve/main/lora/elysia5in1Lora_v20.safetensors",
+            "path": "/models/Lora"
+        },
+        "type": "LoRA"
+    },
+    "gachaSplashLORA_v40": {
+        "name": "gachaSplashLORA_v40",
+        "hash": "eebdb8e46fafdaf3fca98d0b3adb0cbb16f71e138b65ddf8e43288d0b4a511eb",
+        "images": ["https://raw.githubusercontent.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/main/model-reference/imgs/gachaSplashLORA_v40.jpg"],
+        "download": {
+            "fileurl": "https://huggingface.co/fiatrete/dan-used-models/resolve/main/lora/gachaSplashLORA_v40.safetensors",
+            "path": "/models/Lora"
+        },
+        "type": "LoRA"
+    },
+    "hanfu_v30Song": {
+        "name": "hanfu_v30Song",
+        "hash": "55aef962864e844cf426c518c2a13a38073b8c078c3cd1d600dc6debb4c4fa32",
+        "images": ["https://raw.githubusercontent.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/main/model-reference/imgs/hanfu_v30Song.jpg"],
+        "download": {
+            "fileurl": "https://huggingface.co/fiatrete/dan-used-models/resolve/main/lora/hanfu_v30Song.safetensors",
+            "path": "/models/Lora"
+        },
+        "type": "LoRA"
+    },
+    "kobeni_v10": {
+        "name": "kobeni_v10",
+        "hash": "3e5d8fe726b4c0f1e7f0905f32ea3d1c9ce89a54028209e8179d64d323048dac",
+        "images": ["https://raw.githubusercontent.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/main/model-reference/imgs/kobeni_v10.jpg"],
+        "download": {
+            "fileurl": "https://huggingface.co/fiatrete/dan-used-models/resolve/main/lora/kobeni_v10.safetensors",
+            "path": "/models/Lora"
+        },
+        "type": "LoRA"
+    },
+    "koreanDollLikeness_v10": {
+        "name": "koreanDollLikeness_v10",
+        "hash": "62efe75048d55a096a238c6e8c4e12d61b36bf59e388a90589335f750923954c",
+        "images": ["https://raw.githubusercontent.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/main/model-reference/imgs/koreanDollLikeness_v10.jpg"],
+        "download": {
+            "fileurl": "https://huggingface.co/fiatrete/dan-used-models/resolve/main/lora/koreandolllikeness_V10.safetensors",
+            "path": "/models/Lora"
+        },
+        "type": "LoRA"
+    },
+    "makimaChainsawMan_offset": {
+        "name": "makimaChainsawMan_offset",
+        "hash": "ef403e13f794421c26e7575636696fd6453de691cf8e10b4027c9a68a0c28ab8",
+        "images": ["https://raw.githubusercontent.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/main/model-reference/imgs/makimaChainsawMan_offset.jpg"],
+        "download": {
+            "fileurl": "https://huggingface.co/fiatrete/dan-used-models/resolve/main/lora/makimaChainsawMan_offset.safetensors",
+            "path": "/models/Lora"
+        },
+        "type": "LoRA"
+    },
+    "Moxin_10": {
+        "name": "Moxin_10",
+        "hash": "3fd52c707c31b9af2207f697d9dd26b400683d011914471814bb33645f518f07",
+        "images": ["https://raw.githubusercontent.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/main/model-reference/imgs/Moxin_10.jpg"],
+        "download": {
+            "fileurl": "https://huggingface.co/fiatrete/dan-used-models/resolve/main/lora/Moxin_10.safetensors",
+            "path": "/models/Lora"
+        },
+        "type": "LoRA"
+    },
+    "raidenShogunRealistic_raidenshogunHandsfix": {
+        "name": "raidenShogunRealistic_raidenshogunHandsfix",
+        "hash": "b688e3dd62f1e12261887fd70a89e262c0e54ff509c6b22189bdbbe20d2677c7",
+        "images": ["https://raw.githubusercontent.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/main/model-reference/imgs/raidenShogunRealistic_raidenshogunHandsfix.jpg"],
+        "download": {
+            "fileurl": "https://huggingface.co/fiatrete/dan-used-models/resolve/main/lora/raidenShogunRealistic_raidenshogunHandsfix.safetensors",
+            "path": "/models/Lora"
+        },
+        "type": "LoRA"
+    },
+    "stLouisLuxuriousWheels_v1": {
+        "name": "stLouisLuxuriousWheels_v1",
+        "hash": "f1efd7b748634120b70343bc3c3b425c06c51548431a1264a2fcb5368352349f",
+        "images": ["https://raw.githubusercontent.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/main/model-reference/imgs/stLouisLuxuriousWheels_v1.jpg"],
+        "download": {
+            "fileurl": "https://huggingface.co/fiatrete/dan-used-models/resolve/main/lora/stLouisLuxuriousWheels_v1.safetensors",
+            "path": "/models/Lora"
+        },
+        "type": "LoRA"
+    },
+    "taiwanDollLikeness_v10": {
+        "name": "taiwanDollLikeness_v10",
+        "hash": "5bbaabc04553d5821a3a45e4de5a02b2e66ecb00da677dd8ae862efd8ba59050",
+        "images": ["https://raw.githubusercontent.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/main/model-reference/imgs/taiwanDollLikeness_v10.jpg"],
+        "download": {
+            "fileurl": "https://huggingface.co/fiatrete/dan-used-models/resolve/main/lora/taiwanDollLikeness_v10.safetensors",
+            "path": "/models/Lora"
+        },
+        "type": "LoRA"
+    },
+    "thickerLinesAnimeStyle_loraVersion": {
+        "name": "thickerLinesAnimeStyle_loraVersion",
+        "hash": "759d6fdf539f44f6991efd27ef1767c7779ac8884defc71dd909e5808b5ea74b",
+        "images": ["https://raw.githubusercontent.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/main/model-reference/imgs/thickerLinesAnimeStyle_loraVersion.jpg"],
+        "download": {
+            "fileurl": "https://huggingface.co/fiatrete/dan-used-models/resolve/main/lora/thickerLinesAnimeStyle_loraVersion.safetensors",
+            "path": "/models/Lora"
+        },
+        "type": "LoRA"
+    },
+    "yaeMikoRealistic_yaemikoMixed": {
+        "name": "yaeMikoRealistic_yaemikoMixed",
+        "hash": "336ca6afbcd712b14fdfc7c3f9db044ab6020bdcbec5ed66c926caf639fd2691",
+        "images": ["https://raw.githubusercontent.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/main/model-reference/imgs/yaeMikoRealistic_yaemikoMixed.jpg"],
+        "download": {
+            "fileurl": "https://huggingface.co/fiatrete/dan-used-models/resolve/main/lora/yaeMikoRealistic_yaemikoMixed.safetensors",
+            "path": "/models/Lora"
+        },
+        "type": "LoRA"
+    },
+    "control_sd15_canny": {
+        "name": "control_sd15_canny",
+        "hash": "4de384b16bc2d7a1fb258ca0cbd941d7dd0a721ae996aff89f905299d6923f45",
+        "download": {
+            "fileurl": "https://huggingface.co/fiatrete/dan-used-models/resolve/main/controlnet/control_sd15_canny.pth",
+            "path": "/extensions/sd-webui-controlnet/models"
+        },
+        "type": "ControlNet"
+    },
+    "control_sd15_openpose": {
+        "name": "control_sd15_openpose",
+        "hash": "d19ffffeeaff6d9feb2204b234c3e1b9aec039ab3e63fca07f4fe5646f2ef591",
+        "download": {
+            "fileurl": "https://huggingface.co/fiatrete/dan-used-models/resolve/main/controlnet/control_sd15_openpose.pth",
+            "path": "/extensions/sd-webui-controlnet/models"
+        },
+        "type": "ControlNet"
+    },
+    "ESRGAN_4x": {
+        "name": "ESRGAN_4x",
+        "hash": "65fece06e1ccb48853242aa972bdf00ad07a7dd8938d2dcbdf4221b59f6372ce",
+        "download": {
+            "fileurl": "https://huggingface.co/fiatrete/dan-used-models/resolve/main/upscale/ESRGAN.pth",
+            "path": "/models/ESRGAN"
+        },
+        "type": "UpScale"
+    },
+    "LDSR-models": {
+        "name": "LDSR-models",
+        "hash": "c209caecac2f97b4bb8f4d726b70ac2ac9b35904b7fc99801e1f5e61f9210c13",
+        "download": {
+            "fileurl": "https://huggingface.co/fiatrete/dan-used-models/resolve/main/upscale/LDSR/model.ckpt",
+            "path": "/models/LDSR"
+        },
+        "type": "UpScale"
+    },
+    "LDSR-project": {
+        "name": "LDSR-project",
+        "hash": "9d6ad53c5dafeb07200fb712db14b813b527edd262bc80ea136777bdb41be2ba",
+        "download": {
+            "fileurl": "https://huggingface.co/fiatrete/dan-used-models/resolve/main/upscale/LDSR/project.yaml",
+            "path": "/models/LDSR"
+        },
+        "type": "UpScale"
+    },
+    "RealESRGAN_x4plus": {
+        "name": "RealESRGAN_x4plus",
+        "hash": "4fa0d38905f75ac06eb49a7951b426670021be3018265fd191d2125df9d682f1",
+        "download": {
+            "fileurl": "https://huggingface.co/fiatrete/dan-used-models/resolve/main/upscale/RealESRGAN_x4plus.pth",
+            "path": "/models/RealESRGAN"
+        },
+        "type": "UpScale"
+    },
+    "RealESRGAN_x4plus_anime_6B": {
+        "name": "RealESRGAN_x4plus_anime_6B",
+        "hash": "f872d837d3c90ed2e05227bed711af5671a6fd1c9f7d7e91c911a61f155e99da",
+        "download": {
+            "fileurl": "https://huggingface.co/fiatrete/dan-used-models/resolve/main/upscale/RealESRGAN_x4plus_anime_6B.pth",
+            "path": "/models/RealESRGAN"
+        },
+        "type": "UpScale"
+    },
+    "SwinIR_4x": {
+        "name": "SwinIR_4x",
+        "hash": "99adfa91350a84c99e946c1eb3d8fce34bc28f57d807b09dc8fe40a316328c0a",
+        "download": {
+            "fileurl": "https://huggingface.co/fiatrete/dan-used-models/resolve/main/upscale/003_realSR_BSRGAN_DFOWMFC_s64w8_SwinIR-L_x4_GAN.pth",
+            "path": "/models/SwinIR"
+        },
+        "type": "UpScale"
+    }
+
+}
