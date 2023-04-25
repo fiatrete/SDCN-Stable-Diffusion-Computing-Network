@@ -151,8 +151,8 @@ export default class SdService {
   }
 
   async supportedModelInfo() {
-    const Models = Object.entries(config.sdConfig.kValidModels).map(([hash, name]) => ({ name, hash }));
-    const LoRAs = Object.entries(config.sdConfig.kValidLoras).map(([hash, name]) => ({ name, hash }));
+    const Models = Object.entries(config.sdConfig.kValidModels).map(([hash, name]) => ({ name, hash })).sort((a, b) => a.name.localeCompare(b.name));
+    const LoRAs = Object.entries(config.sdConfig.kValidLoras).map(([hash, name]) => ({ name, hash })).sort((a, b) => a.name.localeCompare(b.name));
     const Samplers = config.sdConfig.kValidSamplers;
     return { Models, LoRAs, Samplers };
   }
