@@ -276,7 +276,11 @@ const Txt2img = () => {
                 label='Size'
                 name='size'
                 initialValue={sizes[0].value}
-                tooltip='The desired [width x height] of the generated image(s) in pixels.'
+                tooltip={
+                  uiStore.isMobile
+                    ? ''
+                    : 'The desired [width x height] of the generated image(s) in pixels.'
+                }
               >
                 <Select size='large' options={sizes} />
               </Form.Item>
@@ -284,7 +288,11 @@ const Txt2img = () => {
               <Form.Item
                 label='Negative Prompts'
                 name='negative_prompt'
-                tooltip='A negative prompt that describes what you don&#39;t want in the image.'
+                tooltip={
+                  uiStore.isMobile
+                    ? ''
+                    : 'A negative prompt that describes what you don&#39;t want in the image.'
+                }
               >
                 <TextArea
                   size='large'

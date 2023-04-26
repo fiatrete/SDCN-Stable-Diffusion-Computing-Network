@@ -298,7 +298,11 @@ const Inpainting = () => {
                 label='Size'
                 name='size'
                 initialValue={sizes[0].value}
-                tooltip='The desired [width x height] of the generated image(s) in pixels.'
+                tooltip={
+                  uiStore.isMobile
+                    ? ''
+                    : 'The desired [width x height] of the generated image(s) in pixels.'
+                }
               >
                 <Select size='large' options={sizes} />
               </Form.Item>
@@ -308,7 +312,11 @@ const Inpainting = () => {
               <Form.Item
                 label='Negative Prompts'
                 name='negative_prompt'
-                tooltip='A negative prompt that describes what you don&#39;t want in the image.'
+                tooltip={
+                  uiStore.isMobile
+                    ? ''
+                    : 'A negative prompt that describes what you don&#39;t want in the image.'
+                }
               >
                 <TextArea
                   size='large'
@@ -322,7 +330,11 @@ const Inpainting = () => {
                 label='Denoising strength'
                 name='denoising_strength'
                 initialValue={0.5}
-                tooltip='Controls the level of denoising; smaller values yield results that are closer to the original image.'
+                tooltip={
+                  uiStore.isMobile
+                    ? ''
+                    : 'Controls the level of denoising; smaller values yield results that are closer to the original image.'
+                }
               >
                 <SliderSettingItem />
               </Form.Item>
