@@ -1,26 +1,20 @@
 import React, { Fragment, useCallback, useState } from 'react'
 import cx from 'classnames'
 import check from 'check-types'
-import {
-  Form,
-  Select,
-  Button,
-  Input,
-  Typography,
-  message,
-  InputNumber,
-} from 'antd'
+import { Form, Button, Input, Typography, message, InputNumber } from 'antd'
 import {
   ModelFormGroup,
   LoRAFormGroup,
   SamplingFormGroup,
   SeedFormGroup,
+  SizeFormGroup,
+  NegativePromptsFromGroup,
+  DenoisingStrengthFormGroup,
 } from 'components/SettingsFormGroup'
 import ImageOutputWidget from 'components/ImageOutputWidget'
 import ImageInputWidget from 'components/ImageInputWidget'
 import { FormFinishInfo } from 'rc-field-form/es/FormContext'
 import GeneratingMask from 'components/GeneratingMask'
-import SliderSettingItem from 'components/SliderSettingItem'
 import { observer } from 'mobx-react-lite'
 
 import styles from './index.module.css'
@@ -256,50 +250,13 @@ const Img2img = () => {
             <div className={cx('gap-0')}>
               <ModelFormGroup label='Model' name='model' />
 
-              <Form.Item
-                label='Size'
-                name='size'
-                initialValue={sizes[0].value}
-                tooltip={
-                  uiStore.isMobile
-                    ? ''
-                    : 'The desired [width x height] of the generated image(s) in pixels.'
-                }
-              >
-                <Select size='large' options={sizes} />
-              </Form.Item>
+              <SizeFormGroup sizes={sizes} />
 
               <LoRAFormGroup />
 
-              <Form.Item
-                label='Negative Prompts'
-                name='negative_prompt'
-                tooltip={
-                  uiStore.isMobile
-                    ? ''
-                    : 'A negative prompt that describes what you don&#39;t want in the image.'
-                }
-              >
-                <TextArea
-                  size='large'
-                  rows={4}
-                  placeholder='Negative Prompts'
-                  className={cx('self-stretch text-base leading-6 px-4 py-2')}
-                />
-              </Form.Item>
+              <NegativePromptsFromGroup />
 
-              <Form.Item
-                label='Denoising strength'
-                name='denoising_strength'
-                tooltip={
-                  uiStore.isMobile
-                    ? ''
-                    : 'Controls the level of denoising; smaller values yield results that are closer to the original image.'
-                }
-                initialValue={0.5}
-              >
-                <SliderSettingItem />
-              </Form.Item>
+              <DenoisingStrengthFormGroup />
 
               <SamplingFormGroup methodName='sampler_name' stepsName='steps' />
 

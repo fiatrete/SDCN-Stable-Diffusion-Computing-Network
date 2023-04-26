@@ -1,12 +1,14 @@
 import React, { useCallback, useState } from 'react'
 import cx from 'classnames'
-import { Form, Select, Button, Input, Typography, message, Tooltip } from 'antd'
+import { Form, Button, Input, Typography, message, Tooltip } from 'antd'
 import {
   ModelFormGroup,
   SamplingFormGroup,
   CFGFormGroup,
   LoRAFormGroup,
   SeedFormGroup,
+  SizeFormGroup,
+  NegativePromptsFromGroup,
 } from 'components/SettingsFormGroup'
 import ImageWidget from 'components/ImageOutputWidget'
 import { FormFinishInfo } from 'rc-field-form/es/FormContext'
@@ -286,41 +288,21 @@ const Txt2img = () => {
             <Title level={5}>Settings</Title>
             <div className={cx('gap-0')}>
               <ModelFormGroup label='Model' name='model' />
-              <Form.Item
-                label='Size'
-                name='size'
-                initialValue={sizes[0].value}
-                tooltip={
-                  uiStore.isMobile
-                    ? ''
-                    : 'The desired [width x height] of the generated image(s) in pixels.'
-                }
-              >
-                <Select size='large' options={sizes} />
-              </Form.Item>
+
+              <SizeFormGroup sizes={sizes} />
+
               <LoRAFormGroup />
-              <Form.Item
-                label='Negative Prompts'
-                name='negative_prompt'
-                tooltip={
-                  uiStore.isMobile
-                    ? ''
-                    : 'A negative prompt that describes what you don&#39;t want in the image.'
-                }
-              >
-                <TextArea
-                  size='large'
-                  rows={4}
-                  placeholder='Negative Prompts'
-                  className={cx('self-stretch text-base leading-6 px-4 py-2')}
-                />
-              </Form.Item>
+
+              <NegativePromptsFromGroup />
+
               <SamplingFormGroup methodName='sampler_name' stepsName='steps' />
+
               <SeedFormGroup
                 seedName='seed'
                 onClickRandomSeed={handleClickRandomSeedButton}
                 onClickLastSeed={handleClickLastSeedButton}
               />
+
               <CFGFormGroup scaleName='cfg_scale' />
             </div>
           </div>

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { Form, Select, InputNumber, Modal, Input, Button, Space } from 'antd'
+import { Form, Select, InputNumber, Modal, Input, Button } from 'antd'
 import { Fragment } from 'react'
 import cx from 'classnames'
 
@@ -12,7 +12,9 @@ import _ from 'lodash'
 import { ReactComponent as IconRecycle } from 'assets/images/icon-recycle.svg'
 import { ReactComponent as IconRandom } from 'assets/images/icon-random.svg'
 import uiStore from 'stores/uiStore'
+import TextArea from 'antd/es/input/TextArea'
 
+// Model
 interface ModelFormGroupProps {
   label?: string
   name?: string
@@ -37,6 +39,29 @@ const ModelFormGroup = (props: ModelFormGroupProps) => {
   )
 }
 
+// Size
+interface SizeFormGroupProps {
+  sizes: { value: string; label: string }[]
+}
+
+const SizeFormGroup = (props: SizeFormGroupProps) => {
+  return (
+    <Form.Item
+      label='Size'
+      name='size'
+      initialValue={props.sizes[0].value}
+      tooltip={
+        uiStore.isMobile
+          ? ''
+          : 'The desired [width x height] of the generated image(s) in pixels.'
+      }
+    >
+      <Select size='large' options={props.sizes} />
+    </Form.Item>
+  )
+}
+
+// LoRA
 interface SelectLoraModal {
   loraInfo?: {
     hash?: string
@@ -310,6 +335,29 @@ const LoRAFormGroup = () => {
   )
 }
 
+// Negative Prompts
+const NegativePromptsFromGroup = () => {
+  return (
+    <Form.Item
+      label='Negative Prompts'
+      name='negative_prompt'
+      tooltip={
+        uiStore.isMobile
+          ? ''
+          : 'A negative prompt that describes what you don&#39;t want in the image.'
+      }
+    >
+      <TextArea
+        size='large'
+        rows={4}
+        placeholder='Negative Prompts'
+        className={cx('self-stretch text-base leading-6 px-4 py-2')}
+      />
+    </Form.Item>
+  )
+}
+
+// Sampling
 interface SamplingFormGroupProps {
   methodName: string
   stepsName: string
@@ -366,6 +414,7 @@ const SamplingFormGroup = (props: SamplingFormGroupProps) => {
   )
 }
 
+// Seed
 interface SeedFormGroupProps {
   seedName: string
   onClickRandomSeed: () => void
@@ -413,6 +462,7 @@ const SeedFormGroup = (props: SeedFormGroupProps) => {
   )
 }
 
+// CFG Scale
 interface CFGFormGroupProps {
   scaleName: string
 }
@@ -446,10 +496,31 @@ const CFGFormGroup = (props: CFGFormGroupProps) => {
   )
 }
 
+// Denoising Strength
+const DenoisingStrengthFormGroup = () => {
+  return (
+    <Form.Item
+      label='Denoising strength'
+      name='denoising_strength'
+      tooltip={
+        uiStore.isMobile
+          ? ''
+          : 'Controls the level of denoising; smaller values yield results that are closer to the original image.'
+      }
+      initialValue={0.5}
+    >
+      <SliderSettingItem />
+    </Form.Item>
+  )
+}
+
 export {
   ModelFormGroup,
+  SizeFormGroup,
   LoRAFormGroup,
+  NegativePromptsFromGroup,
   SamplingFormGroup,
   SeedFormGroup,
   CFGFormGroup,
+  DenoisingStrengthFormGroup,
 }

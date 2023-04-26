@@ -83,7 +83,7 @@ const ImageInputWidget = forwardRef<ImageInputWidgetRefHandle, propTypes>(
 
     return (
       <div
-        className={cx(styles.wrap, 'w-full flex justify-center items-center')}
+        className={cx(styles.wrap, 'w-full flex justify-center items-start')}
         style={{ height: '100%' }}
       >
         <Upload
@@ -101,7 +101,7 @@ const ImageInputWidget = forwardRef<ImageInputWidgetRefHandle, propTypes>(
               src={imageUrl}
               onLoad={onImgLoad}
               alt='source'
-              style={{ width: '100%' }}
+              className={cx('w-full min-h-[300px] rounded-lg')}
             />
           ) : (
             <div
