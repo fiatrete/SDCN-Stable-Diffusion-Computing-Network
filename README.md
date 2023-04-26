@@ -101,7 +101,7 @@ cat params-txt2img.json \
 
 1. Register a `donor account` on [opendan.ai](https://www.opendan.ai/) 
 2. Install lastest [Stable Diffusion WebUI](https://github.com/AUTOMATIC1111/stable-diffusion-webui) on your PC or Server
-3. Start according to REASME.md in the dan-node file
+3. Start according to README.md in the dan-node file
 
 <br>
 
@@ -111,7 +111,7 @@ cat params-txt2img.json \
 
 2. Register a `donor account` on [opendan.ai](https://www.opendan.ai/)
 
-3. Start according to REASME.md in the dan-node file
+3. Start according to README.md in the dan-node file
 
 4. Register a new github OAuth Application set callback url: http://localhost:6006/api/user/connect/github. Get the github client ID and SECRET:, then set in the docker-compose.yml.
 
