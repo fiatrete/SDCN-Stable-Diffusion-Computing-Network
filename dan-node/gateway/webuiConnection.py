@@ -12,10 +12,10 @@ import urllib.request
 import hashlib
 import json
 import sys
-import tqdm
+from tqdm import tqdm
+import utils
 
 webui_file_dir = ""
-models_url = ""
 webui_api_msg = []
 running = True
 webui_watch_dog_interval = 3
@@ -31,9 +31,13 @@ headers = {
 
 def download_model(url, path):
     print("download model from:", url, ", to:", path)
-    response = urllib.request.urlopen(url)
+    try:
+        response = urllib.request.urlopen(url)
+    except Exception as e:
+        print("error:", e, ", url:", url, ", can't be downloaded!!!")
+        return
     total_size = int(response.headers.get('Content-Length', 0))
-    progress_bar = tqdm(total=total_size, unit='ib', unit_scale=True)
+    progress_bar = tqdm(total=total_size, unit='B', unit_scale=True)
 
     with open(path, 'wb') as output:
         while True:
@@ -47,7 +51,7 @@ def download_model(url, path):
 
 
 # if models exit, need to check it's hash with we support
-def check_hash(filename, hasl):
+def check_hash(filename, hash_val):
     print("check_hash from:", filename)
     sha256 = hashlib.sha256()
     # Open the file and read data by block
@@ -59,39 +63,23 @@ def check_hash(filename, hasl):
             sha256.update(data)
 
     result = sha256.hexdigest()
-    return result == hasl
-
-
-# check models
-def check_files(dir, models, type):
-    need_models = models[type]
-    files = os.listdir(dir)
-    print("all models:", files, ", in:", dir)
-    for model in need_models.keys():
-        if model not in files:
-            # download
-            path = os.path.join(dir, model)
-            download_model(models_url+model, path)
-        else:
-            # check sha256
-            path = os.path.join(dir, model)
-            re = check_hash(path, need_models[model])
-            if not re:
-                print("check hash error, path:", path)
-                download_model(models_url+model, path)
+    return result == hash_val
 
 
 def check_models(models):
-    for type in models.keys():
-        if type == "Lora":
-            dir = os.path.join(webui_file_dir, "models", "Lora")
-            check_files(dir, models, type)
-        elif type == "CheckPoint":
-            dir = os.path.join(webui_file_dir, "models", "Stable-diffusion")
-            check_files(dir, models, type)
-        elif type == "ControlNet":
-            dir = os.path.join(webui_file_dir, "extensions", "sd-webui-controlnet", "models")
-            check_files(dir, models, type)
+    for model in models.keys():
+        print("model:", model, ", value:", models[model])
+        hash = models[model]["hash"]
+        path = models[model]["path"]
+        name = models[model]["name"]
+        url = models[model]["url"]
+        file_dir = os.path.join(webui_file_dir, path)
+        if not os.path.exists(file_dir):
+            os.makedirs(file_dir)
+        file_path = os.path.join(file_dir, name)
+        if (not os.path.isfile(file_path)) or (not check_hash(file_path, hash)):
+            download_model(url, file_path)
+
     return True
 
 
@@ -145,7 +133,7 @@ def launch():
     if sys.platform == "win32":
         os.chdir(webui_file_dir)
         print("launch in win, dir:", webui_file_dir + "/webui-user.bat")
-        cmd = os.path.join(webui_file_dir, "webui-user.bat")
+        cmd = utils.os.path.join(webui_file_dir, "webui-user.bat")
         subprocess.call(cmd)
     elif sys.platform.startswith('linux'):
         os.chdir(webui_file_dir)
@@ -229,9 +217,8 @@ def send_webui_api_request(data):
 
 
 def start_webui_con(webuiurl, models, cb):
-    global webui_url, models_url
+    global webui_url
     webui_url = webuiurl
-    models_url = models["downloadPrefix"]
 
     global callback
     callback = cb

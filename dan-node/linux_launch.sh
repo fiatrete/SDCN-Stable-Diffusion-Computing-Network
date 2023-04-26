@@ -13,7 +13,7 @@ fileName="stable-diffusion-webui-master.zip"
 file="stable-diffusion-webui-master"
 if [[ ! -d $currentDir/$file ]]
 then
-    wget -O $fileName https://huggingface.co/datasets/fiatrete/dan-used-apps/resolve/main/stable-diffusion-webui-master-linux-1.0.0.zip
+    wget -O $fileName https://huggingface.co/datasets/fiatrete/dan-used-apps/resolve/main/stable-diffusion-webui-master-linux-1.0.1.zip
     unzip $fileName
 fi
 

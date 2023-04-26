@@ -3,7 +3,7 @@
 rem Define the URL and destination file path to download
 
 set folder_name=stable-diffusion-webui-master
-set url="https://huggingface.co/datasets/fiatrete/dan-used-apps/resolve/main/stable-diffusion-webui-master-win-1.0.0.zip"
+set url="https://huggingface.co/datasets/fiatrete/dan-used-apps/resolve/main/stable-diffusion-webui-master-win-1.0.1.zip"
 set file_name=stable-diffusion-webui-master.zip
 set target_file=%~dp0/%folder_name%
 if not exist "%folder_name%" (

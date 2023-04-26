@@ -101,27 +101,7 @@ cat params-txt2img.json \
 
 1. Register a `donor account` on [opendan.ai](https://www.opendan.ai/) 
 2. Install lastest [Stable Diffusion WebUI](https://github.com/AUTOMATIC1111/stable-diffusion-webui) on your PC or Server
-3. Install the following models & loras::
-
-- `chillout_mix`, [download](https://huggingface.co/fiatrete/dan-used-models/resolve/main/chilloutmix_NiPrunedFp32Fix.safetensors)
-- `clarity`, [download](https://huggingface.co/fiatrete/dan-used-models/resolve/main/clarity.safetensors)
-- `anything-v4.5-pruned`, [download](https://huggingface.co/fiatrete/dan-used-models/resolve/main/anything-v4.5-pruned.safetensors)
-- `koreanDollLikeness_v10`, [download](https://huggingface.co/fiatrete/dan-used-models/resolve/main/koreandolllikeness_V10.safetensors)
-- `stLouisLuxuriousWheels_v1`, [download](https://huggingface.co/fiatrete/dan-used-models/resolve/main/stLouisLuxuriousWheels_v1.safetensors)
-- `taiwanDollLikeness_v10`, [download](https://huggingface.co/fiatrete/dan-used-models/resolve/main/taiwanDollLikeness_v10.safetensors)
-- `kobeni_v10`, [download](https://huggingface.co/fiatrete/dan-used-models/resolve/main/kobeni_v10.safetensors)
-- `thickerLinesAnimeStyle_loraVersion`, [download](https://huggingface.co/fiatrete/dan-used-models/resolve/main/thickerLinesAnimeStyle_loraVersion.safetensors)
-
-4. Startup Stable Diffusion WebUI with `--listen --api --share` argument 
-
-```bash
-bash webui.sh --listen --api --share
-```
-> *You will get a public URL like `https://f00bfa54-7b3c-476b.gradio.live`*
-
-5. Login `donor account` on [opendan.ai](https://opendan.ai) and register the public URL to `global node list`
-
-
+3. Start according to REASME.md in the dan-node file
 
 <br>
 
@@ -129,22 +109,10 @@ bash webui.sh --listen --api --share
 
 1. Install lastest [Stable Diffusion WebUI](https://github.com/AUTOMATIC1111/stable-diffusion-webui) and [Docker](https://github.com/jenkinsci/docker) on your PC or Server
 
-2. Install the following models & loras:
+2. Register a `donor account` on [opendan.ai](https://www.opendan.ai/)
 
-- `chillout_mix`, [download](https://huggingface.co/fiatrete/dan-used-models/resolve/main/chilloutmix_NiPrunedFp32Fix.safetensors)
-- `clarity`, [download](https://huggingface.co/fiatrete/dan-used-models/resolve/main/clarity.safetensors)
-- `anything-v4.5-pruned`, [download](https://huggingface.co/fiatrete/dan-used-models/resolve/main/anything-v4.5-pruned.safetensors)
-- `koreanDollLikeness_v10`, [download](https://huggingface.co/fiatrete/dan-used-models/resolve/main/koreandolllikeness_V10.safetensors)
-- `stLouisLuxuriousWheels_v1`, [download](https://huggingface.co/fiatrete/dan-used-models/resolve/main/stLouisLuxuriousWheels_v1.safetensors)
-- `taiwanDollLikeness_v10`, [download](https://huggingface.co/fiatrete/dan-used-models/resolve/main/taiwanDollLikeness_v10.safetensors)
-- `kobeni_v10`, [download](https://huggingface.co/fiatrete/dan-used-models/resolve/main/kobeni_v10.safetensors)
-- `thickerLinesAnimeStyle_loraVersion`, [download](https://huggingface.co/fiatrete/dan-used-models/resolve/main/thickerLinesAnimeStyle_loraVersion.safetensors)
+3. Start according to REASME.md in the dan-node file
 
-3. Startup Stable Diffusion WebUI with `--listen --api` argument 
-
-```bash
-bash webui.sh --listen --api
-```
 4. Register a new github OAuth Application set callback url: http://localhost:6006/api/user/connect/github. Get the github client ID and SECRET:, then set in the docker-compose.yml.
 
 5. Start dan-server locally in docker with [Docker Compose](https://github.com/docker/compose):
