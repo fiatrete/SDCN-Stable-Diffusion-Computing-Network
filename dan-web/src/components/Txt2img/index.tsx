@@ -3,9 +3,9 @@ import cx from 'classnames'
 import { Form, Select, Button, Input, Typography, message, Tooltip } from 'antd'
 import {
   ModelFormGroup,
-  LoraFormGroup,
   SamplingFormGroup,
   CFGFormGroup,
+  LoRAFormGroup,
 } from 'components/SettingsFormGroup'
 import ImageWidget from 'components/ImageOutputWidget'
 import { FormFinishInfo } from 'rc-field-form/es/FormContext'
@@ -275,16 +275,7 @@ const Txt2img = () => {
               <Form.Item label='Size' name='size' initialValue={sizes[0].value}>
                 <Select size='large' options={sizes} />
               </Form.Item>
-              <LoraFormGroup
-                label='LoRA1'
-                loraName='lora1'
-                weightName='weight1'
-              />
-              <LoraFormGroup
-                label='LoRA2'
-                loraName='lora2'
-                weightName='weight2'
-              />
+              <LoRAFormGroup />
               <Form.Item label='Negative Prompts' name='negative_prompt'>
                 <TextArea
                   size='large'

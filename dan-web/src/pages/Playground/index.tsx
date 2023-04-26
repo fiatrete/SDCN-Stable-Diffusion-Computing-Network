@@ -11,7 +11,7 @@ import Interrogate from 'components/Interrogate'
 import Inpainting from 'components/Inpainting'
 
 import uiStore from 'stores/uiStore'
-import { getSupportedModelInfo } from 'api/playground'
+import { getModelDetails, getSupportedModelInfo } from 'api/playground'
 import { LoadingOutlined } from '@ant-design/icons'
 import { flushSync } from 'react-dom'
 import modelInfoStore from 'stores/modelInfoStore'
@@ -27,6 +27,16 @@ const Playground = () => {
           modelInfoStore.modelInfos = _.cloneDeep(result)
           setIsModelInfoInitialized(true)
         })
+      })
+      .catch(() => {
+        // -
+      })
+  }, [])
+
+  useEffect(() => {
+    getModelDetails()
+      .then((result) => {
+        modelInfoStore.modelDetails = _.cloneDeep(result)
       })
       .catch(() => {
         // -

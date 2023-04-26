@@ -12,7 +12,7 @@ import {
 } from 'antd'
 import {
   ModelFormGroup,
-  LoraFormGroup,
+  LoRAFormGroup,
   SamplingFormGroup,
 } from 'components/SettingsFormGroup'
 import ImageOutputWidget from 'components/ImageOutputWidget'
@@ -246,16 +246,7 @@ const Img2img = () => {
                 <Select size='large' options={sizes} />
               </Form.Item>
 
-              <LoraFormGroup
-                label='LoRA1'
-                loraName='lora1'
-                weightName='weight1'
-              />
-              <LoraFormGroup
-                label='LoRA2'
-                loraName='lora2'
-                weightName='weight2'
-              />
+              <LoRAFormGroup />
 
               <Form.Item label='Negative Prompts' name='negative_prompt'>
                 <TextArea

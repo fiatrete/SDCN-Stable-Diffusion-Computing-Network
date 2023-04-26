@@ -1,8 +1,13 @@
-import React from 'react'
-import { Form, Select, InputNumber } from 'antd'
-import SliderSettingItem from 'components/SliderSettingItem'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { Form, Select, InputNumber, Modal, Input, Button } from 'antd'
 import { Fragment } from 'react'
+import cx from 'classnames'
+
+import SliderSettingItem from 'components/SliderSettingItem'
 import modelInfoStore from 'stores/modelInfoStore'
+import { PlusOutlined } from '@ant-design/icons'
+import { flushSync } from 'react-dom'
+import _ from 'lodash'
 
 interface ModelFormGroupProps {
   label?: string
@@ -27,34 +32,269 @@ const ModelFormGroup = (props: ModelFormGroupProps) => {
   )
 }
 
-interface LoraFormGroupProps {
+interface SelectLoraModal {
+  loraInfo?: {
+    hash?: string
+    weight?: number
+  }
+  onClose: () => void
+  onConfirm: (hash: string, weight: number) => void
+}
+
+const SelectLoraModal = (props: SelectLoraModal) => {
+  const { loraInfo, onClose, onConfirm } = props
+
+  const loras = useRef(
+    modelInfoStore.modelInfos.LoRAs.map((lora) => {
+      return {
+        value: lora.hash,
+        label: lora.name,
+      }
+    }),
+  )
+
+  const [hash, setHash] = useState<string | undefined>(loraInfo?.hash)
+  const [weight, setWeight] = useState(loraInfo?.weight ?? 0.7)
+  const [loraPreview, setLoraPreview] = useState('')
+
+  const updateLoraPreview = useCallback(() => {
+    const loraModelInfo = _.find(modelInfoStore.modelInfos.LoRAs, { hash })
+    if (loraModelInfo !== undefined) {
+      const modelDetail = modelInfoStore.modelDetails[loraModelInfo.name]
+      if (modelDetail !== undefined) {
+        const imageUrl = modelDetail.images?.[0]
+        if (imageUrl !== undefined) {
+          setLoraPreview(imageUrl)
+        }
+      }
+    }
+  }, [hash])
+
+  const handleHashChanged = useCallback((hash: string) => {
+    setHash(hash)
+  }, [])
+
+  const handleWeightChanged = useCallback((weight: number | null) => {
+    setWeight(weight || 0.7)
+  }, [])
+
+  const handleClickOkButton = useCallback(() => {
+    if (hash === undefined) {
+      onClose()
+      return
+    }
+    onConfirm(hash, weight)
+  }, [hash, onClose, onConfirm, weight])
+
+  useEffect(() => {
+    updateLoraPreview()
+  }, [updateLoraPreview])
+
+  return (
+    <Modal
+      open
+      centered
+      destroyOnClose
+      closable
+      cancelText='Cancel'
+      okText='Confirm'
+      onCancel={onClose}
+      onOk={handleClickOkButton}
+    >
+      <div className={cx('flex gap-4 items-center')}>
+        <div
+          className={cx(
+            'w-[200px] h-[200px] flex justify-center items-center bg-neutral-200',
+          )}
+        >
+          {loraPreview === '' ? (
+            <span className={cx('text-2xl text-gray-400')}>Preview</span>
+          ) : (
+            <img
+              src={loraPreview}
+              alt=''
+              className={cx('w-full h-full object-contain')}
+            />
+          )}
+        </div>
+        <div
+          className={cx(
+            'w-full h-full flex flex-1 flex-col justify-center items-start max-w-[250px]',
+          )}
+        >
+          <Form layout='vertical' className={cx('w-full')}>
+            <Form.Item label='LoRA'>
+              <Select
+                className={cx('w-full')}
+                size='large'
+                placeholder='Choose a LoRA'
+                value={hash}
+                onChange={handleHashChanged}
+              >
+                {loras.current.map((lora) => {
+                  return (
+                    <Select.Option value={lora.value} key={lora.value}>
+                      {lora.label}
+                    </Select.Option>
+                  )
+                })}
+              </Select>
+            </Form.Item>
+            <Form.Item label='Weight' style={{ marginBottom: 0 }}>
+              <SliderSettingItem
+                min={0}
+                max={1}
+                value={weight}
+                onChange={handleWeightChanged}
+              />
+            </Form.Item>
+          </Form>
+        </div>
+      </div>
+    </Modal>
+  )
+}
+
+interface LoraFormItemProps {
   label: string
   loraName: string
   weightName: string
+  loraInfo: {
+    hash: string
+    weight: number
+  }
+  onClickRemove: () => void
 }
 
-const LoraFormGroup = (props: LoraFormGroupProps) => {
-  const lorasData = modelInfoStore.modelInfos.LoRAs.map((lora) => {
-    return {
-      value: lora.hash,
-      label: lora.name,
-    }
-  })
+const LoraFormItem = (props: LoraFormItemProps) => {
+  const { loraInfo } = props
+
+  const form = Form.useFormInstance()
+
+  const [hash, setHash] = useState<string>(loraInfo.hash)
+  const [weight, setWeight] = useState<number>(loraInfo.weight)
+  const [showModal, setShowModal] = useState(false)
+
+  const loraModelInfo = _.find(modelInfoStore.modelInfos.LoRAs, { hash })
 
   return (
     <Fragment>
-      <Form.Item label={props.label} name={props.loraName}>
-        <Select
+      <Form.Item name={props.loraName} initialValue={hash} className='hidden'>
+        <Input />
+      </Form.Item>
+      <Form.Item
+        name={props.weightName}
+        initialValue={weight}
+        className='hidden'
+      >
+        <Input />
+      </Form.Item>
+      <div className={cx('relative')}>
+        <Button
+          className={cx('w-full')}
           size='large'
-          options={lorasData}
-          placeholder='Select a LoRA'
-          allowClear={true}
+          onClick={() => {
+            setShowModal(true)
+          }}
+          style={{
+            overflowWrap: 'break-word',
+          }}
+        >
+          <div
+            className={cx(
+              'max-w-full flex flex-row justify-start items-center',
+            )}
+          >
+            <div className={cx('max-w-[80%] truncate ')}>
+              {loraModelInfo?.name}
+            </div>
+            <div className=''>:{weight}</div>
+          </div>
+        </Button>
+        <Button
+          shape='circle'
+          icon={
+            <PlusOutlined
+              className={cx('')}
+              style={{ transform: 'rotate(45deg)' }}
+            />
+          }
+          className={cx('absolute -top-4 -right-4 z-[2]')}
+          onClick={props.onClickRemove}
         />
-      </Form.Item>
-      <Form.Item label='Weight' name={props.weightName} initialValue={0.7}>
-        <SliderSettingItem />
-      </Form.Item>
+      </div>
+      {showModal && (
+        <SelectLoraModal
+          loraInfo={{ hash, weight }}
+          onClose={() => {
+            setShowModal(false)
+          }}
+          onConfirm={(hash, weight) => {
+            flushSync(() => {
+              setHash(hash)
+              setWeight(weight)
+              setShowModal(false)
+            })
+            form.setFieldValue(props.loraName, hash)
+            form.setFieldValue(props.weightName, weight)
+          }}
+        />
+      )}
     </Fragment>
+  )
+}
+
+const LoRAFormGroup = () => {
+  const [loras, setLoras] = useState<{ hash: string; weight: number }[]>([])
+  const [showAddLoRAModal, setShowAddLoRAModal] = useState(false)
+
+  return (
+    <Form.Item label='LoRA'>
+      <div className={cx('flex flex-col gap-4')}>
+        {loras.map((lora, i) => {
+          const index = i + 1
+          return (
+            <LoraFormItem
+              key={i}
+              label={`LoRA${index}`}
+              loraName={`lora${index}`}
+              weightName={`weight${index}`}
+              loraInfo={lora}
+              onClickRemove={() => {
+                setLoras((prev) => {
+                  _.pullAt(prev, [i])
+                  return [...prev]
+                })
+              }}
+            />
+          )
+        })}
+      </div>
+      {loras.length < 2 && (
+        <Button
+          className={cx('mt-4 w-full')}
+          type='default'
+          onClick={() => {
+            setShowAddLoRAModal(true)
+          }}
+        >
+          Add LoRA
+        </Button>
+      )}
+      {showAddLoRAModal && (
+        <SelectLoraModal
+          onClose={() => {
+            setShowAddLoRAModal(false)
+          }}
+          onConfirm={(hash: string, weight: number) => {
+            setShowAddLoRAModal(false)
+            setLoras((prev) => {
+              return [...prev, { hash, weight }]
+            })
+          }}
+        />
+      )}
+    </Form.Item>
   )
 }
 
@@ -111,4 +351,4 @@ const CFGFormGroup = (props: CFGFormGroupProps) => {
   )
 }
 
-export { ModelFormGroup, LoraFormGroup, SamplingFormGroup, CFGFormGroup }
+export { ModelFormGroup, LoRAFormGroup, SamplingFormGroup, CFGFormGroup }
