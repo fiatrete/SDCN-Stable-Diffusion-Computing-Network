@@ -14,6 +14,7 @@ import {
   ModelFormGroup,
   LoRAFormGroup,
   SamplingFormGroup,
+  SeedFormGroup,
 } from 'components/SettingsFormGroup'
 import ImageOutputWidget from 'components/ImageOutputWidget'
 import ImageInputWidget from 'components/ImageInputWidget'
@@ -73,6 +74,7 @@ const sizes = [
 const Inpainting = () => {
   const [form] = Form.useForm()
   const [outputImgUri, setOutputImgUri] = useState<string | undefined>()
+  const [lastSeed, setLastSeed] = useState(-1)
   const [inputImg, setInputImg] = useState<string>('')
   const [inputImgSize, setInputImgSize] = useState({
     width: 0,
@@ -114,7 +116,10 @@ const Inpainting = () => {
           setGeneratingTask(false)
 
           if (_resp.status === 2) {
-            setOutputImgUri(`data:image/png;base64,${_resp.images[0]}`)
+            flushSync(() => {
+              setOutputImgUri(`data:image/png;base64,${_resp.images[0]}`)
+              setLastSeed(_resp.seeds[0])
+            })
           } else if (_resp.status === 3) {
             message.error(`Failed: [${_resp.status}]`)
           }
@@ -206,6 +211,14 @@ const Inpainting = () => {
     setShowPaint(false)
     inpaintMaskRef.current = ''
   }, [])
+
+  const handleClickRandomSeedButton = useCallback(() => {
+    form.setFieldValue('seed', -1)
+  }, [form])
+
+  const handleClickLastSeedButton = useCallback(() => {
+    form.setFieldValue('seed', lastSeed)
+  }, [form, lastSeed])
 
   return (
     /* when Form submitted, the parent Form.Provider received the submittion via onFormFinish */
@@ -339,10 +352,12 @@ const Inpainting = () => {
                 <SliderSettingItem />
               </Form.Item>
 
-              <SamplingFormGroup
-                methodName='sampler_name'
-                stepsName='steps'
+              <SamplingFormGroup methodName='sampler_name' stepsName='steps' />
+
+              <SeedFormGroup
                 seedName='seed'
+                onClickRandomSeed={handleClickRandomSeedButton}
+                onClickLastSeed={handleClickLastSeedButton}
               />
             </div>
           </div>

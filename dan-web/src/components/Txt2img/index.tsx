@@ -6,6 +6,7 @@ import {
   SamplingFormGroup,
   CFGFormGroup,
   LoRAFormGroup,
+  SeedFormGroup,
 } from 'components/SettingsFormGroup'
 import ImageWidget from 'components/ImageOutputWidget'
 import { FormFinishInfo } from 'rc-field-form/es/FormContext'
@@ -26,6 +27,7 @@ import GeneratingMask from 'components/GeneratingMask'
 import { ArrowDownOutlined, ExclamationCircleOutlined } from '@ant-design/icons'
 import _ from 'lodash'
 import modelInfoStore from 'stores/modelInfoStore'
+import { flushSync } from 'react-dom'
 
 const { Title } = Typography
 const { TextArea } = Input
@@ -42,6 +44,7 @@ const Txt2img = () => {
   const [form] = Form.useForm()
 
   const [imgUri, setImgUri] = useState<string | undefined>()
+  const [lastSeed, setLastSeed] = useState(-1)
   const [isGenerating, setIsGenerating] = useState<boolean>(false)
   const [task, setTask] = useState<Task | undefined>(undefined)
 
@@ -112,6 +115,14 @@ const Txt2img = () => {
     }
   }, [form])
 
+  const handleClickRandomSeedButton = useCallback(() => {
+    form.setFieldValue('seed', -1)
+  }, [form])
+
+  const handleClickLastSeedButton = useCallback(() => {
+    form.setFieldValue('seed', lastSeed)
+  }, [form, lastSeed])
+
   const setGeneratingTask = useCallback(
     (_isGenerating: boolean, _task: Task | undefined = undefined) => {
       setIsGenerating(_isGenerating)
@@ -143,7 +154,10 @@ const Txt2img = () => {
           setGeneratingTask(false)
 
           if (_resp.status === 2) {
-            setImgUri(`data:image/png;base64,${_resp.images[0]}`)
+            flushSync(() => {
+              setImgUri(`data:image/png;base64,${_resp.images[0]}`)
+              setLastSeed(_resp.seeds[0])
+            })
           } else if (_resp.status === 3) {
             message.error(`Failed: [${_resp.status}]`)
           }
@@ -242,7 +256,7 @@ const Txt2img = () => {
                   />
                   <Tooltip
                     placement='top'
-                    title='Currently, only generation data copied from civitai.com is supported.'
+                    title='Currently, only generation data copied from civitai.com is supported'
                     arrow={{
                       pointAtCenter: true,
                     }}
@@ -301,10 +315,11 @@ const Txt2img = () => {
                   className={cx('self-stretch text-base leading-6 px-4 py-2')}
                 />
               </Form.Item>
-              <SamplingFormGroup
-                methodName='sampler_name'
-                stepsName='steps'
+              <SamplingFormGroup methodName='sampler_name' stepsName='steps' />
+              <SeedFormGroup
                 seedName='seed'
+                onClickRandomSeed={handleClickRandomSeedButton}
+                onClickLastSeed={handleClickLastSeedButton}
               />
               <CFGFormGroup scaleName='cfg_scale' />
             </div>

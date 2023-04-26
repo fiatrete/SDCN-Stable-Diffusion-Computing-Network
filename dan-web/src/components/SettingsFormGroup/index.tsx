@@ -1,13 +1,16 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { Form, Select, InputNumber, Modal, Input, Button } from 'antd'
+import { Form, Select, InputNumber, Modal, Input, Button, Space } from 'antd'
 import { Fragment } from 'react'
 import cx from 'classnames'
 
 import SliderSettingItem from 'components/SliderSettingItem'
 import modelInfoStore from 'stores/modelInfoStore'
-import { PlusOutlined } from '@ant-design/icons'
+import Icon, { PlusOutlined } from '@ant-design/icons'
 import { flushSync } from 'react-dom'
 import _ from 'lodash'
+
+import { ReactComponent as IconRecycle } from 'assets/images/icon-recycle.svg'
+import { ReactComponent as IconRandom } from 'assets/images/icon-random.svg'
 import uiStore from 'stores/uiStore'
 
 interface ModelFormGroupProps {
@@ -310,7 +313,6 @@ const LoRAFormGroup = () => {
 interface SamplingFormGroupProps {
   methodName: string
   stepsName: string
-  seedName: string
 }
 
 const SamplingFormGroup = (props: SamplingFormGroupProps) => {
@@ -360,10 +362,24 @@ const SamplingFormGroup = (props: SamplingFormGroupProps) => {
       >
         <SliderSettingItem min={1} max={100} step={1} />
       </Form.Item>
+    </Fragment>
+  )
+}
+
+interface SeedFormGroupProps {
+  seedName: string
+  onClickRandomSeed: () => void
+  onClickLastSeed: () => void
+}
+
+const SeedFormGroup = (props: SeedFormGroupProps) => {
+  return (
+    <div className={cx('flex justify-start items-end gap-2 mb-6')}>
       <Form.Item
         label='Seed'
         name={props.seedName}
         initialValue={-1}
+        className={cx('flex-1 mb-0')}
         tooltip={
           uiStore.isMobile ? (
             ''
@@ -379,7 +395,21 @@ const SamplingFormGroup = (props: SamplingFormGroupProps) => {
       >
         <InputNumber size='large' style={{ width: '100%' }} controls={false} />
       </Form.Item>
-    </Fragment>
+      <Button
+        icon={<Icon component={IconRandom} />}
+        size='large'
+        className={cx('!w-[40px] flex-shrink-0')}
+        title='Set seed to -1, which will cause a new random number to be used every time'
+        onClick={props.onClickRandomSeed}
+      />
+      <Button
+        icon={<Icon component={IconRecycle} />}
+        size='large'
+        className={cx('!w-[40px] flex-shrink-0')}
+        title='Reuse seed from last generation, mostly useful if it was randomed'
+        onClick={props.onClickLastSeed}
+      />
+    </div>
   )
 }
 
@@ -416,4 +446,10 @@ const CFGFormGroup = (props: CFGFormGroupProps) => {
   )
 }
 
-export { ModelFormGroup, LoRAFormGroup, SamplingFormGroup, CFGFormGroup }
+export {
+  ModelFormGroup,
+  LoRAFormGroup,
+  SamplingFormGroup,
+  SeedFormGroup,
+  CFGFormGroup,
+}

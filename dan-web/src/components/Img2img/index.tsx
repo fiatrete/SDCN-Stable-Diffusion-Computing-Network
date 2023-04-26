@@ -14,6 +14,7 @@ import {
   ModelFormGroup,
   LoRAFormGroup,
   SamplingFormGroup,
+  SeedFormGroup,
 } from 'components/SettingsFormGroup'
 import ImageOutputWidget from 'components/ImageOutputWidget'
 import ImageInputWidget from 'components/ImageInputWidget'
@@ -34,6 +35,7 @@ import {
   getTaskStatus,
   img2imgAsync,
 } from 'api/playground'
+import { flushSync } from 'react-dom'
 
 const { Title } = Typography
 const { TextArea } = Input
@@ -71,6 +73,7 @@ const sizes = [
 const Img2img = () => {
   const [form] = Form.useForm()
   const [outputImgUri, setOutputImgUri] = useState<string | undefined>()
+  const [lastSeed, setLastSeed] = useState(-1)
   const [inputImg, setInputImg] = useState<string>('')
   const [isGenerating, setIsGenerating] = useState<boolean>(false)
   const [task, setTask] = useState<Task | undefined>(undefined)
@@ -106,7 +109,10 @@ const Img2img = () => {
           setGeneratingTask(false)
 
           if (_resp.status === 2) {
-            setOutputImgUri(`data:image/png;base64,${_resp.images[0]}`)
+            flushSync(() => {
+              setOutputImgUri(`data:image/png;base64,${_resp.images[0]}`)
+              setLastSeed(_resp.seeds[0])
+            })
           } else if (_resp.status === 3) {
             message.error(`Failed: [${_resp.status}]`)
           }
@@ -173,6 +179,14 @@ const Img2img = () => {
     },
     [form],
   )
+
+  const handleClickRandomSeedButton = useCallback(() => {
+    form.setFieldValue('seed', -1)
+  }, [form])
+
+  const handleClickLastSeedButton = useCallback(() => {
+    form.setFieldValue('seed', lastSeed)
+  }, [form, lastSeed])
 
   return (
     /* when Form submitted, the parent Form.Provider received the submittion via onFormFinish */
@@ -287,10 +301,12 @@ const Img2img = () => {
                 <SliderSettingItem />
               </Form.Item>
 
-              <SamplingFormGroup
-                methodName='sampler_name'
-                stepsName='steps'
+              <SamplingFormGroup methodName='sampler_name' stepsName='steps' />
+
+              <SeedFormGroup
                 seedName='seed'
+                onClickRandomSeed={handleClickRandomSeedButton}
+                onClickLastSeed={handleClickLastSeedButton}
               />
             </div>
           </div>
