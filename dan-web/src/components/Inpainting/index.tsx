@@ -1,7 +1,21 @@
-import React, { Fragment, useCallback, useRef, useState } from 'react'
+import React, {
+  Fragment,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import cx from 'classnames'
 import check from 'check-types'
-import { Form, Button, Input, Typography, message, InputNumber } from 'antd'
+import {
+  Form,
+  Button,
+  Input,
+  Typography,
+  message,
+  InputNumber,
+  FormInstance,
+} from 'antd'
 import {
   ModelFormGroup,
   LoRAFormGroup,
@@ -12,8 +26,9 @@ import {
   DenoisingStrengthFormGroup,
 } from 'components/SettingsFormGroup'
 import ImageOutputWidget from 'components/ImageOutputWidget'
-import ImageInputWidget from 'components/ImageInputWidget'
-import { FormFinishInfo } from 'rc-field-form/es/FormContext'
+import ImageInputWidget, {
+  ImageInputWidgetRefHandle,
+} from 'components/ImageInputWidget'
 import GeneratingMask from 'components/GeneratingMask'
 import { observer } from 'mobx-react-lite'
 import { flushSync } from 'react-dom'
@@ -31,6 +46,8 @@ import {
   getTaskStatus,
   img2imgAsync,
 } from 'api/playground'
+import playgroundStore from 'stores/playgroundStore'
+import { StoreValue } from 'antd/es/form/interface'
 
 const { Title } = Typography
 const { TextArea } = Input
@@ -65,8 +82,8 @@ const sizes = [
   { value: '1024x768', label: '1024x768' },
 ]
 
-const Inpainting = () => {
-  const [form] = Form.useForm()
+const Inpainting = ({ form }: { form: FormInstance }) => {
+  const imageUploaderRef = useRef<ImageInputWidgetRefHandle>(null)
   const [outputImgUri, setOutputImgUri] = useState<string | undefined>()
   const [lastSeed, setLastSeed] = useState(-1)
   const [inputImg, setInputImg] = useState<string>('')
@@ -86,6 +103,24 @@ const Inpainting = () => {
     },
     [],
   )
+
+  const activeTabKey = playgroundStore.activePlaygroundTabKey
+  useEffect(() => {
+    const inputImageValue = form.getFieldValue('input_image')
+    if (activeTabKey === 'inpainting' && inputImageValue) {
+      const width = form.getFieldValue('input_width')
+      const height = form.getFieldValue('input_height')
+      setInputImgSize({
+        width,
+        height,
+      })
+      inpaintMaskRef.current = ''
+
+      imageUploaderRef.current?.updateImage(inputImageValue)
+
+      form.setFieldValue('input_image', undefined)
+    }
+  }, [form, activeTabKey])
 
   const pollingTaskResult = useCallback(
     (task: Task) => {
@@ -123,8 +158,8 @@ const Inpainting = () => {
     [setGeneratingTask],
   )
 
-  const onFormSubmit = useCallback(
-    async (name: string, { values }: FormFinishInfo) => {
+  const onFormFinish = useCallback(
+    async (values: StoreValue) => {
       try {
         check.assert(inputImg, 'input image must be existed')
 
@@ -214,113 +249,129 @@ const Inpainting = () => {
     form.setFieldValue('seed', lastSeed)
   }, [form, lastSeed])
 
+  const onImageOutputWidgetJump = useCallback(
+    (key: string) => {
+      playgroundStore.getForm(key)?.setFieldsValue(form.getFieldsValue(true))
+      playgroundStore.getForm(key)?.setFieldValue('input_image', outputImgUri)
+
+      playgroundStore.activePlaygroundTabKey = key
+    },
+    [form, outputImgUri],
+  )
+
   return (
-    /* when Form submitted, the parent Form.Provider received the submittion via onFormFinish */
-    <Form.Provider onFormFinish={onFormSubmit}>
-      <Form form={form} name='img2imgForm' layout='vertical'>
-        <GeneratingMask
-          open={isGenerating}
-          defaultTip='Generating...'
-          task={task}
-        />
-        <Fragment>
-          <Form.Item hidden={true} name='input_width'>
-            <InputNumber />
-          </Form.Item>
-          <Form.Item hidden={true} name='input_height'>
-            <InputNumber />
-          </Form.Item>
-        </Fragment>
+    <Form
+      form={form}
+      name='inpaintingForm'
+      layout='vertical'
+      onFinish={onFormFinish}
+    >
+      <GeneratingMask
+        open={isGenerating}
+        defaultTip='Generating...'
+        task={task}
+      />
+      <Fragment>
+        <Form.Item hidden={true} name='input_width'>
+          <InputNumber />
+        </Form.Item>
+        <Form.Item hidden={true} name='input_height'>
+          <InputNumber />
+        </Form.Item>
+      </Fragment>
+      <div
+        className={cx(
+          uiStore.isMobile
+            ? [styles.wrap, 'w-full flex flex-col gap-12']
+            : [styles.wrap, 'w-full flex flex-row gap-24 mt-8'],
+        )}
+      >
         <div
           className={cx(
             uiStore.isMobile
-              ? [styles.wrap, 'w-full flex flex-col gap-12']
-              : [styles.wrap, 'w-full flex flex-row gap-24 mt-8'],
+              ? ['flex flex-col gap-6']
+              : ['flex flex-col flex-1 gap-6'],
           )}
         >
+          <div className={cx('flex flex-col items-start gap-6')}>
+            <Title level={5}>Input keyword and generate</Title>
+            <div className={cx('flex flex-col w-full items-start gap-6')}>
+              <Form.Item
+                name='prompt'
+                className={cx('self-stretch')}
+                style={{ marginBottom: '0px' }}
+              >
+                <TextArea
+                  size='large'
+                  rows={6}
+                  placeholder='Enter prompts here'
+                  className={cx('text-base leading-6 px-4 py-2')}
+                />
+              </Form.Item>
+              <Button type='primary' htmlType='submit' size='large'>
+                Generate
+              </Button>
+            </div>
+          </div>
           <div
             className={cx(
               uiStore.isMobile
-                ? ['flex flex-col gap-6']
-                : ['flex flex-col flex-1 gap-6'],
+                ? ['flex flex-col gap-2.5']
+                : ['min-h-[388px] flex gap-2.5'],
             )}
           >
-            <div className={cx('flex flex-col items-start gap-6')}>
-              <Title level={5}>Input keyword and generate</Title>
-              <div className={cx('flex flex-col w-full items-start gap-6')}>
-                <Form.Item
-                  name='prompt'
-                  className={cx('self-stretch')}
-                  style={{ marginBottom: '0px' }}
-                >
-                  <TextArea
-                    size='large'
-                    rows={6}
-                    placeholder='Enter prompts here'
-                    className={cx('text-base leading-6 px-4 py-2')}
-                  />
-                </Form.Item>
-                <Button type='primary' htmlType='submit' size='large'>
-                  Generate
-                </Button>
-              </div>
-            </div>
-            <div
-              className={cx(
-                uiStore.isMobile
-                  ? ['flex flex-col gap-2.5']
-                  : ['min-h-[388px] flex gap-2.5'],
-              )}
-            >
-              {showPaint === false && (
-                <ImageInputWidget
-                  onChanged={setInputImg}
-                  onSize={onInputSize}
-                />
-              )}
-              {showPaint && (
-                <div
-                  className={cx(
-                    'relative w-full h-full flex justify-center items-center',
-                  )}
-                >
-                  <Paint
-                    width={inputImgSize.width}
-                    height={inputImgSize.height}
-                    image={inputImg}
-                    onUpdate={handlePaintUpdate}
-                    onClose={handlePaintClose}
-                  />
-                </div>
-              )}
-              <ImageOutputWidget src={outputImgUri} />
-            </div>
-          </div>
-          <div className={cx('flex flex-col w-80 gap-6')}>
-            <Title level={5}>Settings</Title>
-            <div className={cx('gap-0')}>
-              <ModelFormGroup label='Model' name='model' />
-
-              <SizeFormGroup sizes={sizes} />
-
-              <LoRAFormGroup />
-
-              <NegativePromptsFromGroup />
-
-              <DenoisingStrengthFormGroup />
-
-              <SamplingFormGroup methodName='sampler_name' stepsName='steps' />
-
-              <SeedFormGroup
-                seedName='seed'
-                onClickRandomSeed={handleClickRandomSeedButton}
-                onClickLastSeed={handleClickLastSeedButton}
+            {showPaint === false && (
+              <ImageInputWidget
+                onChanged={setInputImg}
+                onSize={onInputSize}
+                ref={imageUploaderRef}
               />
-            </div>
+            )}
+            {showPaint && (
+              <div
+                className={cx(
+                  'relative w-full h-full flex justify-center items-center',
+                )}
+              >
+                <Paint
+                  width={inputImgSize.width}
+                  height={inputImgSize.height}
+                  image={inputImg}
+                  onUpdate={handlePaintUpdate}
+                  onClose={handlePaintClose}
+                />
+              </div>
+            )}
+            <ImageOutputWidget
+              src={outputImgUri}
+              onJump={onImageOutputWidgetJump}
+            />
           </div>
         </div>
-      </Form>
-    </Form.Provider>
+        <div className={cx('flex flex-col w-80 gap-6')}>
+          <Title level={5}>Settings</Title>
+          <div className={cx('gap-0')}>
+            <ModelFormGroup label='Model' name='model' />
+
+            <SizeFormGroup sizes={sizes} />
+
+            <LoRAFormGroup />
+
+            <NegativePromptsFromGroup />
+
+            <DenoisingStrengthFormGroup />
+
+            <SamplingFormGroup methodName='sampler_name' stepsName='steps' />
+
+            <SeedFormGroup
+              seedName='seed'
+              onClickRandomSeed={handleClickRandomSeedButton}
+              onClickLastSeed={handleClickLastSeedButton}
+            />
+          </div>
+        </div>
+      </div>
+    </Form>
   )
 }
 

@@ -1,6 +1,14 @@
 import React, { useCallback, useState } from 'react'
 import cx from 'classnames'
-import { Form, Button, Input, Typography, message, Tooltip } from 'antd'
+import {
+  Form,
+  Button,
+  Input,
+  Typography,
+  message,
+  Tooltip,
+  FormInstance,
+} from 'antd'
 import {
   ModelFormGroup,
   SamplingFormGroup,
@@ -10,8 +18,7 @@ import {
   SizeFormGroup,
   NegativePromptsFromGroup,
 } from 'components/SettingsFormGroup'
-import ImageWidget from 'components/ImageOutputWidget'
-import { FormFinishInfo } from 'rc-field-form/es/FormContext'
+import ImageOutputWidget from 'components/ImageOutputWidget'
 
 import styles from './index.module.css'
 import { observer } from 'mobx-react-lite'
@@ -30,6 +37,8 @@ import { ArrowDownOutlined, ExclamationCircleOutlined } from '@ant-design/icons'
 import _ from 'lodash'
 import modelInfoStore from 'stores/modelInfoStore'
 import { flushSync } from 'react-dom'
+import playgroundStore from 'stores/playgroundStore'
+import { StoreValue } from 'antd/es/form/interface'
 
 const { Title } = Typography
 const { TextArea } = Input
@@ -42,9 +51,7 @@ const sizes = [
   { value: '1024x768', label: '1024x768' },
 ]
 
-const Txt2img = () => {
-  const [form] = Form.useForm()
-
+const Txt2img = ({ form }: { form: FormInstance }) => {
   const [imgUri, setImgUri] = useState<string | undefined>()
   const [lastSeed, setLastSeed] = useState(-1)
   const [isGenerating, setIsGenerating] = useState<boolean>(false)
@@ -169,8 +176,8 @@ const Txt2img = () => {
     [setGeneratingTask],
   )
 
-  const onFormSubmit = useCallback(
-    async (name: string, { values }: FormFinishInfo) => {
+  const onFormFinish = useCallback(
+    async (values: StoreValue) => {
       try {
         setGeneratingTask(true)
 
@@ -203,112 +210,127 @@ const Txt2img = () => {
     [pollingTaskResult, setGeneratingTask],
   )
 
+  const onImageOutputWidgetJump = useCallback(
+    (key: string) => {
+      playgroundStore.getForm(key)?.setFieldsValue(form.getFieldsValue(true))
+      playgroundStore.getForm(key)?.setFieldValue('input_image', imgUri)
+
+      playgroundStore.activePlaygroundTabKey = key
+    },
+    [form, imgUri],
+  )
+
   return (
-    /* when Form submitted, the parent Form.Provider received the submittion via onFormFinish */
-    <Form.Provider onFormFinish={onFormSubmit}>
-      <Form name='txt2imgForm' form={form} layout='vertical'>
-        <GeneratingMask
-          open={isGenerating}
-          defaultTip='Generating...'
-          task={task}
-        />
+    <Form
+      name='txt2imgForm'
+      form={form}
+      layout='vertical'
+      onFinish={onFormFinish}
+    >
+      <GeneratingMask
+        open={isGenerating}
+        defaultTip='Generating...'
+        task={task}
+      />
+      <div
+        className={cx(
+          uiStore.isMobile
+            ? [styles.wrap, 'w-full flex flex-col gap-12']
+            : [styles.wrap, 'w-full flex flex-row gap-24 mt-8'],
+        )}
+      >
         <div
           className={cx(
             uiStore.isMobile
-              ? [styles.wrap, 'w-full flex flex-col gap-12']
-              : [styles.wrap, 'w-full flex flex-row gap-24 mt-8'],
+              ? ['w-full flex flex-col']
+              : ['w-full flex flex-col flex-1 gap-6'],
           )}
         >
+          <div className={cx('flex flex-col items-start gap-6')}>
+            <Title level={5}>Input keyword and generate</Title>
+            <div className={cx('flex flex-col w-full items-start gap-6')}>
+              <Form.Item
+                name='prompt'
+                className={cx('self-stretch mb-0')}
+                rules={[{ required: true, message: 'Please input prompts' }]}
+              >
+                <TextArea
+                  size='large'
+                  rows={6}
+                  placeholder='Enter prompts here'
+                  className={cx('text-base leading-6 px-4 py-2')}
+                />
+              </Form.Item>
+            </div>
+            <div className={cx('w-full flex justify-between items-start')}>
+              <Button type='primary' htmlType='submit' size='large'>
+                Generate
+              </Button>
+              <div className={cx('flex gap-2 justify-center items-center')}>
+                <Button
+                  icon={
+                    <ArrowDownOutlined
+                      style={{ transform: 'rotate(-45deg)' }}
+                    />
+                  }
+                  title='Read generation parameters from prompt'
+                  onClick={handleClickReadParamsButton}
+                />
+                <Tooltip
+                  placement='top'
+                  title='Currently, only generation data copied from civitai.com is supported'
+                  arrow={{
+                    pointAtCenter: true,
+                  }}
+                >
+                  <ExclamationCircleOutlined style={{ color: 'gray' }} />
+                </Tooltip>
+              </div>
+            </div>
+          </div>
           <div
             className={cx(
               uiStore.isMobile
-                ? ['w-full flex flex-col']
-                : ['w-full flex flex-col flex-1 gap-6'],
+                ? ['w-full mt-4']
+                : ['min-h-[388px] w-full flex justify-center'],
             )}
           >
-            <div className={cx('flex flex-col items-start gap-6')}>
-              <Title level={5}>Input keyword and generate</Title>
-              <div className={cx('flex flex-col w-full items-start gap-6')}>
-                <Form.Item
-                  name='prompt'
-                  className={cx('self-stretch mb-0')}
-                  rules={[{ required: true, message: 'Please input prompts' }]}
-                >
-                  <TextArea
-                    size='large'
-                    rows={6}
-                    placeholder='Enter prompts here'
-                    className={cx('text-base leading-6 px-4 py-2')}
-                  />
-                </Form.Item>
-              </div>
-              <div className={cx('w-full flex justify-between items-start')}>
-                <Button type='primary' htmlType='submit' size='large'>
-                  Generate
-                </Button>
-                <div className={cx('flex gap-2 justify-center items-center')}>
-                  <Button
-                    icon={
-                      <ArrowDownOutlined
-                        style={{ transform: 'rotate(-45deg)' }}
-                      />
-                    }
-                    title='Read generation parameters from prompt'
-                    onClick={handleClickReadParamsButton}
-                  />
-                  <Tooltip
-                    placement='top'
-                    title='Currently, only generation data copied from civitai.com is supported'
-                    arrow={{
-                      pointAtCenter: true,
-                    }}
-                  >
-                    <ExclamationCircleOutlined style={{ color: 'gray' }} />
-                  </Tooltip>
-                </div>
-              </div>
-            </div>
             <div
               className={cx(
-                uiStore.isMobile
-                  ? ['w-full mt-4']
-                  : ['min-h-[388px] w-full flex justify-center'],
+                uiStore.isMobile ? ['w-full h-full'] : ['w-[500px] flex'],
               )}
             >
-              <div
-                className={cx(
-                  uiStore.isMobile ? ['w-full h-full'] : ['w-[500px] flex'],
-                )}
-              >
-                <ImageWidget src={imgUri} />
-              </div>
-            </div>
-          </div>
-          <div className={cx('flex flex-col w-80 gap-6')}>
-            <Title level={5}>Settings</Title>
-            <div className={cx('gap-0')}>
-              <ModelFormGroup label='Model' name='model' />
-
-              <SizeFormGroup sizes={sizes} />
-
-              <LoRAFormGroup />
-
-              <NegativePromptsFromGroup />
-
-              <SamplingFormGroup methodName='sampler_name' stepsName='steps' />
-
-              <SeedFormGroup
-                seedName='seed'
-                onClickRandomSeed={handleClickRandomSeedButton}
-                onClickLastSeed={handleClickLastSeedButton}
+              <ImageOutputWidget
+                src={imgUri}
+                onJump={onImageOutputWidgetJump}
               />
-
-              <CFGFormGroup scaleName='cfg_scale' />
             </div>
           </div>
         </div>
-      </Form>
-    </Form.Provider>
+        <div className={cx('flex flex-col w-80 gap-6')}>
+          <Title level={5}>Settings</Title>
+          <div className={cx('gap-0')}>
+            <ModelFormGroup label='Model' name='model' />
+
+            <SizeFormGroup sizes={sizes} />
+
+            <LoRAFormGroup />
+
+            <NegativePromptsFromGroup />
+
+            <SamplingFormGroup methodName='sampler_name' stepsName='steps' />
+
+            <SeedFormGroup
+              seedName='seed'
+              onClickRandomSeed={handleClickRandomSeedButton}
+              onClickLastSeed={handleClickLastSeedButton}
+            />
+
+            <CFGFormGroup scaleName='cfg_scale' />
+          </div>
+        </div>
+      </div>
+    </Form>
   )
 }
 

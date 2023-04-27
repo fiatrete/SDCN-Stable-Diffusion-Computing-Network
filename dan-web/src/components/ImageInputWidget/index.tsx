@@ -44,6 +44,7 @@ interface propTypes {
 }
 
 export interface ImageInputWidgetRefHandle {
+  updateImage: (url: string) => void
   reset: () => void
 }
 
@@ -54,11 +55,15 @@ const ImageInputWidget = forwardRef<ImageInputWidgetRefHandle, propTypes>(
     useImperativeHandle(
       forwardedRef,
       () => ({
+        updateImage(url) {
+          setImageUrl(url)
+          onChanged(url)
+        },
         reset: () => {
           setImageUrl('')
         },
       }),
-      [],
+      [onChanged],
     )
 
     const handleChange: UploadProps['onChange'] = useCallback(
