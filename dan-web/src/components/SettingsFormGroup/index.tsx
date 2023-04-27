@@ -8,6 +8,7 @@ import modelInfoStore from 'stores/modelInfoStore'
 import { PlusOutlined } from '@ant-design/icons'
 import { flushSync } from 'react-dom'
 import _ from 'lodash'
+import uiStore from 'stores/uiStore'
 
 interface ModelFormGroupProps {
   label?: string
@@ -26,6 +27,7 @@ const ModelFormGroup = (props: ModelFormGroupProps) => {
       label={props.label ? props.label : 'Model'}
       name={props.name ? props.name : 'model'}
       initialValue={modelsData[0].value}
+      tooltip={uiStore.isMobile ? '' : 'The model used to generate the image.'}
     >
       <Select size='large' options={modelsData} />
     </Form.Item>
@@ -249,7 +251,14 @@ const LoRAFormGroup = () => {
   const [showAddLoRAModal, setShowAddLoRAModal] = useState(false)
 
   return (
-    <Form.Item label='LoRA'>
+    <Form.Item
+      label='LoRA'
+      tooltip={
+        uiStore.isMobile
+          ? ''
+          : 'LoRA models are small modifiers of checkpoint models.Mixing multiple LoRA models can have a stacking effect.'
+      }
+    >
       <div className={cx('flex flex-col gap-4')}>
         {loras.map((lora, i) => {
           const index = i + 1
@@ -317,6 +326,9 @@ const SamplingFormGroup = (props: SamplingFormGroupProps) => {
   return (
     <Fragment>
       <Form.Item
+        tooltip={
+          uiStore.isMobile ? '' : 'The name of the sampling algorithm used.'
+        }
         label='Sampling Method'
         name={props.methodName}
         initialValue={samplingMethodsData[0].value}
@@ -324,13 +336,47 @@ const SamplingFormGroup = (props: SamplingFormGroupProps) => {
         <Select size='large' options={samplingMethodsData} />
       </Form.Item>
       <Form.Item
+        tooltip={
+          uiStore.isMobile ? (
+            ''
+          ) : (
+            <div>
+              Means sampling steps.
+              <br />
+              Quality improves as the sampling step increases.
+              <br />
+              Although the image will still change subtly when stepping through
+              to higher values, it will become different but not necessarily
+              higher quality.
+              <br />
+              Recommendation: 20 steps. <br />
+              Adjust to higher if you suspect quality is low.
+            </div>
+          )
+        }
         label='Sampling Steps'
         name={props.stepsName}
         initialValue={20}
       >
         <SliderSettingItem min={1} max={100} step={1} />
       </Form.Item>
-      <Form.Item label='Seed' name={props.seedName} initialValue={-1}>
+      <Form.Item
+        label='Seed'
+        name={props.seedName}
+        initialValue={-1}
+        tooltip={
+          uiStore.isMobile ? (
+            ''
+          ) : (
+            <div>
+              The seed determines the initial random noise, which is what
+              determines the final image.
+              <br />
+              -1 for a random seed.
+            </div>
+          )
+        }
+      >
         <InputNumber size='large' style={{ width: '100%' }} controls={false} />
       </Form.Item>
     </Fragment>
@@ -344,7 +390,26 @@ interface CFGFormGroupProps {
 const CFGFormGroup = (props: CFGFormGroupProps) => {
   return (
     <Fragment>
-      <Form.Item label='CFG Scale' name={props.scaleName} initialValue={7}>
+      <Form.Item
+        label='CFG Scale'
+        name={props.scaleName}
+        initialValue={7}
+        tooltip={
+          uiStore.isMobile ? (
+            ''
+          ) : (
+            <div>
+              Classifier Free Guidance scale is a parameter to control how much
+              the model should respect your prompt.
+              <br />
+              Smaller values result in higher quality images, and larger values
+              yield images closer to the provided prompt.
+              <br />
+              Recommendation: Starts with 7.
+            </div>
+          )
+        }
+      >
         <SliderSettingItem min={1} max={30} step={0.5} />
       </Form.Item>
     </Fragment>

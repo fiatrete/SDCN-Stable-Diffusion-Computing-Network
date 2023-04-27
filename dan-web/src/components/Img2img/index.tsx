@@ -242,13 +242,30 @@ const Img2img = () => {
             <div className={cx('gap-0')}>
               <ModelFormGroup label='Model' name='model' />
 
-              <Form.Item label='Size' name='size' initialValue={sizes[0].value}>
+              <Form.Item
+                label='Size'
+                name='size'
+                initialValue={sizes[0].value}
+                tooltip={
+                  uiStore.isMobile
+                    ? ''
+                    : 'The desired [width x height] of the generated image(s) in pixels.'
+                }
+              >
                 <Select size='large' options={sizes} />
               </Form.Item>
 
               <LoRAFormGroup />
 
-              <Form.Item label='Negative Prompts' name='negative_prompt'>
+              <Form.Item
+                label='Negative Prompts'
+                name='negative_prompt'
+                tooltip={
+                  uiStore.isMobile
+                    ? ''
+                    : 'A negative prompt that describes what you don&#39;t want in the image.'
+                }
+              >
                 <TextArea
                   size='large'
                   rows={4}
@@ -260,6 +277,11 @@ const Img2img = () => {
               <Form.Item
                 label='Denoising strength'
                 name='denoising_strength'
+                tooltip={
+                  uiStore.isMobile
+                    ? ''
+                    : 'Controls the level of denoising; smaller values yield results that are closer to the original image.'
+                }
                 initialValue={0.5}
               >
                 <SliderSettingItem />
