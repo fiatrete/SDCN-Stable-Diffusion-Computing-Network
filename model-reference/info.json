@@ -39,7 +39,7 @@
         "name": "clarity",
         "hash": "627a6f5c8bf7669d4a224ac041d527debc65d2d435b16e54ead8ee2c901d1634",
         "download": {
-            "fileurl": "https://huggingface.co/fiatrete/dan-used-models/resolve/main/checkpoint/clarity.safetensors",
+            "fileurl": "https://huggingface.co/fiatrete/dan-used-models/resolve/main/checkpoint/clarity.ckpt",
             "path": "/models/Stable-diffusion"
         },
         "type": "model"
