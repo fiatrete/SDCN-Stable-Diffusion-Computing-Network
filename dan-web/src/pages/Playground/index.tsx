@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import { Tabs } from 'antd'
+import React, { useCallback, useEffect, useState } from 'react'
+import { Form, Tabs } from 'antd'
 import cx from 'classnames'
 import { observer } from 'mobx-react-lite'
 
@@ -16,8 +16,17 @@ import { LoadingOutlined } from '@ant-design/icons'
 import { flushSync } from 'react-dom'
 import modelInfoStore from 'stores/modelInfoStore'
 import _ from 'lodash'
+import playgroundStore from 'stores/playgroundStore'
 
 const Playground = () => {
+  const [txt2imgForm] = Form.useForm()
+  const [img2imgForm] = Form.useForm()
+  const [inpaintingForm] = Form.useForm()
+
+  playgroundStore.putForm('txt2img', txt2imgForm)
+  playgroundStore.putForm('img2img', img2imgForm)
+  playgroundStore.putForm('inpainting', inpaintingForm)
+
   const [isModelInfoInitialized, setIsModelInfoInitialized] = useState(false)
 
   useEffect(() => {
@@ -43,6 +52,10 @@ const Playground = () => {
       })
   }, [])
 
+  const onTabChange = useCallback((activeKey: string) => {
+    playgroundStore.activePlaygroundTabKey = activeKey
+  }, [])
+
   return (
     <div
       className={cx(uiStore.isMobile ? [styles.wrapForMobile] : [styles.wrap])}
@@ -55,25 +68,26 @@ const Playground = () => {
           className={cx(
             uiStore.isMobile ? [styles.tabsForMobile] : [styles.tabs],
           )}
-          defaultActiveKey='1'
+          onChange={onTabChange}
+          activeKey={playgroundStore.activePlaygroundTabKey ?? 'txt2img'}
           items={[
             {
-              key: '1',
+              key: 'txt2img',
               label: `txt2img`,
-              children: <Txt2img />,
+              children: <Txt2img form={txt2imgForm} />,
             },
             {
-              key: '2',
+              key: 'img2img',
               label: `img2img`,
-              children: <Img2img />,
+              children: <Img2img form={img2imgForm} />,
             },
             {
-              key: '3',
+              key: 'inpainting',
               label: `inpainting`,
-              children: <Inpainting />,
+              children: <Inpainting form={inpaintingForm} />,
             },
             {
-              key: '4',
+              key: 'interrogate',
               label: `interrogate`,
               children: <Interrogate />,
             },

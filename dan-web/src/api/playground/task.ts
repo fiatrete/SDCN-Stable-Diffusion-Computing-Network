@@ -5,6 +5,7 @@ import { Task } from 'typings/Task'
 
 export interface TaskResponseData extends Task {
   images: string[]
+  seeds: number[]
 }
 
 /**

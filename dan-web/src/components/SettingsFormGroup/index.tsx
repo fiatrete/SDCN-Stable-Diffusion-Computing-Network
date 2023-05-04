@@ -1,15 +1,27 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react'
 import { Form, Select, InputNumber, Modal, Input, Button } from 'antd'
 import { Fragment } from 'react'
 import cx from 'classnames'
 
 import SliderSettingItem from 'components/SliderSettingItem'
 import modelInfoStore from 'stores/modelInfoStore'
-import { PlusOutlined } from '@ant-design/icons'
+import Icon, { PlusOutlined } from '@ant-design/icons'
 import { flushSync } from 'react-dom'
 import _ from 'lodash'
-import uiStore from 'stores/uiStore'
 
+import { ReactComponent as IconRecycle } from 'assets/images/icon-recycle.svg'
+import { ReactComponent as IconRandom } from 'assets/images/icon-random.svg'
+import uiStore from 'stores/uiStore'
+import TextArea from 'antd/es/input/TextArea'
+
+// Model
 interface ModelFormGroupProps {
   label?: string
   name?: string
@@ -34,6 +46,29 @@ const ModelFormGroup = (props: ModelFormGroupProps) => {
   )
 }
 
+// Size
+interface SizeFormGroupProps {
+  sizes: { value: string; label: string }[]
+}
+
+const SizeFormGroup = (props: SizeFormGroupProps) => {
+  return (
+    <Form.Item
+      label='Size'
+      name='size'
+      initialValue={props.sizes[0].value}
+      tooltip={
+        uiStore.isMobile
+          ? ''
+          : 'The desired [width x height] of the generated image(s) in pixels.'
+      }
+    >
+      <Select size='large' options={props.sizes} />
+    </Form.Item>
+  )
+}
+
+// LoRA
 interface SelectLoraModal {
   loraInfo?: {
     hash?: string
@@ -246,9 +281,26 @@ const LoraFormItem = (props: LoraFormItemProps) => {
   )
 }
 
-const LoRAFormGroup = () => {
+export interface LoRAFormGroupRefHandle {
+  updateLoRAs: (_loras: { hash: string; weight: number }[]) => void
+}
+
+const LoRAFormGroup = forwardRef<LoRAFormGroupRefHandle>((__, forwardedRef) => {
   const [loras, setLoras] = useState<{ hash: string; weight: number }[]>([])
   const [showAddLoRAModal, setShowAddLoRAModal] = useState(false)
+
+  useImperativeHandle(
+    forwardedRef,
+    () => ({
+      updateLoRAs(_loras) {
+        console.log('loras', _loras)
+        setLoras(() => {
+          return _loras
+        })
+      },
+    }),
+    [setLoras],
+  )
 
   return (
     <Form.Item
@@ -264,7 +316,7 @@ const LoRAFormGroup = () => {
           const index = i + 1
           return (
             <LoraFormItem
-              key={i}
+              key={`${lora.hash}-${lora.weight}`}
               label={`LoRA${index}`}
               loraName={`lora${index}`}
               weightName={`weight${index}`}
@@ -305,12 +357,35 @@ const LoRAFormGroup = () => {
       )}
     </Form.Item>
   )
+})
+LoRAFormGroup.displayName = 'LoRAFormGroup'
+
+// Negative Prompts
+const NegativePromptsFromGroup = () => {
+  return (
+    <Form.Item
+      label='Negative Prompts'
+      name='negative_prompt'
+      tooltip={
+        uiStore.isMobile
+          ? ''
+          : 'A negative prompt that describes what you don&#39;t want in the image.'
+      }
+    >
+      <TextArea
+        size='large'
+        rows={4}
+        placeholder='Negative Prompts'
+        className={cx('self-stretch text-base leading-6 px-4 py-2')}
+      />
+    </Form.Item>
+  )
 }
 
+// Sampling
 interface SamplingFormGroupProps {
   methodName: string
   stepsName: string
-  seedName: string
 }
 
 const SamplingFormGroup = (props: SamplingFormGroupProps) => {
@@ -360,10 +435,25 @@ const SamplingFormGroup = (props: SamplingFormGroupProps) => {
       >
         <SliderSettingItem min={1} max={100} step={1} />
       </Form.Item>
+    </Fragment>
+  )
+}
+
+// Seed
+interface SeedFormGroupProps {
+  seedName: string
+  onClickRandomSeed: () => void
+  onClickLastSeed: () => void
+}
+
+const SeedFormGroup = (props: SeedFormGroupProps) => {
+  return (
+    <div className={cx('flex justify-start items-end gap-2 mb-6')}>
       <Form.Item
         label='Seed'
         name={props.seedName}
         initialValue={-1}
+        className={cx('flex-1 mb-0')}
         tooltip={
           uiStore.isMobile ? (
             ''
@@ -379,10 +469,25 @@ const SamplingFormGroup = (props: SamplingFormGroupProps) => {
       >
         <InputNumber size='large' style={{ width: '100%' }} controls={false} />
       </Form.Item>
-    </Fragment>
+      <Button
+        icon={<Icon component={IconRandom} />}
+        size='large'
+        className={cx('!w-[40px] flex-shrink-0')}
+        title='Set seed to -1, which will cause a new random number to be used every time'
+        onClick={props.onClickRandomSeed}
+      />
+      <Button
+        icon={<Icon component={IconRecycle} />}
+        size='large'
+        className={cx('!w-[40px] flex-shrink-0')}
+        title='Reuse seed from last generation, mostly useful if it was randomed'
+        onClick={props.onClickLastSeed}
+      />
+    </div>
   )
 }
 
+// CFG Scale
 interface CFGFormGroupProps {
   scaleName: string
 }
@@ -416,4 +521,31 @@ const CFGFormGroup = (props: CFGFormGroupProps) => {
   )
 }
 
-export { ModelFormGroup, LoRAFormGroup, SamplingFormGroup, CFGFormGroup }
+// Denoising Strength
+const DenoisingStrengthFormGroup = () => {
+  return (
+    <Form.Item
+      label='Denoising strength'
+      name='denoising_strength'
+      tooltip={
+        uiStore.isMobile
+          ? ''
+          : 'Controls the level of denoising; smaller values yield results that are closer to the original image.'
+      }
+      initialValue={0.5}
+    >
+      <SliderSettingItem />
+    </Form.Item>
+  )
+}
+
+export {
+  ModelFormGroup,
+  SizeFormGroup,
+  LoRAFormGroup,
+  NegativePromptsFromGroup,
+  SamplingFormGroup,
+  SeedFormGroup,
+  CFGFormGroup,
+  DenoisingStrengthFormGroup,
+}

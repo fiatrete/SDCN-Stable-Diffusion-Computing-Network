@@ -44,6 +44,7 @@ interface propTypes {
 }
 
 export interface ImageInputWidgetRefHandle {
+  updateImage: (url: string) => void
   reset: () => void
 }
 
@@ -54,11 +55,15 @@ const ImageInputWidget = forwardRef<ImageInputWidgetRefHandle, propTypes>(
     useImperativeHandle(
       forwardedRef,
       () => ({
+        updateImage(url) {
+          setImageUrl(url)
+          onChanged(url)
+        },
         reset: () => {
           setImageUrl('')
         },
       }),
-      [],
+      [onChanged],
     )
 
     const handleChange: UploadProps['onChange'] = useCallback(
@@ -83,7 +88,7 @@ const ImageInputWidget = forwardRef<ImageInputWidgetRefHandle, propTypes>(
 
     return (
       <div
-        className={cx(styles.wrap, 'w-full flex justify-center items-center')}
+        className={cx(styles.wrap, 'w-full flex justify-center items-start')}
         style={{ height: '100%' }}
       >
         <Upload
@@ -101,7 +106,7 @@ const ImageInputWidget = forwardRef<ImageInputWidgetRefHandle, propTypes>(
               src={imageUrl}
               onLoad={onImgLoad}
               alt='source'
-              style={{ width: '100%' }}
+              className={cx('w-full min-h-[300px] rounded-lg')}
             />
           ) : (
             <div

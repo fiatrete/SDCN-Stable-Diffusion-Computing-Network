@@ -1,25 +1,36 @@
-import React, { Fragment, useCallback, useState } from 'react'
+import React, {
+  Fragment,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import cx from 'classnames'
 import check from 'check-types'
 import {
   Form,
-  Select,
   Button,
   Input,
   Typography,
   message,
   InputNumber,
+  FormInstance,
 } from 'antd'
 import {
   ModelFormGroup,
   LoRAFormGroup,
   SamplingFormGroup,
+  SeedFormGroup,
+  SizeFormGroup,
+  NegativePromptsFromGroup,
+  DenoisingStrengthFormGroup,
+  LoRAFormGroupRefHandle,
 } from 'components/SettingsFormGroup'
 import ImageOutputWidget from 'components/ImageOutputWidget'
-import ImageInputWidget from 'components/ImageInputWidget'
-import { FormFinishInfo } from 'rc-field-form/es/FormContext'
+import ImageInputWidget, {
+  ImageInputWidgetRefHandle,
+} from 'components/ImageInputWidget'
 import GeneratingMask from 'components/GeneratingMask'
-import SliderSettingItem from 'components/SliderSettingItem'
 import { observer } from 'mobx-react-lite'
 
 import styles from './index.module.css'
@@ -34,6 +45,9 @@ import {
   getTaskStatus,
   img2imgAsync,
 } from 'api/playground'
+import { flushSync } from 'react-dom'
+import playgroundStore from 'stores/playgroundStore'
+import { StoreValue } from 'antd/es/form/interface'
 
 const { Title } = Typography
 const { TextArea } = Input
@@ -68,9 +82,11 @@ const sizes = [
   { value: '1024x768', label: '1024x768' },
 ]
 
-const Img2img = () => {
-  const [form] = Form.useForm()
+const Img2img = ({ form }: { form: FormInstance }) => {
+  const imageUploaderRef = useRef<ImageInputWidgetRefHandle>(null)
+  const loraFormGroupRef = useRef<LoRAFormGroupRefHandle>(null)
   const [outputImgUri, setOutputImgUri] = useState<string | undefined>()
+  const [lastSeed, setLastSeed] = useState(-1)
   const [inputImg, setInputImg] = useState<string>('')
   const [isGenerating, setIsGenerating] = useState<boolean>(false)
   const [task, setTask] = useState<Task | undefined>(undefined)
@@ -82,6 +98,31 @@ const Img2img = () => {
     },
     [],
   )
+
+  const activeTabKey = playgroundStore.activePlaygroundTabKey
+  useEffect(() => {
+    console.log('values', form.getFieldsValue(true))
+    const inputImageValue = form.getFieldValue('input_image')
+    if (activeTabKey === 'img2img' && inputImageValue) {
+      imageUploaderRef.current?.updateImage(inputImageValue)
+      form.setFieldValue('input_image', undefined)
+
+      const loras = []
+      if (form.getFieldValue('lora1')) {
+        loras.push({
+          hash: form.getFieldValue('lora1'),
+          weight: form.getFieldValue('weight1'),
+        })
+      }
+      if (form.getFieldValue('lora2')) {
+        loras.push({
+          hash: form.getFieldValue('lora2'),
+          weight: form.getFieldValue('weight2'),
+        })
+      }
+      loraFormGroupRef.current?.updateLoRAs(loras)
+    }
+  }, [form, activeTabKey])
 
   const pollingTaskResult = useCallback(
     (task: Task) => {
@@ -106,7 +147,10 @@ const Img2img = () => {
           setGeneratingTask(false)
 
           if (_resp.status === 2) {
-            setOutputImgUri(`data:image/png;base64,${_resp.images[0]}`)
+            flushSync(() => {
+              setOutputImgUri(`data:image/png;base64,${_resp.images[0]}`)
+              setLastSeed(_resp.seeds[0])
+            })
           } else if (_resp.status === 3) {
             message.error(`Failed: [${_resp.status}]`)
           }
@@ -116,8 +160,8 @@ const Img2img = () => {
     [setGeneratingTask],
   )
 
-  const onFormSubmit = useCallback(
-    async (name: string, { values }: FormFinishInfo) => {
+  const onFormFinish = useCallback(
+    async (values: StoreValue) => {
       try {
         check.assert(inputImg, 'input image must be existed')
 
@@ -174,129 +218,122 @@ const Img2img = () => {
     [form],
   )
 
+  const handleClickRandomSeedButton = useCallback(() => {
+    form.setFieldValue('seed', -1)
+  }, [form])
+
+  const handleClickLastSeedButton = useCallback(() => {
+    form.setFieldValue('seed', lastSeed)
+  }, [form, lastSeed])
+
+  const onImageOutputWidgetJump = useCallback(
+    (key: string) => {
+      playgroundStore.getForm(key)?.setFieldsValue(form.getFieldsValue(true))
+      playgroundStore.getForm(key)?.setFieldValue('input_image', outputImgUri)
+
+      playgroundStore.activePlaygroundTabKey = key
+    },
+    [form, outputImgUri],
+  )
+
   return (
-    /* when Form submitted, the parent Form.Provider received the submittion via onFormFinish */
-    <Form.Provider onFormFinish={onFormSubmit}>
-      <Form form={form} name='img2imgForm' layout='vertical'>
-        <GeneratingMask
-          open={isGenerating}
-          defaultTip='Generating...'
-          task={task}
-        />
-        <Fragment>
-          <Form.Item hidden={true} name='input_width'>
-            <InputNumber />
-          </Form.Item>
-          <Form.Item hidden={true} name='input_height'>
-            <InputNumber />
-          </Form.Item>
-        </Fragment>
+    <Form
+      form={form}
+      name='img2imgForm'
+      layout='vertical'
+      onFinish={onFormFinish}
+      preserve={false}
+    >
+      <GeneratingMask
+        open={isGenerating}
+        defaultTip='Generating...'
+        task={task}
+      />
+      <Fragment>
+        <Form.Item hidden={true} name='input_width'>
+          <InputNumber />
+        </Form.Item>
+        <Form.Item hidden={true} name='input_height'>
+          <InputNumber />
+        </Form.Item>
+      </Fragment>
+      <div
+        className={cx(
+          uiStore.isMobile
+            ? [styles.wrap, 'w-full flex flex-col gap-12']
+            : [styles.wrap, 'w-full flex flex-row gap-24 mt-8'],
+        )}
+      >
         <div
           className={cx(
             uiStore.isMobile
-              ? [styles.wrap, 'w-full flex flex-col gap-12']
-              : [styles.wrap, 'w-full flex flex-row gap-24 mt-8'],
+              ? ['flex flex-col gap-6']
+              : ['flex flex-col flex-1 gap-6'],
           )}
         >
-          <div
-            className={cx(
-              uiStore.isMobile
-                ? ['flex flex-col gap-6']
-                : ['flex flex-col flex-1 gap-6'],
-            )}
-          >
-            <div className={cx('flex flex-col items-start gap-6')}>
-              <Title level={5}>Input keyword and generate</Title>
-              <div className={cx('flex flex-col w-full items-start gap-6')}>
-                <Form.Item
-                  name='prompt'
-                  className={cx('self-stretch')}
-                  style={{ marginBottom: '0px' }}
-                  rules={[{ required: true, message: 'Please input prompts' }]}
-                >
-                  <TextArea
-                    size='large'
-                    rows={6}
-                    placeholder='Enter prompts here'
-                    className={cx('text-base leading-6 px-4 py-2')}
-                  />
-                </Form.Item>
-                <Button type='primary' htmlType='submit' size='large'>
-                  Generate
-                </Button>
-              </div>
-            </div>
-            <div
-              className={cx(
-                uiStore.isMobile
-                  ? ['flex flex-col gap-2.5']
-                  : ['min-h-[388px] flex gap-2.5'],
-              )}
-            >
-              <ImageInputWidget onChanged={setInputImg} onSize={onInputSize} />
-              <ImageOutputWidget src={outputImgUri} />
-            </div>
-          </div>
-          <div className={cx('flex flex-col w-80 gap-6')}>
-            <Title level={5}>Settings</Title>
-            <div className={cx('gap-0')}>
-              <ModelFormGroup label='Model' name='model' />
-
+          <div className={cx('flex flex-col items-start gap-6')}>
+            <Title level={5}>Input keyword and generate</Title>
+            <div className={cx('flex flex-col w-full items-start gap-6')}>
               <Form.Item
-                label='Size'
-                name='size'
-                initialValue={sizes[0].value}
-                tooltip={
-                  uiStore.isMobile
-                    ? ''
-                    : 'The desired [width x height] of the generated image(s) in pixels.'
-                }
-              >
-                <Select size='large' options={sizes} />
-              </Form.Item>
-
-              <LoRAFormGroup />
-
-              <Form.Item
-                label='Negative Prompts'
-                name='negative_prompt'
-                tooltip={
-                  uiStore.isMobile
-                    ? ''
-                    : 'A negative prompt that describes what you don&#39;t want in the image.'
-                }
+                name='prompt'
+                className={cx('self-stretch')}
+                style={{ marginBottom: '0px' }}
+                rules={[{ required: true, message: 'Please input prompts' }]}
               >
                 <TextArea
                   size='large'
-                  rows={4}
-                  placeholder='Negative Prompts'
-                  className={cx('self-stretch text-base leading-6 px-4 py-2')}
+                  rows={6}
+                  placeholder='Enter prompts here'
+                  className={cx('text-base leading-6 px-4 py-2')}
                 />
               </Form.Item>
-
-              <Form.Item
-                label='Denoising strength'
-                name='denoising_strength'
-                tooltip={
-                  uiStore.isMobile
-                    ? ''
-                    : 'Controls the level of denoising; smaller values yield results that are closer to the original image.'
-                }
-                initialValue={0.5}
-              >
-                <SliderSettingItem />
-              </Form.Item>
-
-              <SamplingFormGroup
-                methodName='sampler_name'
-                stepsName='steps'
-                seedName='seed'
-              />
+              <Button type='primary' htmlType='submit' size='large'>
+                Generate
+              </Button>
             </div>
           </div>
+          <div
+            className={cx(
+              uiStore.isMobile
+                ? ['flex flex-col gap-2.5']
+                : ['min-h-[388px] flex gap-2.5'],
+            )}
+          >
+            <ImageInputWidget
+              onChanged={setInputImg}
+              onSize={onInputSize}
+              ref={imageUploaderRef}
+            />
+            <ImageOutputWidget
+              src={outputImgUri}
+              onJump={onImageOutputWidgetJump}
+            />
+          </div>
         </div>
-      </Form>
-    </Form.Provider>
+        <div className={cx('flex flex-col w-80 gap-6')}>
+          <Title level={5}>Settings</Title>
+          <div className={cx('gap-0')}>
+            <ModelFormGroup label='Model' name='model' />
+
+            <SizeFormGroup sizes={sizes} />
+
+            <LoRAFormGroup ref={loraFormGroupRef} />
+
+            <NegativePromptsFromGroup />
+
+            <DenoisingStrengthFormGroup />
+
+            <SamplingFormGroup methodName='sampler_name' stepsName='steps' />
+
+            <SeedFormGroup
+              seedName='seed'
+              onClickRandomSeed={handleClickRandomSeedButton}
+              onClickLastSeed={handleClickLastSeedButton}
+            />
+          </div>
+        </div>
+      </div>
+    </Form>
   )
 }
 
