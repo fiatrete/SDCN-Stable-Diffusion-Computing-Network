@@ -9,7 +9,7 @@
         "sessionId" :"",
         "code" : 200
     },
-    
+
     "nodeHeartbeat" : {
         "msgType" : "heartbeat",
         "sessionId" :"",
@@ -29,11 +29,11 @@
         "taskId": "",
         "request" : {
             "type":"",
-            "url": "",   
+            "url": "",
             "data":{
-        
+
             }
-        
+
         }
     },
     "nodeCommandResult" : {
@@ -44,7 +44,7 @@
             "type":"",
             "code":200,
             "data":{
-        
+
             }
         }
     },
@@ -52,7 +52,7 @@
     "servAskOffline" : {
         "msgType" : "offline",
         "sessionId" :"",
-        "type" : 1,    
+        "type" : 1,
         "reason" : ""
     },
     "servAskOfflineResult" : {
