@@ -23,10 +23,6 @@ const Playground = () => {
   const [img2imgForm] = Form.useForm()
   const [inpaintingForm] = Form.useForm()
 
-  // playgroundStore.txt2imgForm = txt2imgForm
-  // playgroundStore.img2imgForm = img2imgForm
-  // playgroundStore.inpaintingForm = inpaintingForm
-
   playgroundStore.putForm('txt2img', txt2imgForm)
   playgroundStore.putForm('img2img', img2imgForm)
   playgroundStore.putForm('inpainting', inpaintingForm)

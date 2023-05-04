@@ -1,4 +1,11 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react'
 import { Form, Select, InputNumber, Modal, Input, Button } from 'antd'
 import { Fragment } from 'react'
 import cx from 'classnames'
@@ -274,9 +281,26 @@ const LoraFormItem = (props: LoraFormItemProps) => {
   )
 }
 
-const LoRAFormGroup = () => {
+export interface LoRAFormGroupRefHandle {
+  updateLoRAs: (_loras: { hash: string; weight: number }[]) => void
+}
+
+const LoRAFormGroup = forwardRef<LoRAFormGroupRefHandle>((__, forwardedRef) => {
   const [loras, setLoras] = useState<{ hash: string; weight: number }[]>([])
   const [showAddLoRAModal, setShowAddLoRAModal] = useState(false)
+
+  useImperativeHandle(
+    forwardedRef,
+    () => ({
+      updateLoRAs(_loras) {
+        console.log('loras', _loras)
+        setLoras(() => {
+          return _loras
+        })
+      },
+    }),
+    [setLoras],
+  )
 
   return (
     <Form.Item
@@ -292,7 +316,7 @@ const LoRAFormGroup = () => {
           const index = i + 1
           return (
             <LoraFormItem
-              key={i}
+              key={`${lora.hash}-${lora.weight}`}
               label={`LoRA${index}`}
               loraName={`lora${index}`}
               weightName={`weight${index}`}
@@ -333,7 +357,8 @@ const LoRAFormGroup = () => {
       )}
     </Form.Item>
   )
-}
+})
+LoRAFormGroup.displayName = 'LoRAFormGroup'
 
 // Negative Prompts
 const NegativePromptsFromGroup = () => {

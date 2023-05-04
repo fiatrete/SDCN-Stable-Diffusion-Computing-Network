@@ -212,8 +212,12 @@ const Txt2img = ({ form }: { form: FormInstance }) => {
 
   const onImageOutputWidgetJump = useCallback(
     (key: string) => {
+      console.log('txt2img', form.getFieldsValue(true))
+
       playgroundStore.getForm(key)?.setFieldsValue(form.getFieldsValue(true))
       playgroundStore.getForm(key)?.setFieldValue('input_image', imgUri)
+
+      console.log('img2img', playgroundStore.getForm(key)?.getFieldsValue(true))
 
       playgroundStore.activePlaygroundTabKey = key
     },
@@ -226,6 +230,7 @@ const Txt2img = ({ form }: { form: FormInstance }) => {
       form={form}
       layout='vertical'
       onFinish={onFormFinish}
+      preserve={false}
     >
       <GeneratingMask
         open={isGenerating}

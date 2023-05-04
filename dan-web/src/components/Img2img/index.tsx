@@ -24,6 +24,7 @@ import {
   SizeFormGroup,
   NegativePromptsFromGroup,
   DenoisingStrengthFormGroup,
+  LoRAFormGroupRefHandle,
 } from 'components/SettingsFormGroup'
 import ImageOutputWidget from 'components/ImageOutputWidget'
 import ImageInputWidget, {
@@ -83,6 +84,7 @@ const sizes = [
 
 const Img2img = ({ form }: { form: FormInstance }) => {
   const imageUploaderRef = useRef<ImageInputWidgetRefHandle>(null)
+  const loraFormGroupRef = useRef<LoRAFormGroupRefHandle>(null)
   const [outputImgUri, setOutputImgUri] = useState<string | undefined>()
   const [lastSeed, setLastSeed] = useState(-1)
   const [inputImg, setInputImg] = useState<string>('')
@@ -99,10 +101,26 @@ const Img2img = ({ form }: { form: FormInstance }) => {
 
   const activeTabKey = playgroundStore.activePlaygroundTabKey
   useEffect(() => {
+    console.log('values', form.getFieldsValue(true))
     const inputImageValue = form.getFieldValue('input_image')
     if (activeTabKey === 'img2img' && inputImageValue) {
       imageUploaderRef.current?.updateImage(inputImageValue)
       form.setFieldValue('input_image', undefined)
+
+      const loras = []
+      if (form.getFieldValue('lora1')) {
+        loras.push({
+          hash: form.getFieldValue('lora1'),
+          weight: form.getFieldValue('weight1'),
+        })
+      }
+      if (form.getFieldValue('lora2')) {
+        loras.push({
+          hash: form.getFieldValue('lora2'),
+          weight: form.getFieldValue('weight2'),
+        })
+      }
+      loraFormGroupRef.current?.updateLoRAs(loras)
     }
   }, [form, activeTabKey])
 
@@ -224,6 +242,7 @@ const Img2img = ({ form }: { form: FormInstance }) => {
       name='img2imgForm'
       layout='vertical'
       onFinish={onFormFinish}
+      preserve={false}
     >
       <GeneratingMask
         open={isGenerating}
@@ -298,7 +317,7 @@ const Img2img = ({ form }: { form: FormInstance }) => {
 
             <SizeFormGroup sizes={sizes} />
 
-            <LoRAFormGroup />
+            <LoRAFormGroup ref={loraFormGroupRef} />
 
             <NegativePromptsFromGroup />
 

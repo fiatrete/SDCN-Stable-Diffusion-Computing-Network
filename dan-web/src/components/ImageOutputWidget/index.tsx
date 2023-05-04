@@ -49,10 +49,11 @@ const ImageOutputWidget = (props: ImageOutputWidgetProps) => {
             fallback={fallbackImageURL}
             className={cx('w-full min-h-[300px] rounded-lg')}
           />
-          <div className={cx('w-full mt-3 flex justify-around')}>
+          <div className={cx('w-full mt-3 flex justify-between')}>
             <Button
               icon={<DownloadOutlined />}
-              className={cx('text-green-500 border-green-300 bg-green-50')}
+              type='primary'
+              ghost
               onClick={handleDownload}
             >
               Download
@@ -60,7 +61,8 @@ const ImageOutputWidget = (props: ImageOutputWidgetProps) => {
 
             <Button
               icon={<SyncOutlined />}
-              className={cx('text-green-500 border-green-300 bg-green-50')}
+              type='primary'
+              ghost
               onClick={handleImg2Img}
             >
               Img2Img
@@ -68,7 +70,8 @@ const ImageOutputWidget = (props: ImageOutputWidgetProps) => {
 
             <Button
               icon={<SyncOutlined />}
-              className={cx('text-green-500 border-green-300 bg-green-50')}
+              type='primary'
+              ghost
               onClick={handleInpainting}
             >
               Inpainting

@@ -24,6 +24,7 @@ import {
   SizeFormGroup,
   NegativePromptsFromGroup,
   DenoisingStrengthFormGroup,
+  LoRAFormGroupRefHandle,
 } from 'components/SettingsFormGroup'
 import ImageOutputWidget from 'components/ImageOutputWidget'
 import ImageInputWidget, {
@@ -84,6 +85,7 @@ const sizes = [
 
 const Inpainting = ({ form }: { form: FormInstance }) => {
   const imageUploaderRef = useRef<ImageInputWidgetRefHandle>(null)
+  const loraFormGroupRef = useRef<LoRAFormGroupRefHandle>(null)
   const [outputImgUri, setOutputImgUri] = useState<string | undefined>()
   const [lastSeed, setLastSeed] = useState(-1)
   const [inputImg, setInputImg] = useState<string>('')
@@ -117,8 +119,22 @@ const Inpainting = ({ form }: { form: FormInstance }) => {
       inpaintMaskRef.current = ''
 
       imageUploaderRef.current?.updateImage(inputImageValue)
-
       form.setFieldValue('input_image', undefined)
+
+      const loras = []
+      if (form.getFieldValue('lora1')) {
+        loras.push({
+          hash: form.getFieldValue('lora1'),
+          weight: form.getFieldValue('weight1'),
+        })
+      }
+      if (form.getFieldValue('lora2')) {
+        loras.push({
+          hash: form.getFieldValue('lora2'),
+          weight: form.getFieldValue('weight2'),
+        })
+      }
+      loraFormGroupRef.current?.updateLoRAs(loras)
     }
   }, [form, activeTabKey])
 
@@ -265,6 +281,7 @@ const Inpainting = ({ form }: { form: FormInstance }) => {
       name='inpaintingForm'
       layout='vertical'
       onFinish={onFormFinish}
+      preserve={false}
     >
       <GeneratingMask
         open={isGenerating}
@@ -355,7 +372,7 @@ const Inpainting = ({ form }: { form: FormInstance }) => {
 
             <SizeFormGroup sizes={sizes} />
 
-            <LoRAFormGroup />
+            <LoRAFormGroup ref={loraFormGroupRef} />
 
             <NegativePromptsFromGroup />
 
