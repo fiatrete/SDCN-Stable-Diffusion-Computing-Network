@@ -40,7 +40,7 @@ def start_serv_connection():
 def start_webui_connection():
     webuiConnection.start_webui_con(
         config_info["webuiLocalUrl"],
-        config_info["supportModels"],
+        config_info["onlineModelsUrl"],
         webui_conn_callback
     )
 

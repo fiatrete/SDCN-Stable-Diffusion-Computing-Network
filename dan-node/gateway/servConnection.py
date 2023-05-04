@@ -265,11 +265,12 @@ def time_now():
 
 def stop():
     global running
-    create_serv_adk_offline_result()
+    if serv_adk_offline:
+        create_serv_adk_offline_result()
+        ws.close()
     time.sleep(1)
     print("stop servConnection!!!!!!!!!!!!!")
     running = False
-    ws.close()
 
 
 def start_connection(addr, key, name, cb):
