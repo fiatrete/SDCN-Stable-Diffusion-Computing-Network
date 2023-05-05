@@ -19,7 +19,6 @@ const Reward = () => {
 
   const handleFormFinish = useCallback(
     (values: FormValues) => {
-      console.log('handleFormFinish', values)
       setIsLoading(true)
       userApi
         .presentHonor(values.uid, values.count)
