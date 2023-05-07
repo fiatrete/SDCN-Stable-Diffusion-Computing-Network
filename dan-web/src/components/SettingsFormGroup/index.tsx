@@ -293,7 +293,6 @@ const LoRAFormGroup = forwardRef<LoRAFormGroupRefHandle>((__, forwardedRef) => {
     forwardedRef,
     () => ({
       updateLoRAs(_loras) {
-        console.log('loras', _loras)
         setLoras(() => {
           return _loras
         })

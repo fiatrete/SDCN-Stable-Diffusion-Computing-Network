@@ -209,7 +209,6 @@ const Inpainting = ({ form }: { form: FormInstance }) => {
             inpaint_area: 0,
           }
         }
-        //console.log('submit', apiParams)
 
         const [_error, _task] = await to<Task, AxiosError>(
           img2imgAsync(apiParams),
@@ -325,16 +324,13 @@ const Inpainting = ({ form }: { form: FormInstance }) => {
                   className={cx('text-base leading-6 px-4 py-2')}
                 />
               </Form.Item>
-              <Button type='primary' htmlType='submit' size='large'>
-                Generate
-              </Button>
             </div>
           </div>
           <div
             className={cx(
               uiStore.isMobile
                 ? ['flex flex-col gap-2.5']
-                : ['min-h-[388px] flex gap-2.5'],
+                : ['min-h-[300px] flex gap-2.5'],
             )}
           >
             {showPaint === false && (
@@ -363,6 +359,12 @@ const Inpainting = ({ form }: { form: FormInstance }) => {
               src={outputImgUri}
               onJump={onImageOutputWidgetJump}
             />
+          </div>
+
+          <div>
+            <Button type='primary' htmlType='submit' size='large'>
+              Generate
+            </Button>
           </div>
         </div>
         <div className={cx('flex flex-col w-80 gap-6')}>
