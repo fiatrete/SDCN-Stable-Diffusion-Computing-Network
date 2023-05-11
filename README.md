@@ -1,10 +1,10 @@
-<p align="center"><a href="https://opendan.ai" target="_blank" rel="noopener noreferrer"><img width="300" src="imgs/logo.svg" alt="DAN logo"></a></p>
+<p align="center"><a href="https://opendan.ai" target="_blank" rel="noopener noreferrer"><img width="300" src="imgs/logo.svg" alt="SDCN logo"></a></p>
 
 <p align="center">
-  <a href="https://github.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License"></a>
+  <a href="https://github.com/fiatrete/SDCN-Stable-Diffusion-Computing-Network/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License"></a>
   <a><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome"></a>
-  <a href="https://github.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/graphs/contributors"><img src="https://img.shields.io/github/contributors/fiatrete/DAN-Stable-Diffusion-Computing-Network" alt="GitHub Contributors" /></a>
-  <a href="https://github.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/commits/main"><img src="https://img.shields.io/github/last-commit/fiatrete/DAN-Stable-Diffusion-Computing-Network" alt="Last Commit"></a>
+  <a href="https://github.com/fiatrete/SDCN-Stable-Diffusion-Computing-Network/graphs/contributors"><img src="https://img.shields.io/github/contributors/fiatrete/SDCN-Stable-Diffusion-Computing-Network" alt="GitHub Contributors" /></a>
+  <a href="https://github.com/fiatrete/SDCN-Stable-Diffusion-Computing-Network/commits/main"><img src="https://img.shields.io/github/last-commit/fiatrete/SDCN-Stable-Diffusion-Computing-Network" alt="Last Commit"></a>
 </p>
 
 <p align="center">
@@ -16,28 +16,28 @@
 
 ## Overview
 
-**[DAN](https://www.opendan.ai) is an infrastructure for sharing Stable Diffusion computing power**
+**[SDCN](https://www.opendan.ai) is an infrastructure for sharing Stable Diffusion computing power**
 
-- **Decentralization**: By running the DAN node program, users can register their idle computing resources with the DAN network
-- **Trustlessness**: DAN abstracts the capabilities of Stable Diffusion into a set of atomic interface calls and hides the computing process from application developers
-- **Powerful**: Application developers can quickly develop their own applications based on the Stable Diffusion related capabilities provided by DAN, without worrying about how these interfaces are implemented or how computing power is provided
+- **Decentralization**: By running the SDCN node program, users can register their idle computing resources with the SDCN network
+- **Trustlessness**: SDCN abstracts the capabilities of Stable Diffusion into a set of atomic interface calls and hides the computing process from application developers
+- **Powerful**: Application developers can quickly develop their own applications based on the Stable Diffusion related capabilities provided by SDCN, without worrying about how these interfaces are implemented or how computing power is provided
 
-![DAN structure](imgs/dan_structure_image.png)
+![SDCN structure](imgs/dan_structure_image.png)
 
-- DAN Node
+- SDCN Node
   - Executes image generation tasks
   - Use Stable Diffusion WebUI with API mode directly
-- DAN Server
-  - Manage and route image generation tasks to DAN Nodes
+- SDCN Server
+  - Manage and route image generation tasks to SDCN Nodes
   - Hide the image generating details and expose a standard interface to application developers
-  - Implement DAN server with openresty
+  - Implement SDCN server with openresty
 - API
   - txt2img
   - img2img
   - integrate
   - more APIs under developing
 
-**Why DAN?**
+**Why SDCN?**
 
 - Everyone should have the ability to use AI freely, AI will be a public good
 - For the public, the cost of trying various ways of stable diffusion is too high
@@ -54,15 +54,15 @@
 
 ## Getting Started
 
-Try out DAN functionalities in [DAN website](https://www.opendan.ai/).
+Try out SDCN functionalities in [SDCN website](https://www.opendan.ai/).
 
 🎈Feel free to file tickets for bugs or feature requests. 
 
 </br>
 
-## 📱 How-to: try out DAN API
+## 📱 How-to: try out SDCN API
 
-DAN provide SaaS-like API from [https://api.opendan.ai](https://api.opendan.ai)
+SDCN provide SaaS-like API from [https://api.opendan.ai](https://api.opendan.ai)
 
 
 ### Using `dan_run.py` script
@@ -90,7 +90,7 @@ cat params-txt2img.json \
 | jq '.data.images[0]' |tr -d '\"' | tr -d '\\' | base64 -d > out.png
 ```
 
-👉 **DAN API** refer to [API Docs](doc/api.md)
+👉 **SDCN API** refer to [API Docs](doc/api.md)
 
 </br>
 
@@ -122,9 +122,9 @@ docker-compose up -d
 
 >*Now your dan-server is available on "[http://127.0.0.1:6006](http://127.0.0.1:6006/)"*
 
-6. Register your Stable Diffusion WebUI instance as a DAN node:
+6. Register your Stable Diffusion WebUI instance as a SDCN node:
 
-- Login your account using DAN's web page: http://127.0.0.1:6006;
+- Login your account using SDCN's web page: http://127.0.0.1:6006;
 - Navigate to `Nodes` -> `Donate Node`
 - Enter your worker node's address
 - Click `Donate`
@@ -149,27 +149,27 @@ python3 dan_run.py txt2img params-txt2img.json OUTPUT_IMAGE.png
 
 ## Roadmap
 
-- [x] Rename project to DAN
+- [x] Rename project to SDCN
 - [x] Management GUI for computing power donors
-    - [x] Add login to the DAN website
+    - [x] Add login to the SDCN website
     - [x] CRUD management of computing power provided by donors
 - [x] Workload ranking page
     - [x] Node-based workload ranking
     - [x] Donor-based workload ranking
     - [ ] Model-based workload ranking
     - [ ] API-based workload ranking
-- [ ] Basic DAN functional interfaces
+- [ ] Basic SDCN functional interfaces
     - [ ] Scale interface
     - [x] Inpaint interface
     - [x] Support for controlnet
 - [ ] Enrich examples in the playground
     - [ ] 2D to 3D style conversion
     - [ ] 3D to 2D style conversion
-- [x] One-click installation of Stable Diffusion WebUI as an DAN node (Windows & Linux supported)
+- [x] One-click installation of Stable Diffusion WebUI as an SDCN node (Windows & Linux supported)
     - [x] Customize Stable Diffusion WebUI installer
     - [x] Automatically download necessary model files
-    - [x] Customize DAN node daemon as intermediary for communication between Stable Diffusion WebUI and DAN server
-- [ ] Image Stream (user generated by the DAN tool and share to opendan.ai)
+    - [x] Customize SDCN node daemon as intermediary for communication between Stable Diffusion WebUI and SDCN server
+- [ ] Image Stream (user generated by the SDCN tool and share to opendan.ai)
     - [ ] Sharing mechanisms for images generated through API or playground
     - [ ] A page to display shared images in a waterfall flow
 - [x] Constraints for the use of computing resources
@@ -186,7 +186,7 @@ python3 dan_run.py txt2img params-txt2img.json OUTPUT_IMAGE.png
 
 This project is licensed under the [MIT license]
 
-[MIT license]: https://github.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/blob/main/LICENSE
+[MIT license]: https://github.com/fiatrete/SDCN-Stable-Diffusion-Computing-Network/blob/main/LICENSE
 
 </br>
 
