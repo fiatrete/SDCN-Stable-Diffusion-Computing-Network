@@ -51,7 +51,7 @@ export async function getModelDetails(): Promise<ModelDetails> {
   return new Promise((resolve, reject) => {
     axios
       .get<ModelDetails>(
-        `https://raw.githubusercontent.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/main/model-reference/info.json?t=${Date.now()}`,
+        `https://raw.githubusercontent.com/fiatrete/SDCN-Stable-Diffusion-Computing-Network/main/model-reference/info.json?t=${Date.now()}`,
       )
       .then((resp) => {
         if (resp.status === 200) {

@@ -162,7 +162,7 @@ const Header = () => {
                 }}
               >
                 <img
-                  src='https://img.shields.io/github/stars/fiatrete/DAN-Stable-Diffusion-Computing-Network?style=social'
+                  src='https://img.shields.io/github/stars/fiatrete/SDCN-Stable-Diffusion-Computing-Network?style=social'
                   alt=''
                   style={{ height: 22 }}
                 />

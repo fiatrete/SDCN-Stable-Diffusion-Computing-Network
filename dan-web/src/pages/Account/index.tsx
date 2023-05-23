@@ -60,7 +60,7 @@ const Account = () => {
                 <div className={cx('block pt-4')}>
                   <h3 className={cx('')}>API Key</h3>
                   <ul className={cx('ps-2')}>
-                    <li>The DAN API uses API Key for authentication.</li>
+                    <li>The SDCN API uses API Key for authentication.</li>
                     <li>
                       Do not share your API Key with others, or expose it in the
                       browser or other client-side code.

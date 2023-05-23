@@ -83,7 +83,7 @@ const Header = () => {
             className={cx('flex justify-center items-center mx-2.5')}
           >
             <Image
-              src='https://img.shields.io/github/stars/fiatrete/DAN-Stable-Diffusion-Computing-Network?style=social'
+              src='https://img.shields.io/github/stars/fiatrete/SDCN-Stable-Diffusion-Computing-Network?style=social'
               preview={false}
             />
           </Button>
