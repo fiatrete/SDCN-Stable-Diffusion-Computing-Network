@@ -53,7 +53,7 @@ const NodeList = (props: NodeListProps) => {
             'text-base font-medium flex flex-col justify-center px-2',
           )}
         >
-          DAN Nodes
+          SDCN Nodes
         </div>
         <Table<Node>
           className={cx('mt-2 overflow-x-auto')}

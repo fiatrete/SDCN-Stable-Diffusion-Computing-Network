@@ -89,11 +89,11 @@ const DonateNode = (props: DonateNodeProps) => {
           <Link
             type='secondary'
             underline
-            href='https://github.com/fiatrete/DAN-Stable-Diffusion-Computing-Network'
+            href='https://github.com/fiatrete/SDCN-Stable-Diffusion-Computing-Network'
             target='_blank'
             className={cx('mx-1')}
           >
-            https://github.com/fiatrete/DAN-Stable-Diffusion-Computing-Network
+            https://github.com/fiatrete/SDCN-Stable-Diffusion-Computing-Network
           </Link>
           link
         </Paragraph>
