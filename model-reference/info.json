@@ -1,4 +1,40 @@
 {
+    "meinamix_meinaV10": {
+        "name": "meinamix_meinaV10",
+        "hash": "77b7dc4ef0fca64ed8c3c38e80efa3e559488ee377f4138ec4bce488ef6c8412",
+        "download": {
+            "fileurl": "https://civitai.com/api/download/models/80511",
+            "path": "/models/Stable-diffusion"
+        },
+        "type": "model"
+    },
+    "CounterfeitV30_v30": {
+        "name": "CounterfeitV30_v30",
+        "hash": "cbfba64e662370f59d4aa2aa69bf16749fce93846ccce20506aee5df01169859",
+        "download": {
+            "fileurl": "https://civitai.com/api/download/models/57618",
+            "path": "/models/Stable-diffusion"
+        },
+        "type": "model"
+    },
+    "FuzzyHazel": {
+        "name": "FuzzyHazel",
+        "hash": "2dc6d45a617e1a7abd31a4ad5723bf545733eb19814e45b51b8adb6eef53656c",
+        "download": {
+            "fileurl": "https://huggingface.co/Lucetepolis/FuzzyHazel/resolve/main/FuzzyHazel.safetensors",
+            "path": "/models/Stable-diffusion"
+        },
+        "type": "model"
+    },
+    "cetusMix_v4": {
+        "name": "cetusMix_v4",
+        "hash": "b42b09ff12ca9cd70d78aa8210f8d4577ec513fc1484a68615385b8076292639",
+        "download": {
+            "fileurl": "https://civitai.com/api/download/models/78676",
+            "path": "/models/Stable-diffusion"
+        },
+        "type": "model"
+    },
     "abyssorangemix3AOM3_aom3a1b": {
         "name": "abyssorangemix3AOM3_aom3a1b",
         "hash": "5493a0ec491f5961dbdc1c861404088a6ae9bd4007f6a3a7c5dee8789cdc1361",
@@ -97,6 +133,66 @@
             "path": "/models/Stable-diffusion"
         },
         "type": "model"
+    },
+    "okingjo-Char-HonkaiSR-Herta-v1": {
+        "name": "okingjo-Char-HonkaiSR-Herta-v1",
+        "hash": "b905bca96f60063a5cafc05a01450776c3f0f9434eb275c6428e6436d4239732",
+        "images": ["https://raw.githubusercontent.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/main/model-reference/imgs/okingjo-Char-HonkaiSR-Herta-v1.jpeg"],
+        "download": {
+            "fileurl": "https://civitai.com/api/download/models/87823",
+            "path": "/models/Lora"
+        },
+        "type": "LoRA"
+    },
+    "okingjo-Char-Amane_Lily": {
+        "name": "okingjo-Char-Amane_Lily",
+        "hash": "d1765cf9879ca58b265689247ea261fb40c57ac30e60c9c9706175562c109844",
+        "images": ["https://raw.githubusercontent.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/main/model-reference/imgs/okingjo-Char-Amane_Lily.jpeg"],
+        "download": {
+            "fileurl": "https://civitai.com/api/download/models/80435",
+            "path": "/models/Lora"
+        },
+        "type": "LoRA"
+    },
+    "okingjo-char-Genshin-Sangonomiya Kokomi-v2": {
+        "name": "okingjo-char-Genshin-Sangonomiya Kokomi-v2",
+        "hash": "065babbe196ce4be791af5ca5d6d6f1ff6bf92671bf9ba1cb72ca485b3aadbc2",
+        "images": ["https://raw.githubusercontent.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/main/model-reference/imgs/okingjo-char-Genshin-Sangonomiya Kokomi-v2.jpeg"],
+        "download": {
+            "fileurl": "https://civitai.com/api/download/models/49010",
+            "path": "/models/Lora"
+        },
+        "type": "LoRA"
+    },
+    "okingjo-char-Honkai-Elysia": {
+        "name": "okingjo-char-Honkai-Elysia",
+        "hash": "4495d15f676b707dd27d8de28ea4d00ae65d075618d23194fbb5459afdf4fb9b",
+        "images": ["https://raw.githubusercontent.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/main/model-reference/imgs/okingjo-char-Honkai-Elysia.jpeg"],
+        "download": {
+            "fileurl": "https://civitai.com/api/download/models/39227",
+            "path": "/models/Lora"
+        },
+        "type": "LoRA"
+    },
+    "okingjo-char-Genshin-Barbara": {
+        "name": "okingjo-char-Genshin-Barbara",
+        "hash": "68891c0e7ef4a0a5c48e846f482115e0a49d419aabc339fcd8c7cca6024afc41",
+        "images": ["https://raw.githubusercontent.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/main/model-reference/imgs/okingjo-char-Genshin-Barbara.jpeg"],
+        "download": {
+            "fileurl": "https://civitai.com/api/download/models/18073",
+            "path": "/models/Lora"
+        },
+        "type": "LoRA"
+    },
+    "okingjo-Ningguang": {
+        "name": "okingjo-Ningguang",
+        "hash": "a142f420b29baa5b93a0dd611fe85171504228aa78477361ec088ca2b63aa139",
+        "images": ["https://raw.githubusercontent.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/main/model-reference/imgs/okingjo-Ningguang.jpeg"],
+        "download": {
+            "fileurl": "https://civitai.com/api/download/models/10075",
+            "path": "/models/Lora"
+        },
+        "type": "LoRA"
     },
     "arknightsTexasThe_v10": {
         "name": "arknightsTexasThe_v10",
