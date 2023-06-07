@@ -51,7 +51,13 @@ const sizes = [
   { value: '1024x768', label: '1024x768' },
 ]
 
-const Txt2img = ({ form }: { form: FormInstance }) => {
+const Txt2img = ({
+  form,
+  showAdModel,
+}: {
+  form: FormInstance
+  showAdModel: (callback: () => void) => void
+}) => {
   const [imgUri, setImgUri] = useState<string | undefined>()
   const [lastSeed, setLastSeed] = useState(-1)
   const [isGenerating, setIsGenerating] = useState<boolean>(false)
@@ -178,36 +184,40 @@ const Txt2img = ({ form }: { form: FormInstance }) => {
 
   const onFormFinish = useCallback(
     async (values: StoreValue) => {
-      try {
-        setGeneratingTask(true)
+      async function callback() {
+        try {
+          setGeneratingTask(true)
 
-        const [widthStr, heightStr] = values.size.split('x')
-        delete values.size
-        const apiParams: Txt2imgParams = Object.assign(values)
-        apiParams.width = parseInt(widthStr)
-        apiParams.height = parseInt(heightStr)
-        apiParams.cfg_scale = parseFloat(values.cfg_scale)
+          const [widthStr, heightStr] = values.size.split('x')
+          delete values.size
+          const apiParams: Txt2imgParams = Object.assign(values)
+          apiParams.width = parseInt(widthStr)
+          apiParams.height = parseInt(heightStr)
+          apiParams.cfg_scale = parseFloat(values.cfg_scale)
 
-        const [_error, _task] = await to<Task, AxiosError>(
-          txt2imgAsync(apiParams),
-        )
+          const [_error, _task] = await to<Task, AxiosError>(
+            txt2imgAsync(apiParams),
+          )
 
-        if (_error !== null) {
-          message.error(_error.message)
-          console.error('txt2img Async Error', _error)
+          if (_error !== null) {
+            message.error(_error.message)
+            console.error('txt2img Async Error', _error)
+            setGeneratingTask(false)
+            return
+          }
+
+          pollingTaskResult(_task)
+        } catch (err) {
+          if (err instanceof String) message.error(err)
+          if (err instanceof Error) message.error(err.message)
+
           setGeneratingTask(false)
-          return
         }
-
-        pollingTaskResult(_task)
-      } catch (err) {
-        if (err instanceof String) message.error(err)
-        if (err instanceof Error) message.error(err.message)
-
-        setGeneratingTask(false)
       }
+
+      showAdModel(callback)
     },
-    [pollingTaskResult, setGeneratingTask],
+    [pollingTaskResult, setGeneratingTask, showAdModel],
   )
 
   const onImageOutputWidgetJump = useCallback(

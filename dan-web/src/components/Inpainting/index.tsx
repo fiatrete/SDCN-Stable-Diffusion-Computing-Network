@@ -83,7 +83,13 @@ const sizes = [
   { value: '1024x768', label: '1024x768' },
 ]
 
-const Inpainting = ({ form }: { form: FormInstance }) => {
+const Inpainting = ({
+  form,
+  showAdModel,
+}: {
+  form: FormInstance
+  showAdModel: (callback: () => void) => void
+}) => {
   const imageUploaderRef = useRef<ImageInputWidgetRefHandle>(null)
   const loraFormGroupRef = useRef<LoRAFormGroupRefHandle>(null)
   const [outputImgUri, setOutputImgUri] = useState<string | undefined>()
@@ -176,60 +182,69 @@ const Inpainting = ({ form }: { form: FormInstance }) => {
 
   const onFormFinish = useCallback(
     async (values: StoreValue) => {
-      try {
-        check.assert(inputImg, 'input image must be existed')
+      async function callback() {
+        try {
+          check.assert(inputImg, 'input image must be existed')
 
-        setGeneratingTask(true)
+          setGeneratingTask(true)
 
-        // Get input image size
-        const [widthStr, heightStr] = values.size.split('x')
-        delete values.size
-        const inWid: number = values.input_width
-        delete values.input_width
-        const inHei: number = values.input_height
-        delete values.input_height
+          // Get input image size
+          const [widthStr, heightStr] = values.size.split('x')
+          delete values.size
+          const inWid: number = values.input_width
+          delete values.input_width
+          const inHei: number = values.input_height
+          delete values.input_height
 
-        const apiParams: Img2imgParams = Object.assign(values)
+          const apiParams: Img2imgParams = Object.assign(values)
 
-        const setWid = parseInt(widthStr)
-        const setHei = parseInt(heightStr)
-        // Set submit image size
-        const [subWidth, subHeight] = calcImgSize(inWid, inHei, setWid, setHei)
-        apiParams.width = subWidth
-        apiParams.height = subHeight
+          const setWid = parseInt(widthStr)
+          const setHei = parseInt(heightStr)
+          // Set submit image size
+          const [subWidth, subHeight] = calcImgSize(
+            inWid,
+            inHei,
+            setWid,
+            setHei,
+          )
+          apiParams.width = subWidth
+          apiParams.height = subHeight
 
-        apiParams.cfg_scale = 7
-        apiParams.init_image = inputImg?.split(',')[1]
+          apiParams.cfg_scale = 7
+          apiParams.init_image = inputImg?.split(',')[1]
 
-        if (inpaintMaskRef.current !== '') {
-          apiParams.inpaint = {
-            mask: inpaintMaskRef.current,
-            mask_blur: 0,
-            mask_mode: 0,
-            inpaint_area: 0,
+          if (inpaintMaskRef.current !== '') {
+            apiParams.inpaint = {
+              mask: inpaintMaskRef.current,
+              mask_blur: 0,
+              mask_mode: 0,
+              inpaint_area: 0,
+            }
           }
-        }
 
-        const [_error, _task] = await to<Task, AxiosError>(
-          img2imgAsync(apiParams),
-        )
+          const [_error, _task] = await to<Task, AxiosError>(
+            img2imgAsync(apiParams),
+          )
 
-        if (_error !== null) {
-          message.error(_error.message)
-          console.error('img2img Async Error', _error)
+          if (_error !== null) {
+            message.error(_error.message)
+            console.error('img2img Async Error', _error)
+            setGeneratingTask(false)
+            return
+          }
+
+          pollingTaskResult(_task)
+        } catch (err) {
+          if (err instanceof String) message.error(err)
+          if (err instanceof Error) message.error(err.message)
+
           setGeneratingTask(false)
-          return
         }
-
-        pollingTaskResult(_task)
-      } catch (err) {
-        if (err instanceof String) message.error(err)
-        if (err instanceof Error) message.error(err.message)
-
-        setGeneratingTask(false)
       }
+
+      showAdModel(callback)
     },
-    [inputImg, pollingTaskResult, setGeneratingTask],
+    [inputImg, pollingTaskResult, setGeneratingTask, showAdModel],
   )
 
   const onInputSize = useCallback(
