@@ -137,7 +137,7 @@
     "okingjo-HonkaiSR-Herta-v1": {
         "name": "okingjo-HonkaiSR-Herta-v1",
         "hash": "b905bca96f60063a5cafc05a01450776c3f0f9434eb275c6428e6436d4239732",
-        "images": ["https://raw.githubusercontent.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/main/model-reference/imgs/okingjo-HonkaiSR-Herta-v1.jpg"],
+        "images": ["https://raw.githubusercontent.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/main/model-reference/imgs/okingjo-Char-HonkaiSR-Herta-v1.jpeg"],
         "download": {
             "fileurl": "https://civitai.com/api/download/models/87823",
             "path": "/models/Lora"
@@ -147,7 +147,7 @@
     "okingjo-Amane_Lily": {
         "name": "okingjo-Amane_Lily",
         "hash": "d1765cf9879ca58b265689247ea261fb40c57ac30e60c9c9706175562c109844",
-        "images": ["https://raw.githubusercontent.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/main/model-reference/imgs/okingjo-Amane_Lily.jpg"],
+        "images": ["https://raw.githubusercontent.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/main/model-reference/imgs/okingjo-Char-Amane_Lily.jpeg"],
         "download": {
             "fileurl": "https://civitai.com/api/download/models/80435",
             "path": "/models/Lora"
@@ -157,7 +157,7 @@
     "okingjo-Honkai-Prometheus": {
         "name": "okingjo-Honkai-Prometheus",
         "hash": "cb7c8a12a9997ae47bdef93e8e8d176c0c043a2f6277358a85be676ff5dff5a4",
-        "images": ["https://raw.githubusercontent.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/main/model-reference/imgs/okingjo-Honkai-Prometheus.jpg"],
+        "images": ["https://raw.githubusercontent.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/main/model-reference/imgs/okingjo-Char-Honkai-Prometheus.jpeg"],
         "download": {
             "fileurl": "https://civitai.com/api/download/models/74577",
             "path": "/models/Lora"
@@ -167,7 +167,7 @@
     "okingjo-Genshin-Sangonomiya Kokomi-v2": {
         "name": "okingjo-Genshin-Sangonomiya Kokomi-v2",
         "hash": "065babbe196ce4be791af5ca5d6d6f1ff6bf92671bf9ba1cb72ca485b3aadbc2",
-        "images": ["https://raw.githubusercontent.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/main/model-reference/imgs/okingjo-Genshin-Sangonomiya Kokomi-v2.jpg"],
+        "images": ["https://raw.githubusercontent.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/main/model-reference/imgs/okingjo-char-Genshin-Sangonomiya%20Kokomi-v2.jpeg"],
         "download": {
             "fileurl": "https://civitai.com/api/download/models/49010",
             "path": "/models/Lora"
@@ -177,7 +177,7 @@
     "okingjo-Honkai-Elysia": {
         "name": "okingjo-Honkai-Elysia",
         "hash": "4495d15f676b707dd27d8de28ea4d00ae65d075618d23194fbb5459afdf4fb9b",
-        "images": ["https://raw.githubusercontent.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/main/model-reference/imgs/okingjo-Honkai-Elysia.jpg"],
+        "images": ["https://raw.githubusercontent.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/main/model-reference/imgs/okingjo-char-Honkai-Elysia.jpeg"],
         "download": {
             "fileurl": "https://civitai.com/api/download/models/39227",
             "path": "/models/Lora"
@@ -187,7 +187,7 @@
     "okingjo-Genshin-Barbara": {
         "name": "okingjo-Genshin-Barbara",
         "hash": "68891c0e7ef4a0a5c48e846f482115e0a49d419aabc339fcd8c7cca6024afc41",
-        "images": ["https://raw.githubusercontent.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/main/model-reference/imgs/okingjo-Genshin-Barbara.jpg"],
+        "images": ["https://raw.githubusercontent.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/main/model-reference/imgs/okingjo-char-Genshin-Barbara.jpeg"],
         "download": {
             "fileurl": "https://civitai.com/api/download/models/18073",
             "path": "/models/Lora"
@@ -197,7 +197,7 @@
     "okingjo-Ningguang": {
         "name": "okingjo-Ningguang",
         "hash": "a142f420b29baa5b93a0dd611fe85171504228aa78477361ec088ca2b63aa139",
-        "images": ["https://raw.githubusercontent.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/main/model-reference/imgs/okingjo-Ningguang.jpg"],
+        "images": ["https://raw.githubusercontent.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/main/model-reference/imgs/okingjo-Ningguang.jpeg"],
         "download": {
             "fileurl": "https://civitai.com/api/download/models/10075",
             "path": "/models/Lora"
