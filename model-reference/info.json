@@ -204,6 +204,16 @@
         },
         "type": "LoRA"
     },
+    "okingjo-HonkaiSR-Asta": {
+        "name": "okingjo-HonkaiSR-Asta",
+        "hash": "4b6f565a26a7cdcf8e1c1123316ce685a123f21d08c32cc00cbb12ce7f433594",
+        "images": ["https://raw.githubusercontent.com/fiatrete/DAN-Stable-Diffusion-Computing-Network/main/model-reference/imgs/okingjo-HonkaiSR-Asta.jpg"],
+        "download": {
+            "fileurl": "https://civitai.com/api/download/models/97731",
+            "path": "/models/Lora"
+        },
+        "type": "LoRA"
+    },
     "arknightsTexasThe_v10": {
         "name": "arknightsTexasThe_v10",
         "hash": "0b86fe247c1a02d781e236abd356b2b7180f4250f1f7c2633ede7bac2cd40272",
