@@ -151,8 +151,21 @@ export default class SdService {
   }
 
   async supportedModelInfo() {
+    const prefix = 'okingjo-';
     const Models = Object.entries(config.sdConfig.kValidModels).map(([hash, name]) => ({ name, hash })).sort((a, b) => a.name.localeCompare(b.name));
-    const LoRAs = Object.entries(config.sdConfig.kValidLoras).map(([hash, name]) => ({ name, hash })).sort((a, b) => a.name.localeCompare(b.name));
+    const LoRAs = Object.entries(config.sdConfig.kValidLoras)
+      .map(([hash, name]) => ({ name, hash }))
+      .sort((a, b) => {
+        const aStartsWithPrefix = a.name.startsWith(prefix);
+        const bStartsWithPrefix = b.name.startsWith(prefix);
+        if (aStartsWithPrefix && !bStartsWithPrefix) {
+          return -1;
+        } else if (!aStartsWithPrefix && bStartsWithPrefix) {
+          return 1;
+        } else {
+          return a.name.localeCompare(b.name);
+        }
+      });
     const Samplers = config.sdConfig.kValidSamplers;
     return { Models, LoRAs, Samplers };
   }
